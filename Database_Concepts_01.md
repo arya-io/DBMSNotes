@@ -646,3 +646,284 @@ SELECT COALESCE(null, null, 78, null, 76, null, 54);
 |                                           78 |
 +----------------------------------------------+
 ```
+
+Conditional Function
+
+Case
+- Switch: Based on Values
+- If - else, If.... - Else: Based on Boolean Condition
+
+Case is an ANSI SQL conditional function.
+
+```sql
+SELECT ename,
+    deptno,
+    case deptno
+        when 10 then 'A'
+        when 20 then 'B'
+        else
+        'C'
+    end as "Deptno Grade"
+from emp;
+```
+```
++--------+--------+--------------+
+| ename  | deptno | Deptno Grade |
++--------+--------+--------------+
+| SMITH  |     20 | B            |
+| ALLEN  |     30 | C            |
+| WARD   |     30 | C            |
+| JONES  |     20 | B            |
+| MARTIN |     30 | C            |
+| BLAKE  |     30 | C            |
+| CLARK  |     10 | A            |
+| SCOTT  |     20 | B            |
+| KING   |     10 | A            |
+| TURNER |     30 | C            |
+| ADAMS  |     20 | B            |
+| JAMES  |     30 | C            |
+| FORD   |     20 | B            |
+| MILLER |     10 | A            |
++--------+--------+--------------+
+```
+
+```
+Display ename, sal and salary class.
+Salary class should be High if sal is >= 2700
+It should be medium if sal >= 1800
+else if should be "Low"
+```
+```sql
+SELECT ename, sal,
+    case
+        when sal >= 2700 then 'High'
+        when sal >= 1800 then 'Medium'
+        else
+        'Low'
+    end as "Salary Class"
+from emp;
+```
+```
++--------+------+--------------+
+| ename  | sal  | Salary Class |
++--------+------+--------------+
+| SMITH  |  800 | Low          |
+| ALLEN  | 1600 | Low          |
+| WARD   | 1250 | Low          |
+| JONES  | 2975 | High         |
+| MARTIN | 1250 | Low          |
+| BLAKE  | 2850 | High         |
+| CLARK  | 2450 | Medium       |
+| SCOTT  | 3000 | High         |
+| KING   | 5000 | High         |
+| TURNER | 1500 | Low          |
+| ADAMS  | 1100 | Low          |
+| JAMES  |  950 | Low          |
+| FORD   | 3000 | High         |
+| MILLER | 1300 | Low          |
++--------+------+--------------+
+```
+
+`Aliases should be enclosed in Double Inverted Commas and the Condition Output in Single Inverted Commas.'`
+
+```sql
+SELECT ename, sal,
+    -> case
+    ->      when sal between 2001 and 3000 then 'A'
+    ->      when sal between 1001 and 2000 then 'B'
+    ->      when sal between 3001 and 5000 then 'c'
+    -> else
+    -> 'D'
+    -> end
+    -> as "salary Class"
+    -> From emp;
+```
+```
++--------+------+--------------+
+| ename  | sal  | salary Class |
++--------+------+--------------+
+| SMITH  |  800 | D            |
+| ALLEN  | 1600 | B            |
+| WARD   | 1250 | B            |
+| JONES  | 2975 | A            |
+| MARTIN | 1250 | B            |
+| BLAKE  | 2850 | A            |
+| CLARK  | 2450 | A            |
+| SCOTT  | 3000 | A            |
+| KING   | 5000 | c            |
+| TURNER | 1500 | B            |
+| ADAMS  | 1100 | B            |
+| JAMES  |  950 | D            |
+| FORD   | 3000 | A            |
+| MILLER | 1300 | B            |
++--------+------+--------------+
+```
+
+## Concat Function
+
+```sql
+ SELECT CONCAT('mysql', 'cdac');
+```
+```
++-------------------------+
+| CONCAT('mysql', 'cdac') |
++-------------------------+
+| mysqlcdac               |
++-------------------------+
+```
+
+```sql
+SELECT CONCAT('mysql', 'cdac', 'DBDA');
+```
+```
++---------------------------------+
+| CONCAT('mysql', 'cdac', 'DBDA') |
++---------------------------------+
+| mysqlcdacDBDA                   |
++---------------------------------+
+```
+```sql
+SELECT CONCAT(ename, job) from emp;
+```
+```
++--------------------+
+| CONCAT(ename, job) |
++--------------------+
+| SMITHCLERK         |
+| ALLENSALESMAN      |
+| WARDSALESMAN       |
+| JONESMANAGER       |
+| MARTINSALESMAN     |
+| BLAKEMANAGER       |
+| CLARKMANAGER       |
+| SCOTTANALYST       |
+| KINGPRESIDENT      |
+| TURNERSALESMAN     |
+| ADAMSCLERK         |
+| JAMESCLERK         |
+| FORDANALYST        |
+| MILLERCLERK        |
++--------------------+
+```
+
+```sql
+SELECT CONCAT('Dear ', ENAME, ', Your salary is: ', SAL) AS "SALARY DETAILS" FROM emp;
+```
+```
++-----------------------------------+
+| SALARY DETAILS                    |
++-----------------------------------+
+| Dear SMITH, Your salary is: 800   |
+| Dear ALLEN, Your salary is: 1600  |
+| Dear WARD, Your salary is: 1250   |
+| Dear JONES, Your salary is: 2975  |
+| Dear MARTIN, Your salary is: 1250 |
+| Dear BLAKE, Your salary is: 2850  |
+| Dear CLARK, Your salary is: 2450  |
+| Dear SCOTT, Your salary is: 3000  |
+| Dear KING, Your salary is: 5000   |
+| Dear TURNER, Your salary is: 1500 |
+| Dear ADAMS, Your salary is: 1100  |
+| Dear JAMES, Your salary is: 950   |
+| Dear FORD, Your salary is: 3000   |
+| Dear MILLER, Your salary is: 1300 |
++-----------------------------------+
+```
+
+### Literal Characters
+These are the characters which are repeated for every record.
+
+```sql
+select ename,sal,comm,concat(sal,coalesce(comm,'N/A'))from emp;
+```
+```
++--------+------+------+----------------------------------+
+| ename  | sal  | comm | concat(sal,coalesce(comm,'N/A')) |
++--------+------+------+----------------------------------+
+| SMITH  |  800 | NULL | 800N/A                           |
+| ALLEN  | 1600 |  300 | 1600300                          |
+| WARD   | 1250 |  500 | 1250500                          |
+| JONES  | 2975 | NULL | 2975N/A                          |
+| MARTIN | 1250 | 1400 | 12501400                         |
+| BLAKE  | 2850 | NULL | 2850N/A                          |
+| CLARK  | 2450 | NULL | 2450N/A                          |
+| SCOTT  | 3000 | NULL | 3000N/A                          |
+| KING   | 5000 | NULL | 5000N/A                          |
+| TURNER | 1500 |    0 | 15000                            |
+| ADAMS  | 1100 | NULL | 1100N/A                          |
+| JAMES  |  950 | NULL | 950N/A                           |
+| FORD   | 3000 | NULL | 3000N/A                          |
+| MILLER | 1300 | NULL | 1300N/A                          |
++--------+------+------+----------------------------------+
+```
+
+## Create Table
+
+```sql
+CREATE TABLE Customer_Master
+    -> (CustID Int Primary Key,
+    -> CustName Varchar(40)Not NULL,
+    -> CustDeposit Int Check(CustDeposit >=500),
+    -> CustInvoice Varchar(10) Unique);
+
+desc Customer_Master;
+```
+```
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| CustID      | int         | NO   | PRI | NULL    |       |
+| CustName    | varchar(40) | NO   |     | NULL    |       |
+| CustDeposit | int         | YES  |     | NULL    |       |
+| CustInvoice | varchar(10) | YES  | UNI | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+```
+
+## Insert Into Table
+
+```sql
+INSERT INTO CUSTOMER_MASTER VALUES(1, 'ABC', 700, 'INV1');
+```
+
+```sql
+SELECT * FROM CUSTOMER_MASTER;
+```
+```
++--------+----------+-------------+-------------+
+| CustID | CustName | CustDeposit | CustInvoice |
++--------+----------+-------------+-------------+
+|      1 | ABC      |         700 | INV1        |
++--------+----------+-------------+-------------+
+```
+
+We can also insert value by just specifying the column names.
+
+# Foreign Key
+```sql
+CREATE TABLE CUSTOMER_TRANSACTION
+(CustID INT REFERENCES CUSTOMER_MASTER,
+CustAmount INT);
+```
+```sql
+DESCRIBE CUSTOMER_TRANSACTION;
+```
+```
++------------+------+------+-----+---------+-------+
+| Field      | Type | Null | Key | Default | Extra |
++------------+------+------+-----+---------+-------+
+| CustID     | int  | YES  |     | NULL    |       |
+| CustAmount | int  | YES  |     | NULL    |       |
++------------+------+------+-----+---------+-------+
+```
+
+```sql
+SELECT * FROM CUSTOMER_TRANSACTION;
+```
+```
++--------+------------+
+| CustID | CustAmount |
++--------+------------+
+|     78 |        600 |
++--------+------------+
+```
+
