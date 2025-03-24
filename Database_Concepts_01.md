@@ -241,3 +241,408 @@ where sal >= 3000;
 
 `MySQL is super case-insensitive.`
 `Use Single Quotes only.`
+
+- Display clerks who earn salary > 1000
+- SELECT * FROM emp WHERE job = 'manager' or sal < 1000;
+- Combining different sets of conditions
+- Display clerks earning sal less than 1000 as well as display salesmen who earn less than 1300
+
+## Special SQL Operators:
+
+1. Between (Range of values)
+```sql
+SELECT *
+FROM emp 
+WHERE sal BETWEEN 1250 AND 3000;
+```
+
+  NOT BETWEEN
+```sql
+SELECT *
+FROM emp 
+WHERE sal NOT BETWEEN 1250 AND 3000;
+```
+
+2. IN Operator (Used to filter rows by checking if a value matches any value in a given list)
+```sql
+SELECT * FROM emp
+WHERE job IN ('CLERK', 'MANAGER');
+```
+
+  NOT IN Operator
+```sql
+SELECT * FROM emp
+WHERE job NOT IN ('CLERK', 'MANAGER');
+```
+
+3. IS NULL (used to SHOW null value record)
+```SQL
+SELECT * FROM emp
+WHERE comm IS NULL;
+```
+
+IS NOT NULL
+```SQL
+SELECT * FROM emp
+WHERE comm is NOT NULL;
+```
+
+## Pattern Matching Operators of SQL:
+
+Two Wildcard Characters:
+- Percentage (%)
+- Underscore (_)
+
+## Display Records that starts with 'S'
+```sql
+SELECT *
+FROM emp
+WHERE ename LIKE 'S%';
+```
+```
++-------+-------+---------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB     | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+---------+------+------------+------+------+--------+
+|  7369 | SMITH | CLERK   | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7788 | SCOTT | ANALYST | 7566 | 1982-12-09 | 3000 | NULL |     20 |
++-------+-------+---------+------+------------+------+------+--------+
+```
+## Display Records that ends with 'R'
+```sql
+SELECT *
+FROM emp
+WHERE ename LIKE '%R';
+```
+```
++-------+--------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+----------+------+------------+------+------+--------+
+|  7844 | TURNER | SALESMAN | 7698 | 1981-08-09 | 1500 |    0 |     30 |
+|  7934 | MILLER | CLERK    | 7782 | 1982-01-23 | 1300 | NULL |     10 |
++-------+--------+----------+------+------------+------+------+--------+
+```
+```SQL
+SELECT *
+FROM PCODES
+WHERE CODE LIKE 'pq_%01';
+```
+```
++-------+------+
+| Code  | Qty  |
++-------+------+
+| PQR01 |   29 |
++-------+------+
+```
+
+## ESCAPE OPERATOR
+
+```SQL
+SELECT *
+FROM pcodes
+WHERE code LIKE 'A?%C01' ESCAPE '?';
+```
+
+## COLUMN ALIASES
+```sql
+SELECT ename AS "Name Of Employee",
+sal AS "Salary"
+FROM emp;
+```
+```
++------------------+--------+
+| Name Of Employee | Salary |
++------------------+--------+
+| SMITH            |    800 |
+| ALLEN            |   1600 |
+| WARD             |   1250 |
+| JONES            |   2975 |
+| MARTIN           |   1250 |
+| BLAKE            |   2850 |
+| CLARK            |   2450 |
+| SCOTT            |   3000 |
+| KING             |   5000 |
+| TURNER           |   1500 |
+| ADAMS            |   1100 |
+| JAMES            |    950 |
+| FORD             |   3000 |
+| MILLER           |   1300 |
++------------------+--------+
+```
+
+## ORDER BY (SORTING)
+```sql
+SELECT * FROM emp
+ORDER BY sal DESC;
+```
+```
++-------+--------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7839 | KING   | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK  | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|  7844 | TURNER | SALESMAN  | 7698 | 1981-08-09 | 1500 |    0 |     30 |
+|  7934 | MILLER | CLERK     | 7782 | 1982-01-23 | 1300 | NULL |     10 |
+|  7521 | WARD   | SALESMAN  | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7654 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7876 | ADAMS  | CLERK     | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK     | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  7369 | SMITH  | CLERK     | 7902 | 1980-12-17 |  800 | NULL |     20 |
++-------+--------+-----------+------+------------+------+------+--------+
+```
+
+## ORDER BY (MULTIPLE COLUMN SORTING)
+```sql
+SELECT DEPTNO, ENAME, SAL
+FROM EMP
+ORDER BY DEPTNO, SAL DESC;
+```
+```
++--------+--------+------+
+| DEPTNO | ENAME  | SAL  |
++--------+--------+------+
+|     10 | KING   | 5000 |
+|     10 | CLARK  | 2450 |
+|     10 | MILLER | 1300 |
+|     20 | SCOTT  | 3000 |
+|     20 | FORD   | 3000 |
+|     20 | JONES  | 2975 |
+|     20 | ADAMS  | 1100 |
+|     20 | SMITH  |  800 |
+|     30 | BLAKE  | 2850 |
+|     30 | ALLEN  | 1600 |
+|     30 | TURNER | 1500 |
+|     30 | WARD   | 1250 |
+|     30 | MARTIN | 1250 |
+|     30 | JAMES  |  950 |
++--------+--------+------+
+```
+
+## ALIAS WITH ORDER BY
+```sql
+SELECT ENAME AS Name,
+SAL AS Salary,
+DEPTNO FROM EMP
+ORDER BY Name;
+```
+```
++--------+--------+--------+
+| Name   | Salary | DEPTNO |
++--------+--------+--------+
+| ADAMS  |   1100 |     20 |
+| ALLEN  |   1600 |     30 |
+| BLAKE  |   2850 |     30 |
+| CLARK  |   2450 |     10 |
+| FORD   |   3000 |     20 |
+| JAMES  |    950 |     30 |
+| JONES  |   2975 |     20 |
+| KING   |   5000 |     10 |
+| MARTIN |   1250 |     30 |
+| MILLER |   1300 |     10 |
+| SCOTT  |   3000 |     20 |
+| SMITH  |    800 |     20 |
+| TURNER |   1500 |     30 |
+| WARD   |   1250 |     30 |
++--------+--------+--------+
+```
+
+## ORDER BY COLUMN NUMBER
+```sql
+SELECT * FROM EMP
+ORDER BY 3;
+```
+```
++-------+--------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7788 | SCOTT  | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
+|  7369 | SMITH  | CLERK     | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7876 | ADAMS  | CLERK     | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK     | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  7934 | MILLER | CLERK     | 7782 | 1982-01-23 | 1300 | NULL |     10 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK  | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7839 | KING   | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|  7521 | WARD   | SALESMAN  | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7654 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7844 | TURNER | SALESMAN  | 7698 | 1981-08-09 | 1500 |    0 |     30 |
++-------+--------+-----------+------+------------+------+------+--------+
+```
+
+## COLUMN EXPRESSIONS OR DERIVED COLUMNS IN THE PROJECTIONS
+```sql
+SELECT ENAME, SAL, SAL * 12 FROM EMP;
+```
+```
++--------+------+----------+
+| ENAME  | SAL  | SAL * 12 |
++--------+------+----------+
+| SMITH  |  800 |     9600 |
+| ALLEN  | 1600 |    19200 |
+| WARD   | 1250 |    15000 |
+| JONES  | 2975 |    35700 |
+| MARTIN | 1250 |    15000 |
+| BLAKE  | 2850 |    34200 |
+| CLARK  | 2450 |    29400 |
+| SCOTT  | 3000 |    36000 |
+| KING   | 5000 |    60000 |
+| TURNER | 1500 |    18000 |
+| ADAMS  | 1100 |    13200 |
+| JAMES  |  950 |    11400 |
+| FORD   | 3000 |    36000 |
+| MILLER | 1300 |    15600 |
++--------+------+----------+
+```
+```sql
+SELECT ENAME, SAL, SAL * 12 AS "Annual Salary" FROM EMP;
+```
+```
++--------+------+---------------+
+| ENAME  | SAL  | Annual Salary |
++--------+------+---------------+
+| SMITH  |  800 |          9600 |
+| ALLEN  | 1600 |         19200 |
+| WARD   | 1250 |         15000 |
+| JONES  | 2975 |         35700 |
+| MARTIN | 1250 |         15000 |
+| BLAKE  | 2850 |         34200 |
+| CLARK  | 2450 |         29400 |
+| SCOTT  | 3000 |         36000 |
+| KING   | 5000 |         60000 |
+| TURNER | 1500 |         18000 |
+| ADAMS  | 1100 |         13200 |
+| JAMES  |  950 |         11400 |
+| FORD   | 3000 |         36000 |
+| MILLER | 1300 |         15600 |
++--------+------+---------------+
+```
+
+## Types of BUILT-IN SQL Function as per their execution :
+1. Single Row Function(Scaler Function)
+2. Multi Row Functions or Aggregate Functions or Group Functions
+
+1. Single Row Functions: They will return 
+
+```sql
+SELECT ENAME, LOWER(ENAME) FROM EMP;
+```
+```
++--------+--------------+
+| ENAME  | LOWER(ENAME) |
++--------+--------------+
+| SMITH  | smith        |
+| ALLEN  | allen        |
+| WARD   | ward         |
+| JONES  | jones        |
+| MARTIN | martin       |
+| BLAKE  | blake        |
+| CLARK  | clark        |
+| SCOTT  | scott        |
+| KING   | king         |
+| TURNER | turner       |
+| ADAMS  | adams        |
+| JAMES  | james        |
+| FORD   | ford         |
+| MILLER | miller       |
++--------+--------------+
+```
+```sql
+SELECT 5 + NULL;
+```
+```
++----------+
+| 5 + NULL |
++----------+
+|     NULL |
++----------+
+```
+```sql
+SELECT ENAME, SAL, COMM, SAL + COMM AS "Total" FROM EMP;
+```
+```
++--------+------+------+-------+
+| ENAME  | SAL  | COMM | Total |
++--------+------+------+-------+
+| SMITH  |  800 | NULL |  NULL |
+| ALLEN  | 1600 |  300 |  1900 |
+| WARD   | 1250 |  500 |  1750 |
+| JONES  | 2975 | NULL |  NULL |
+| MARTIN | 1250 | 1400 |  2650 |
+| BLAKE  | 2850 | NULL |  NULL |
+| CLARK  | 2450 | NULL |  NULL |
+| SCOTT  | 3000 | NULL |  NULL |
+| KING   | 5000 | NULL |  NULL |
+| TURNER | 1500 |    0 |  1500 |
+| ADAMS  | 1100 | NULL |  NULL |
+| JAMES  |  950 | NULL |  NULL |
+| FORD   | 3000 | NULL |  NULL |
+| MILLER | 1300 | NULL |  NULL |
++--------+------+------+-------+
+```
+
+### ifnull(column name or expression, value or expression if the first parameter is null)
+```sql
+SELECT ENAME, SAL, COMM, SAL + ifnull (COMM,0) AS "Total" FROM EMP;
+```
+```
++--------+------+------+-------+
+| ENAME  | SAL  | COMM | Total |
++--------+------+------+-------+
+| SMITH  |  800 | NULL |   800 |
+| ALLEN  | 1600 |  300 |  1900 |
+| WARD   | 1250 |  500 |  1750 |
+| JONES  | 2975 | NULL |  2975 |
+| MARTIN | 1250 | 1400 |  2650 |
+| BLAKE  | 2850 | NULL |  2850 |
+| CLARK  | 2450 | NULL |  2450 |
+| SCOTT  | 3000 | NULL |  3000 |
+| KING   | 5000 | NULL |  5000 |
+| TURNER | 1500 |    0 |  1500 |
+| ADAMS  | 1100 | NULL |  1100 |
+| JAMES  |  950 | NULL |   950 |
+| FORD   | 3000 | NULL |  3000 |
+| MILLER | 1300 | NULL |  1300 |
++--------+------+------+-------+
+```
+
+## Coalesce
+```sql
+SELECT ENAME, SAL, COMM, SAL + coalesce(COMM,0) AS "Total" FROM EMP;
+```
+```
++--------+------+------+-------+
+| ENAME  | SAL  | COMM | Total |
++--------+------+------+-------+
+| SMITH  |  800 | NULL |   800 |
+| ALLEN  | 1600 |  300 |  1900 |
+| WARD   | 1250 |  500 |  1750 |
+| JONES  | 2975 | NULL |  2975 |
+| MARTIN | 1250 | 1400 |  2650 |
+| BLAKE  | 2850 | NULL |  2850 |
+| CLARK  | 2450 | NULL |  2450 |
+| SCOTT  | 3000 | NULL |  3000 |
+| KING   | 5000 | NULL |  5000 |
+| TURNER | 1500 |    0 |  1500 |
+| ADAMS  | 1100 | NULL |  1100 |
+| JAMES  |  950 | NULL |   950 |
+| FORD   | 3000 | NULL |  3000 |
+| MILLER | 1300 | NULL |  1300 |
++--------+------+------+-------+
+```
+```sql
+SELECT COALESCE(null, null, 78, null, 76, null, 54);
+```
+```
++----------------------------------------------+
+| COALESCE(null, null, 78, null, 76, null, 54) |
++----------------------------------------------+
+|                                           78 |
++----------------------------------------------+
+```
