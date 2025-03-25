@@ -1547,3 +1547,167 @@ SELECT DISTINCT JOB, DEPTNO FROM EMP;
 | CLERK     |     10 |
 +-----------+--------+
 ```
+
+## GROUP BY CLAUSE
+```sql
+SELECT JOB
+FROM emp
+GROUP BY JOB;
+```
+```
++-----------+
+| JOB       |
++-----------+
+| CLERK     |
+| SALESMAN  |
+| MANAGER   |
+| ANALYST   |
+| PRESIDENT |
++-----------+
+```
+
+GROUP BY AND DISTINCT both eliminate Duplicates.
+
+Difference:
+- GROUP BY is the extension of DISTINCT.
+- It can do the aggregation in each distinct value. This cannot be done by distinct clause.
+
+### Display job wise total salaries.
+```sql
+SELECT JOB, SUM(SAL)
+    FROM emp
+    GROUP BY JOB;
+```
+```
++-----------+----------+
+| JOB       | SUM(SAL) |
++-----------+----------+
+| CLERK     |     4150 |
+| SALESMAN  |     5600 |
+| MANAGER   |     8275 |
+| ANALYST   |     6000 |
+| PRESIDENT |     5000 |
++-----------+----------+
+```
+
+### Display deptno wise employees count
+```sql
+SELECT DEPTNO, COUNT(*)
+    FROM emp
+    GROUP BY DEPTNO;
+```
+```
++--------+----------+
+| DEPTNO | COUNT(*) |
++--------+----------+
+|     20 |        5 |
+|     30 |        6 |
+|     10 |        3 |
++--------+----------+
+```
+
+### Display total salary for each deptno within each job type.
+
+```sql
+SELECT DEPTNO, JOB, SUM(SAL)
+    FROM emp
+    GROUP BY DEPTNO, JOB;
+```
+```
++--------+-----------+----------+
+| DEPTNO | JOB       | SUM(SAL) |
++--------+-----------+----------+
+|     20 | CLERK     |     1900 |
+|     30 | SALESMAN  |     5600 |
+|     20 | MANAGER   |     2975 |
+|     30 | MANAGER   |     2850 |
+|     10 | MANAGER   |     2450 |
+|     20 | ANALYST   |     6000 |
+|     10 | PRESIDENT |     5000 |
+|     30 | CLERK     |      950 |
+|     10 | CLERK     |     1300 |
++--------+-----------+----------+
+```
+
+`If the order of columns is changed in GROUP BY Clause, then there is no change in Output.`
+
+`Whenever you use Aggregate Function in SELECT, it should also come in GROUP BY Clause.`
+
+## GROUP BY ON EXPRESSIONS
+
+### Display year wise count of employees getting hired
+
+```sql
+SELECT YEAR(HIREDATE), COUNT(*)
+FROM EMP
+GROUP BY YEAR(HIREDATE);
+```
+```
++----------------+----------+
+| YEAR(HIREDATE) | COUNT(*) |
++----------------+----------+
+|           1980 |        1 |
+|           1981 |       10 |
+|           1982 |        2 |
+|           1983 |        1 |
++----------------+----------+
+```
+
+## HAVING CLAUSE
+
+WHERE CLAUSE filters original data of records.
+HAVING CLAUSE can filter summary records (based on Aggregate Values).
+
+### Display deptno wise total where total > 10000
+
+```sql
+SELECT DEPTNO, SUM(SAL) AS "TOTAL" FROM emp
+    GROUP BY DEPTNO
+    HAVING TOTAL > 10000;
+```
+```
++--------+-------+
+| DEPTNO | TOTAL |
++--------+-------+
+|     20 | 10875 |
++--------+-------+
+```
+
+This will return empty set 👇🏻
+```sql
+SELECT EMPNO, MAX(SAL)
+    FROM EMP
+    GROUP BY EMPNO
+    HAVING COUNT(EMPNO) > 1; -- No Output, but it is correct
+```
+
+`We can mention those column name in HAVING CLAUSE only which are mentioned in Projection (SELECT ColumnName) or GROUP BY CLAUSE.`
+
+## EXECUTION FO ALL 6 CLAUSES OF SELECT STATEMENT
+
+### Display job wise highest salaries, excluding president, for those jobs who have highest > 2800. Display output highest salary wise ascending.
+
+```sql
+SELECT JOB, MAX(SAL) FROM emp
+    WHERE JOB <> 'PRESIDENT'
+    GROUP BY JOB
+    HAVING MAX(SAL) > 2800
+    ORDER BY MAX(SAL);
+```
+```
++---------+----------+
+| JOB     | MAX(SAL) |
++---------+----------+
+| MANAGER |     2975 |
+| ANALYST |     3000 |
++---------+----------+
+```
+
+Above is the Optimised Solution. The below approach is less optimised. We have used the WHERE CLAUSE Condition in HAVING CLAUSE. Why?
+
+```sql
+SELECT JOB, MAX(SAL) FROM emp
+    GROUP BY JOB
+    HAVING MAX(SAL) > 2800 AND JOB <> 'PRESIDENT'
+    ORDER BY MAX(SAL);
+```
