@@ -1,164 +1,180 @@
 # DATABASE CONCEPTS - NOTES PART 1
 
+In the context of database software, data is stored in a persistent medium. It can be retrieved as and when required.
 
-In context of Database Software data gets stored in some medium.
-As and when required it will be retrieved.
+Prior to database software, data was stored in the **Flat File System (FFS)**.
 
-Prior to Database software data was getting stored in “Flat File System” (FFS).
+A **delimiter** was used to separate fields within these files.
 
-Delimeter (used for seperator).
+## Properties of Flat File System:
 
-## Properties of Flat File System :
+1. The entire data is stored in a **single file**. No physical or logical division is done.
+2. A heavy amount of **data redundancy** (repetition of data).
+3. **Unnecessary disk space** is consumed due to redundant data.
+4. **More processing time** is required for data retrieval and manipulation.
+5. No support for **data types** (only text data was stored).
+6. No inherent support for **data validation** (e.g., ensuring a date is valid).
+7. No built-in support for **data security** (no control over who can access the data).
+8. Lack of a built-in **backup strategy** to safeguard data.
+9. Difficult to create reports quickly. **Programming languages** were often needed to generate reports, making it challenging.
+10. **Data updates** required inserting a new record. Overriding existing values wasn't feasible.
+11. No easy mechanism to **delete records**.
 
-1. Entire data gets stored in a “single file”. No will physical and logical division is done.
-2. Heavy amount of “Data Redundancy” (Data Repetition). 
-3. Unnecessary more disk space will be required.
-4. More processing time is required.
-5. No datatype support. Only text datatype is there.
-6. No inherent support for doing “Data Validation”.
-7. No inherent support for “Data Security”.
-8. No inherent support for “Back up Strategy”.
-9. No inherent easy mechanism to create reports quickly. Programming languages had to be used to generate report. It was difficult.
-10. For updating data, a new record has to be entered. We cannot override the existing values.
-11. To delete record no mechanism.
+---
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**RDBMS** (Relational Database Management System) was introduced by **Dr. E.F. Codd** in the late 1970s.
 
-RDBMS (Relational Database Management System) was introduced by Dr. Codd in late 1970s.
 
 ## Properties of RDBMS:
 
-1. Do NOT enter everything in a single table or file. Make sure “Subject or Context Specific” tables.
-2. Heavy amount of data redundancy gets eliminated. Only marginal (very small amount of) data, i.e., IDs will get repeated.
-3. Unnecessary more disk space will NOT be required.
-4. More processing time is NOT required.
-5. For updating data, a new record has NOT to be entered. We can override the existing values.
-6. Datatype support is there.
-7. Inherent support for doing “Data Validations”.
-8. Inherent support for “Data Security”.
-9. Inherent support for “Backup Strategy”. (This is Database specific)
-10. Inherent easy mechanism to create reports quickly. Programming languages NOT to be used to generate report.
-11. Simple mechanism to delete records.
+1. Data is not stored in a single table or file. Use **subject- or context-specific** tables.
+2. **Heavy data redundancy** is eliminated. Only a marginal amount of data, like **IDs**, may be repeated.
+3. **Unnecessary disk space** usage is avoided.
+4. **Processing time** is optimized, reducing overhead.
+5. You don't need to enter new records for updates. You can **override existing values**.
+6. **Datatype support** is provided (e.g., integer, date, varchar, etc.).
+7. Inherent support for **data validation** (ensuring data meets specific criteria).
+8. Inherent support for **data security** (restricting access to authorized users).
+9. Inherent support for a **backup strategy** (this may vary depending on the database).
+10. Provides an easy mechanism to **generate reports** without relying on programming languages.
+11. **Simple mechanisms** are available for **deleting records**.
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
 ## SQL
 
-1. RDBMS is a framework.
-2. SQL will implement RDBMS via scripting.
-3. Fourth Generation Language.
-4. Based on English Words.
-5. Keywords are not Case-Sensitive.
-6. No coding knowledge required.
-7. Data Validation can be done easily.
+1. **RDBMS** is a framework.
+2. **SQL** implements RDBMS through **scripting**.
+3. SQL is a **fourth-generation language (4GL)**.
+4. It is based on **English-like syntax**.
+5. **SQL keywords** are **not case-sensitive**.
+6. No coding knowledge is required for basic queries.
+7. **Data validation** can be done easily using SQL.
 
 ## ANSI SQL:
-1. Syntaxes are common for all DBs.
-2. Supported by all DBs.
 
+1. SQL syntaxes are **common across all databases**.
+2. **Supported by all DBMS** platforms.
 
+---
 
 ![Alt text](Databases.png)
 
-
 ## Data Integrity Rules:
 
-1. Primary Key (PK) -> It is a value or set of values, which will uniquely identify a record from the SQL database table.
-  a. It has to be unique.
-  b. It cannot be blank or NULL.
-  c. There can be ONLY 1 PK per table.
+1. **Primary Key (PK)**: A value or set of values that uniquely identifies a record in the SQL database table.
+   - It must be **unique**.
+   - It **cannot** be **blank** or **NULL**.
+   - There can be **only one PK per table**.
 
-2. Unique Key (UK) -> Value has to be unique.
-3. Not Null (NN) -> Value is mandatory.
+2. **Unique Key (UK)**: The value must be **unique** across the column.
 
-4. Foreign Key (FK) -> FK is a value taken from the PK or UK column of a different or same table.
-  a. FK can repeat. (It may happen that a student issues multiple books)
-  b. FK can be NULL. (It may happen that a book is not being issued by any student)
+3. **Not Null (NN)**: The value is **mandatory**; it cannot be left blank.
 
-`Table which contains PK is called as Parent Table (Master Table).
-Table which contains FK is called as Child Table.
-Table which contains FK and PK can act as both Parent and Child Table.`
+4. **Foreign Key (FK)**: A value that references the PK or UK of a different or the same table.
+   - **FK can repeat** (e.g., a student may issue multiple books).
+   - **FK can be NULL** (e.g., a book may not be issued by any student).
 
-5. Check Constraint (Ch) -> It will check exactly which value needs to be entered.
-  For e.g. Salary -> 50000, City should be Pune or Mumbai or Bangalore,
-  Return Date >= Issue Date
+   `The table containing the PK is called the Parent Table (Master Table).`
+   
+   `The table containing the FK is called the Child Table.`
 
-Combining Data Integrity Rules for one column:
-1.UK + NN
-2.PK + Ch
-3.NN + Ch
-4.FK + Ch
+   `A table containing both FK and PK can act as both Parent and Child Table.`
 
-Composite PK -> Combination cannot repeat, individual values can repeat.
+5. **Check Constraint (Ch)**: Ensures that specific rules are followed for the values being entered.
+   - Examples:
+     - Salary must be greater than 50000.
+     - City should be either Pune, Mumbai, or Bangalore.
+     - Return Date must be **greater than or equal to** the Issue Date.
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+### Combining Data Integrity Rules for a Single Column:
+1. **UK + NN**: Ensures uniqueness and that the value is mandatory.
+2. **PK + Ch**: Combines uniqueness and a condition that must be met.
+3. **NN + Ch**: Ensures the value is mandatory and must satisfy a condition.
+4. **FK + Ch**: Ensures the foreign key follows certain validation rules.
 
-Student_Master Table
-Rollno(PK),Name,Address,Mobile_No
-1,A,Pune,xxxxx
-2,B,Mumbai,rrrr
-3,C,Pune,tttt
-4,D,Delhi,tttt
+### Composite Primary Key (Composite PK):
+- A **combination of columns** that together form a unique key. The combination must be unique, though individual values in those columns may repeat.
 
-Result_Details Table
-Rollno (FK) + (PK), Marks
-2,89
-3,78
+---
 
-Certificate_Details Table
-Rollno (FK from Result_Details), Certificate_ID
-2,C1
-3,C2
+## Example Tables
 
-Foreign Key can also act as a Primary Key for another Table.
+### Student_Master Table:
+| Rollno (PK) | Name | Address | Mobile_No |
+|-------------|------|---------|-----------|
+| 1           | A    | Pune    | xxxxx     |
+| 2           | B    | Mumbai  | rrrr      |
+| 3           | C    | Pune    | tttt      |
+| 4           | D    | Delhi   | tttt      |
 
-## TYPES OF SQL COMMANDS
+---
 
-1. DDL (Data Definition Language): CREATE, DROP, ALTER
-- Focuses on Structure of Data.
+### Result_Details Table:
+| Rollno (FK) + (PK) | Marks |
+|--------------------|-------|
+| 2                  | 89    |
+| 3                  | 78    |
 
-2. DML (Data Manipulation Language): INSERT, UPDATE, DELETE, MERGE
-- Focuses on Manipulation of Data.
+---
 
-3. **DQL (Data Query Language) OR DRL (Data Retrieval Language)** : SELECT, FROM, WHERE….
+### Certificate_Details Table:
+| Rollno (FK from Result_Details) | Certificate_ID |
+|---------------------------------|----------------|
+| 2                               | C1             |
+| 3                               | C2             |
 
--------------------------------------
+---
 
-4. DCL (Data Control Language): GRANT, REVOKE
+### Additional Explanation:
+- **Foreign Keys (FK)** can also act as **Primary Keys (PK)** for another table. For example, in the `Result_Details` table, `Rollno` acts as both a **Foreign Key (FK)** (referencing `Rollno` in `Student_Master`) and a **Primary Key (PK)** in the `Result_Details` table itself.
 
-5. TCL (Transactional Control Language): COMMIT, ROLLBACK
+## Types of SQL Commands
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1. **DDL (Data Definition Language)**: `CREATE`, `DROP`, `ALTER`
+   - Focuses on the **structure of data** (defining and modifying database objects like tables, indexes, etc.).
+
+2. **DML (Data Manipulation Language)**: `INSERT`, `UPDATE`, `DELETE`, `MERGE`
+   - Focuses on the **manipulation of data** (adding, updating, or removing records in tables).
+
+3. **DQL (Data Query Language)** OR **DRL (Data Retrieval Language)**: `SELECT`, `FROM`, `WHERE`, etc.
+   - Focuses on **retrieving data** from the database using queries.
+
+---
+
+4. **DCL (Data Control Language)**: `GRANT`, `REVOKE`
+   - Focuses on **controlling access** to data by granting or revoking permissions.
+
+5. **TCL (Transactional Control Language)**: `COMMIT`, `ROLLBACK`
+   - Manages **transactions** in the database, ensuring data consistency by committing or rolling back changes.
+
+---
 
 ## SQL Database Structure:
 
-1. It is a Software based on Client-Software Architecture.
+1. **Client-Server Architecture**:
+   - **Server**: Refers to the physical copy of the database where data is stored on a machine.
+   - **Client**: Refers to the software that has the necessary networking configuration to connect and access the server remotely.
 
-Server means the physical copy of database gets created.
-Data physically gets saved in that machine.
+2. There will be an implicit set of **default users**, usually **DBA (Database Administrator)** users.
 
-Client means only the s/w which has networking configuration required to connect and access the server.
+3. Some implicit databases are created during installation. A **database** is a collection of related data and objects like tables, views, and indexes.
 
-2. It will have some implicit set of users.
-By default they are DBA users.
+4. **Editors** available for interacting with the database:
+   - **CUI** (Character User Interface): Command-line interfaces like the command prompt.
+   - **GUI** (Graphical User Interface): Visual tools for interacting with the database without using commands.
 
-3. There will be some implicit databases created at the time of installation.
-Database will be collections of:
+5. **Sample tables** are provided, often used for training purposes to help learn SQL `SELECT` commands and other operations.
 
-4. Editors:
-  i. CUI - Command prompt
-  ii. GUI
+6. **Service Configuration** is required to connect the database with the **operating system**.
 
-5. Sample tables are provided. Useful in training for learning Select commands.
+7. Database **booting or starting** is necessary to initiate the database services.
 
-6. Service Configuration (operation system connection)
+---
 
-7. Database booting or starting.
-
-----------------------------------------------------------------------------------------------------------------------------
 
 ```sql
-Select user();  -- To show current user.
+SELECT user();  -- To show current user.
 ```
 
 ```
@@ -174,7 +190,7 @@ System cls; -- To clear screen.
 ```
 
 ```sql
-select user FROM mysql.user; -- To show all users.
+SELECT user FROM mysql.user; -- To show all users.
 ```
 
 ```
@@ -189,7 +205,7 @@ select user FROM mysql.user; -- To show all users.
 ```
 
 ```sql
-Show tables; --To show tables.
+SHOW TABLES; --To show tables.
 ```
 
 ```
@@ -216,9 +232,9 @@ Show tables; --To show tables.
 ### Display records of employees who earns sal greater than or equal to 3000.
 
 ```sql
-select *
-from emp
-where sal >= 3000;
+SELECT *
+FROM emp
+WHERE SAL >= 3000;
 ```
 ```
 +-------+-------+-----------+------+------------+------+------+--------+
@@ -231,21 +247,39 @@ where sal >= 3000;
 ```
 
 
-## Types of compile time errors in SQL:
-1. Table name and column name is wrong.
-2. WRONG keywords.
-3. Permission denied.
-4. Tables are locked.
-5. Tables or Databases are offline.
-6. Not reaching server.
+## Types of Compile-Time Errors in SQL:
 
-`MySQL is super case-insensitive.`
-`Use Single Quotes only.`
+1. **Incorrect table name or column name**.
+2. **Wrong keywords** used in the SQL statement.
+3. **Permission denied** to access a table or database.
+4. **Tables are locked**, preventing access or modification.
+5. **Tables or databases are offline** or unavailable.
+6. **Cannot reach the server**, possibly due to network or configuration issues.
 
-- Display clerks who earn salary > 1000
-- SELECT * FROM emp WHERE job = 'manager' or sal < 1000;
-- Combining different sets of conditions
-- Display clerks earning sal less than 1000 as well as display salesmen who earn less than 1300
+`Note: MySQL is super case-insensitive.`  
+`Tip: Use single quotes (' ') for string values in SQL queries.`
+
+---
+
+### Example Queries:
+
+- **Display clerks who earn a salary greater than 1000**:
+  ```sql
+  SELECT * FROM emp WHERE job = 'clerk' AND sal > 1000;
+
+- **Select all employees with the job 'manager' or salary less than 1000**:
+  
+  ```sql
+  SELECT * FROM emp WHERE job = 'manager' OR sal < 1000;
+
+### Combining Different Conditions:
+
+- **Display clerks earning less than 1000, as well as salesmen earning less than 1300**:
+
+  ```sql
+  SELECT * FROM emp 
+  WHERE (job = 'clerk' AND sal < 1000) 
+  OR (job = 'salesman' AND sal < 1300);
 
 ## Special SQL Operators:
 
@@ -275,7 +309,7 @@ SELECT * FROM emp
 WHERE job NOT IN ('CLERK', 'MANAGER');
 ```
 
-3. IS NULL (used to SHOW null value record)
+3. IS NULL (Used to show records where a column value is null)
 ```SQL
 SELECT * FROM emp
 WHERE comm IS NULL;
@@ -289,14 +323,16 @@ WHERE comm is NOT NULL;
 
 ## Pattern Matching Operators of SQL:
 
-Two Wildcard Characters:
-- Percentage (%)
-- Underscore (_)
+### Two Wildcard Characters:
+- **Percentage (%)**: Represents zero or more characters.
+- **Underscore (_)**: Represents a single character.
 
-## Display Records that starts with 'S'
+---
+
+### Display Records that Start with 'S':
 ```sql
-SELECT *
-FROM emp
+SELECT * 
+FROM emp 
 WHERE ename LIKE 'S%';
 ```
 ```
@@ -321,9 +357,14 @@ WHERE ename LIKE '%R';
 |  7934 | MILLER | CLERK    | 7782 | 1982-01-23 | 1300 | NULL |     10 |
 +-------+--------+----------+------+------------+------+------+--------+
 ```
-```SQL
-SELECT *
-FROM PCODES
+### Command: Display Records with Specific Pattern Matching Using Underscore
+
+This SQL command retrieves all records from the `PCODES` table where the `CODE` column matches the pattern `'pq_%01'`. The `LIKE` operator is used with the underscore (`_`) wildcard to match exactly one character in the third position.
+
+Example:
+```sql
+SELECT * 
+FROM PCODES 
 WHERE CODE LIKE 'pq_%01';
 ```
 ```
@@ -336,13 +377,23 @@ WHERE CODE LIKE 'pq_%01';
 
 ## ESCAPE OPERATOR
 
+The `ESCAPE` operator allows you to define an escape character, which can be used to treat special wildcard characters (like `%` and `_`) as literal characters in pattern matching.
+
 ```SQL
 SELECT *
 FROM pcodes
 WHERE code LIKE 'A?%C01' ESCAPE '?';
 ```
 
+In this query:
+
+- The **?** is defined as the escape character.
+- The **%** after the escape character **?** is treated as a literal **%**, not as a wildcard.
+
 ## COLUMN ALIASES
+
+Column aliases are used to temporarily rename a column heading in the result set of an SQL query. This is particularly useful for improving readability or when working with complex expressions.
+
 ```sql
 SELECT ename AS "Name Of Employee",
 sal AS "Salary"
@@ -369,7 +420,27 @@ FROM emp;
 +------------------+--------+
 ```
 
-## ORDER BY (SORTING)
+## ORDER BY (Sorting)
+
+The `ORDER BY` clause is used to sort the result set of a query by one or more columns. Sorting can be done in ascending (default) or descending order.
+
+### Syntax:
+```sql
+SELECT column1, column2, ...
+FROM table_name
+ORDER BY column1 [ASC|DESC], column2 [ASC|DESC], ...;
+```
+
+- **ASC**: Sorts the data in ascending order (smallest to largest). This is the default.
+
+- **DESC**: Sorts the data in descending order (largest to smallest).
+
+- You can sort by multiple columns by separating them with commas.
+
+### Notes:
+- Sorting can be performed on numeric, string, or date columns.
+- You can sort by columns that are not selected in the result set.
+
 ```sql
 SELECT * FROM emp
 ORDER BY sal DESC;
@@ -395,7 +466,25 @@ ORDER BY sal DESC;
 +-------+--------+-----------+------+------------+------+------+--------+
 ```
 
-## ORDER BY (MULTIPLE COLUMN SORTING)
+## ORDER BY (Multiple Column Sorting)
+
+The `ORDER BY` clause can be used to sort the result set by multiple columns. When sorting by multiple columns, the rows are first sorted by the first column specified, and then by the subsequent columns.
+
+### Syntax:
+```sql
+SELECT column1, column2, ...
+FROM table_name
+ORDER BY column1 [ASC|DESC], column2 [ASC|DESC], ...;
+```
+
+- **Primary Sort**: The first column in the `ORDER BY` clause.
+
+- **Secondary Sort**: The second column (and subsequent columns) that the result set is sorted by if there are ties in the primary sort.
+
+### Notes:
+- The sorting order for each column can be specified independently (ascending or descending).
+- Multiple columns allow for more refined sorting, with the first column being sorted first, followed by subsequent columns.
+
 ```sql
 SELECT DEPTNO, ENAME, SAL
 FROM EMP
@@ -422,7 +511,21 @@ ORDER BY DEPTNO, SAL DESC;
 +--------+--------+------+
 ```
 
-## ALIAS WITH ORDER BY
+## ALIAS with ORDER BY
+
+You can use column aliases in the `ORDER BY` clause to sort the result set based on the renamed columns. This improves readability and makes it easier to reference columns, especially when using complex expressions or calculations in the `SELECT` statement.
+
+### Syntax:
+```sql
+SELECT column_name AS alias_name
+FROM table_name
+ORDER BY alias_name [ASC|DESC];
+```
+### Notes:
+- Column aliases can be used in the `ORDER BY` clause even if the original column name is complex or derived from an expression.
+- Aliases used in `ORDER BY` help in making queries more readable and easier to maintain.
+- Aliases can include spaces or special characters, but they must be enclosed in double quotes (`" "`).
+
 ```sql
 SELECT ENAME AS Name,
 SAL AS Salary,
@@ -450,7 +553,25 @@ ORDER BY Name;
 +--------+--------+--------+
 ```
 
-## ORDER BY COLUMN NUMBER
+## ORDER BY Column Number
+
+In SQL, you can also use the column number (position) in the `ORDER BY` clause to specify the sort order. This is an alternative to specifying the actual column names or aliases. The column number refers to the position of the column in the `SELECT` list.
+
+### Syntax:
+```sql
+SELECT column1, column2, ...
+FROM table_name
+ORDER BY column_position [ASC|DESC];
+```
+- **column_position**: The number representing the position of the column in the `SELECT` statement (starting from 1).
+
+- This method can be useful when you want to sort by a column that is difficult to reference by name, or when using complex calculations.
+
+### Notes:
+- Using the column number can make the query less readable, so it’s generally recommended to use column names or aliases.
+- The column numbers must correspond to the order of columns in the `SELECT` clause, starting from 1.
+- If you change the column order in the `SELECT` clause, make sure to adjust the column number accordingly in the `ORDER BY` clause.
+
 ```sql
 SELECT * FROM EMP
 ORDER BY 3;
@@ -476,7 +597,28 @@ ORDER BY 3;
 +-------+--------+-----------+------+------------+------+------+--------+
 ```
 
-## COLUMN EXPRESSIONS OR DERIVED COLUMNS IN THE PROJECTIONS
+## Column Expressions or Derived Columns in the Projections
+
+In SQL, column expressions or derived columns refer to the use of expressions in the `SELECT` clause to compute values based on the existing data. These computed values can be returned as part of the result set.
+
+### Syntax:
+```sql
+SELECT expression AS alias_name
+FROM table_name;
+```
+- **expression**: Any calculation or combination of columns, constants, operators, and functions that results in a new derived value.
+
+- **alias_name**: The optional name given to the derived column for easier reference.
+
+### Examples of Column Expressions:
+- Arithmetic operations (e.g., `sal * 12` to calculate annual salary).
+- String concatenation (e.g., `fname || ' ' || lname` to combine first and last names).
+- Functions like `UPPER()`, `LOWER()`, `ROUND()`, `SUBSTRING()`, etc.
+
+### Notes:
+- Aliases can be used to provide meaningful names for derived columns.
+- Derived columns can be referenced in the `ORDER BY` clause using either the expression or its alias.
+
 ```sql
 SELECT ENAME, SAL, SAL * 12 FROM EMP;
 ```
@@ -524,11 +666,25 @@ SELECT ENAME, SAL, SAL * 12 AS "Annual Salary" FROM EMP;
 +--------+------+---------------+
 ```
 
-## Types of BUILT-IN SQL Function as per their execution :
-1. Single Row Function(Scaler Function)
-2. Multi Row Functions or Aggregate Functions or Group Functions
+## Types of BUILT-IN SQL Functions as per their execution:
 
-1. Single Row Functions: They will return 
+1. **Single Row Functions (Scalar Functions)**: 
+   - These functions operate on a single row and return one result per row.
+   - Examples: `UPPER()`, `LOWER()`, `ROUND()`, `LENGTH()`, `SUBSTRING()`, etc.
+
+2. **Multi Row Functions (Aggregate Functions or Group Functions)**: 
+   - These functions operate on multiple rows and return a single result for a group of rows.
+   - Examples: `SUM()`, `COUNT()`, `AVG()`, `MAX()`, `MIN()`, etc.
+
+### **Single Row Functions**: 
+   - These functions return one result for each row in the result set. 
+   - They operate on individual row values and can modify or return values based on specific operations or calculations.
+
+   Examples include:
+   - **UPPER()**: Converts a string to uppercase.
+   - **LOWER()**: Converts a string to lowercase.
+   - **ROUND()**: Rounds a number to a specified number of decimal places.
+   - **LENGTH()**: Returns the length of a string.
 
 ```sql
 SELECT ENAME, LOWER(ENAME) FROM EMP;
@@ -587,7 +743,26 @@ SELECT ENAME, SAL, COMM, SAL + COMM AS "Total" FROM EMP;
 +--------+------+------+-------+
 ```
 
-### ifnull(column name or expression, value or expression if the first parameter is null)
+### IFNULL Function
+
+The `IFNULL` function in SQL is used to return an alternate value or expression if the first parameter is `NULL`. If the first parameter is not `NULL`, it will return the original value.
+
+#### Syntax:
+```sql
+IFNULL(column_name_or_expression, value_or_expression_if_null)
+```
+- **column_name_or_expression**: The column or expression to be evaluated.
+
+- **value_or_expression_if_null**: The value or expression returned if the first parameter is `NULL`.
+
+### Example:
+```sql
+SELECT IFNULL(comm, 0) AS commission
+FROM emp;
+```
+
+This query will return `0` in place of `NULL` values in the `comm` column.
+
 ```sql
 SELECT ENAME, SAL, COMM, SAL + ifnull (COMM,0) AS "Total" FROM EMP;
 ```
@@ -612,7 +787,24 @@ SELECT ENAME, SAL, COMM, SAL + ifnull (COMM,0) AS "Total" FROM EMP;
 +--------+------+------+-------+
 ```
 
-## Coalesce
+## COALESCE Function
+
+The `COALESCE` function in SQL returns the first non-NULL value from a list of expressions. It is commonly used to handle `NULL` values by providing an alternative in case all values are `NULL`.
+
+### Syntax:
+```sql
+COALESCE(expression1, expression2, ..., expressionN)
+```
+- **expression1, expression2, ..., expressionN**: The list of expressions to be evaluated in order. The function returns the first non-NULL value in this list.
+
+### Example:
+```sql
+SELECT COALESCE(comm, bonus, 0) AS final_value
+FROM emp;
+```
+
+This query will return the value from `comm` if it is not `NULL`. If `comm` is `NULL`, it will check `bonus`. If both are `NULL`, it will return `0`.
+
 ```sql
 SELECT ENAME, SAL, COMM, SAL + coalesce(COMM,0) AS "Total" FROM EMP;
 ```
@@ -647,13 +839,41 @@ SELECT COALESCE(null, null, 78, null, 76, null, 54);
 +----------------------------------------------+
 ```
 
-Conditional Function
+## Conditional Function: CASE
 
-Case
-- Switch: Based on Values
-- If - else, If.... - Else: Based on Boolean Condition
+The `CASE` function is an ANSI SQL conditional function that can be used for conditional logic similar to a switch-case or if-else statement in programming. It allows you to return specific values based on conditions.
 
-Case is an ANSI SQL conditional function.
+### Types of CASE:
+
+1. **Switch (Based on Values)**:
+   - This type of `CASE` checks for specific values and returns a corresponding result.
+
+2. **If-else, If...-Else (Based on Boolean Conditions)**:
+   - This type of `CASE` is based on evaluating boolean conditions, returning results accordingly.
+
+### Syntax (Switch Based on Values):
+```sql
+SELECT CASE column_name
+    WHEN value1 THEN result1
+    WHEN value2 THEN result2
+    ELSE default_result
+END AS alias_name
+FROM table_name;
+```
+
+### Syntax (If-Else Based on Conditions):
+```sql
+SELECT CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    ELSE default_result
+END AS alias_name
+FROM table_name;
+```
+
+Notes:
+The `CASE` function ensures more complex conditional logic directly within your SQL queries.
+It helps in writing cleaner and more readable SQL code when conditional evaluation is needed.
 
 ```sql
 SELECT ename,
@@ -728,15 +948,15 @@ from emp;
 
 ```sql
 SELECT ename, sal,
-    -> case
-    ->      when sal between 2001 and 3000 then 'A'
-    ->      when sal between 1001 and 2000 then 'B'
-    ->      when sal between 3001 and 5000 then 'c'
-    -> else
-    -> 'D'
-    -> end
-    -> as "salary Class"
-    -> From emp;
+    case
+         when sal between 2001 and 3000 then 'A'
+         when sal between 1001 and 2000 then 'B'
+         when sal between 3001 and 5000 then 'c'
+    else
+    'D'
+    end
+    as "salary Class"
+    From emp;
 ```
 ```
 +--------+------+--------------+
@@ -759,7 +979,30 @@ SELECT ename, sal,
 +--------+------+--------------+
 ```
 
-## Concat Function
+## CONCAT Function
+
+The `CONCAT` function in SQL is used to concatenate two or more strings into one string.
+
+### Syntax:
+```sql
+SELECT CONCAT(string1, string2, ..., stringN) AS alias_name
+FROM table_name;
+```
+string1, string2, ..., stringN: These are the strings (or columns) that you want to concatenate.
+
+alias_name: The optional name given to the concatenated result.
+
+### Example:
+```sql
+SELECT CONCAT(first_name, ' ', last_name) AS "Full Name"
+FROM employees;
+```
+
+This query will concatenate the `first_name` and `last_name` columns with a space in between and display the result as "Full Name".
+
+### Notes:
+- The `CONCAT` function can take two or more arguments.
+- If any argument is `NULL`, `CONCAT` will return the non-null values. If all arguments are `NULL`, it will return `NULL`.
 
 ```sql
  SELECT CONCAT('mysql', 'cdac');
@@ -861,10 +1104,10 @@ select ename,sal,comm,concat(sal,coalesce(comm,'N/A'))from emp;
 
 ```sql
 CREATE TABLE Customer_Master
-    -> (CustID Int Primary Key,
-    -> CustName Varchar(40)Not NULL,
-    -> CustDeposit Int Check(CustDeposit >=500),
-    -> CustInvoice Varchar(10) Unique);
+    (CustID Int Primary Key,
+    CustName Varchar(40)Not NULL,
+    CustDeposit Int Check(CustDeposit >=500),
+    CustInvoice Varchar(10) Unique);
 
 desc Customer_Master;
 ```
@@ -879,7 +1122,21 @@ desc Customer_Master;
 +-------------+-------------+------+-----+---------+-------+
 ```
 
-## Insert Into Table
+## INSERT INTO Table
+
+The `INSERT INTO` statement is used to add new rows of data into a table.
+
+### Syntax:
+
+```sql
+INSERT INTO table_name (column1, column2, column3, ...)
+VALUES (value1, value2, value3, ...);
+```
+
+### Notes:
+- You can specify the column names in the `INSERT INTO` statement. If you omit the column names, the values must be listed in the same order as the columns in the table.
+- You must provide a value for every `NOT NULL` column.
+
 
 ```sql
 INSERT INTO CUSTOMER_MASTER VALUES(1, 'ABC', 700, 'INV1');
@@ -899,6 +1156,28 @@ SELECT * FROM CUSTOMER_MASTER;
 We can also insert value by just specifying the column names.
 
 # Foreign Key
+
+A **Foreign Key (FK)** is a field (or collection of fields) in one table that refers to the **Primary Key (PK)** in another table. The foreign key establishes a relationship between two tables.
+
+### Key Points:
+- The table containing the foreign key is known as the **Child Table**.
+- The table with the primary key referenced by the foreign key is called the **Parent Table**.
+- Foreign keys can accept duplicate values and `NULL` values unless otherwise restricted.
+
+### Syntax:
+
+```sql
+CREATE TABLE ChildTable (
+    column1 datatype,
+    column2 datatype,
+    FOREIGN KEY (column_name) REFERENCES ParentTable (primary_key_column)
+);
+```
+
+### Notes:
+- A **foreign key** ensures referential integrity of the data in one table to match values in another table.
+- It prevents actions that would destroy the links between tables.
+
 ```sql
 CREATE TABLE CUSTOMER_TRANSACTION
 (CustID INT REFERENCES CUSTOMER_MASTER,
