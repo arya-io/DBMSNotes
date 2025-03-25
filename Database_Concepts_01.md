@@ -1206,3 +1206,344 @@ SELECT * FROM CUSTOMER_TRANSACTION;
 +--------+------------+
 ```
 
+Foreign Key should be initialised at table level, i.e., while creating table.
+
+Constraint FK Foreign Key(CustID) References CUSTOMER_MASTER(CustID);
+Constraint Constraint_Name Foreign Key(Column name of child table)
+References Parent Table Name (Column name of parent table)
+
+## COMPOSTIE PRIMARY KEY
+```sql
+CREATE TABLE orders
+    (orderid varchar(10),
+    itemid varchar(10),
+    qty int,
+    rate int,
+    Primary Key (orderid, itemid)
+    );
+
+INSERT INTO orders
+    VALUES('o1', 'i1', 10, 100);
+
+SELECT * FROM orders;
+```
+```
++---------+--------+------+------+
+| orderid | itemid | qty  | rate |
++---------+--------+------+------+
+| o1      | i1     |   10 |  100 |
++---------+--------+------+------+
+```
+
+## CHECK CONSTRAINT AT TABLE LEVEL:
+
+```sql
+CREATE TABLE t2
+    (a int,
+    b int,
+    c int,
+    d int check(d > c)
+    );
+```
+This is column level.
+
+```sql
+CREATE TABLE t2
+    (a int,
+    b int,
+    c int,
+    d int, check(d > c)
+    );
+```
+
+This is table level. We have added one comma after int.
+
+`CONSTRAINTS SHOULD BE ADDED AT TABLE LEVEL ONLY.`
+`NOT NULL CAN BE ONLY DEFINED AT COLUMN LEVEL.`
+
+## CHAR v/s VARCHAR
+
+Difference Table to be created.
+
+- VARCHAR stands for Varying Length.
+- CHAR is fixed length.
+- Space wise VARCHAR is good.
+- Data Retrieval is faster in CHAR.
+- CHAR'S max size is 255.
+- VARCHAR'S max size is 16383.
+- Size changes with respect to versions.
+
+## DATE FUNCTION
+
+```sql
+SELECT ENAME,
+    HIREDATE,
+    YEAR(HIREDATE) AS "Year",
+    MONTH(HIREDATE) AS "Month",
+    DAY(HIREDATE) AS "Date"
+    FROM emp;
+```
+```
++--------+------------+------+-------+------+
+| ENAME  | HIREDATE   | Year | Month | Date |
++--------+------------+------+-------+------+
+| SMITH  | 1980-12-17 | 1980 |    12 |   17 |
+| ALLEN  | 1981-05-20 | 1981 |     5 |   20 |
+| WARD   | 1981-05-22 | 1981 |     5 |   22 |
+| JONES  | 1981-04-02 | 1981 |     4 |    2 |
+| MARTIN | 1981-09-20 | 1981 |     9 |   20 |
+| BLAKE  | 1981-05-01 | 1981 |     5 |    1 |
+| CLARK  | 1981-06-08 | 1981 |     6 |    8 |
+| SCOTT  | 1982-12-09 | 1982 |    12 |    9 |
+| KING   | 1981-11-17 | 1981 |    11 |   17 |
+| TURNER | 1981-08-09 | 1981 |     8 |    9 |
+| ADAMS  | 1983-12-01 | 1983 |    12 |    1 |
+| JAMES  | 1981-12-03 | 1981 |    12 |    3 |
+| FORD   | 1981-03-06 | 1981 |     3 |    6 |
+| MILLER | 1982-01-23 | 1982 |     1 |   23 |
++--------+------------+------+-------+------+
+```
+
+### Display employees joined in 1983
+
+```sql
+SELECT *
+    FROM emp
+    WHERE YEAR(HIREDATE) = 1983;
+```
+```
++-------+-------+-------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB   | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-------+------+------------+------+------+--------+
+|  7876 | ADAMS | CLERK | 7788 | 1983-12-01 | 1100 | NULL |     20 |
++-------+-------+-------+------+------------+------+------+--------+
+```
+
+`Internally Date is a Number.`
+
+## Summary Queries:
+
+ANSI SQL has "Aggregate Function" to summarize the date values.
+e.g.: SUM, MIN, MAX, COUNT, AVG
+
+They return a single value for a group of values.
+If GROUP BY clause is missing the entire table or filtered rows can become a Group.
+
+```sql
+SELECT SUM(SAL) FROM EMP;
+```
+```
++----------+
+| SUM(SAL) |
++----------+
+|    29025 |
++----------+
+```
+
+```sql
+SELECT MAX(SAL) FROM EMP;
+```
+```
++----------+
+| MAX(SAL) |
++----------+
+|     5000 |
++----------+
+```
+```sql
+SELECT MIN(SAL) FROM EMP;
+```
+```
++----------+
+| MIN(SAL) |
++----------+
+|      800 |
++----------+
+```
+```sql
+SELECT AVG(SAL) FROM EMP;
+```
+```
++-----------+
+| AVG(SAL)  |
++-----------+
+| 2073.2143 |
++-----------+
+```
+
+`AGGREGATE FUNCTIONS WILL IGNORE NULL VALUES`
+
+```sql
+SELECT AVG(COMM) FROM EMP;
+```
+```
++-----------+
+| AVG(COMM) |
++-----------+
+|  550.0000 |
++-----------+
+```
+
+`When Calculating Average, it will consider only Not Null Values.`
+
+```SQL
+SELECT MAX(ENAME), MIN(ENAME) FROM EMP;
+```
+```
++------------+------------+
+| MAX(ENAME) | MIN(ENAME) |
++------------+------------+
+| WARD       | ADAMS      |
++------------+------------+
+```
+```SQL
+SELECT MAX(HIREDATE), MIN(HIREDATE) FROM EMP;
+```
+```
++---------------+---------------+
+| MAX(HIREDATE) | MIN(HIREDATE) |
++---------------+---------------+
+| 1983-12-01    | 1980-12-17    |
++---------------+---------------+
+```
+```SQL
+SELECT SUM(ENAME), AVG(ENAME) FROM EMP;
+```
+```
++------------+------------+
+| SUM(ENAME) | AVG(ENAME) |
++------------+------------+
+|          0 |          0 |
++------------+------------+
+```
+
+COUNT(COLUMN_NAME) IGNORES THE VALUE OF NULL IF PRESENT.
+
+```SQL
+SELECT COUNT(COMM) FROM EMP;
+```
+```
++-------------+
+| COUNT(COMM) |
++-------------+
+|           4 |
++-------------+
+```
+
+```SQL
+SELECT COUNT(*) FROM EMP;
+```
+```
++----------+
+| COUNT(*) |
++----------+
+|       14 |
++----------+
+```
+
+`COUNT(1) IS FASTER THAN COUNT('STRING') AND COUNT(*)`
+
+```SQL
+SELECT COUNT(*) FROM EMP;
+```
+```
++----------+
+| COUNT(*) |
++----------+
+|       14 |
++----------+
+```
+```SQL
+SELECT COUNT('CDAC') FROM EMP;
+```
+```
++---------------+
+| COUNT('CDAC') |
++---------------+
+|            14 |
++---------------+
+```
+```SQL
+SELECT COUNT(420) FROM EMP;
+```
+```
++------------+
+| COUNT(420) |
++------------+
+|         14 |
++------------+
+```
+
+### Display total of salaries of employees from job type 'Clerk'
+
+```SQL
+SELECT SUM(SAL)
+    FROM EMP
+    WHERE JOB = 'CLERK';
+```
+```
++----------+
+| SUM(SAL) |
++----------+
+|     4150 |
++----------+
+```
+
+`Above Aggregation Function (SUM) is fast and filter took time.`
+
+## DISTINCT
+
+DISTINCT is the clause in ANSI SQL which will eliminate duplicates.
+
+```SQL
+SELECT DISTINCT JOB FROM EMP;
+```
+```
++-----------+
+| JOB       |
++-----------+
+| CLERK     |
+| SALESMAN  |
+| MANAGER   |
+| ANALYST   |
+| PRESIDENT |
++-----------+
+```
+
+WHAT IF THERE ARE NULL VALUES IN THE COLUMN?
+
+```SQL
+SELECT DISTINCT COMM FROM EMP;
+```
+```
++------+
+| COMM |
++------+
+| NULL |
+|  300 |
+|  500 |
+| 1400 |
+|    0 |
++------+
+```
+
+## DISTINCT WITH MULTIPLE COLUMNS
+
+```SQL
+SELECT DISTINCT JOB, DEPTNO FROM EMP;
+```
+```
++-----------+--------+
+| JOB       | DEPTNO |
++-----------+--------+
+| CLERK     |     20 |
+| SALESMAN  |     30 |
+| MANAGER   |     20 |
+| MANAGER   |     30 |
+| MANAGER   |     10 |
+| ANALYST   |     20 |
+| PRESIDENT |     10 |
+| CLERK     |     30 |
+| CLERK     |     10 |
++-----------+--------+
+```
