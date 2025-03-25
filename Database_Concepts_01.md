@@ -1711,3 +1711,183 @@ SELECT JOB, MAX(SAL) FROM emp
     HAVING MAX(SAL) > 2800 AND JOB <> 'PRESIDENT'
     ORDER BY MAX(SAL);
 ```
+
+## JOINS IN SQL
+
+- Due to RDBMS design the information gets spread across multiple tables via common fields.
+- But due to this design when we want to display columns of those tables based on matching values of common fields then join technique needs to be used.
+
+There are 3 types of JOINS:
+1. INNER
+2. OUTER
+3. CROSS
+
+1. INNER
+    A)Equi- Joins
+    B)Non equi-joins
+
+a)Equi-join:Based on only matching values of common fieLds.
+Display ename and dname from emp and dept tables
+
+ANSI 89 Syntax:
+```SQL
+SELECT ENAME ,DNAME
+FROM EMP, DEPT
+WHERE EMP.DEPTNO = DEPT.DEPTNO;
+```
+```
++--------+------------+
+| ENAME  | DNAME      |
++--------+------------+
+| SMITH  | RESEARCH   |
+| ALLEN  | SALES      |
+| WARD   | SALES      |
+| JONES  | RESEARCH   |
+| MARTIN | SALES      |
+| BLAKE  | SALES      |
+| CLARK  | ACCOUNTING |
+| SCOTT  | RESEARCH   |
+| KING   | ACCOUNTING |
+| TURNER | SALES      |
+| ADAMS  | RESEARCH   |
+| JAMES  | SALES      |
+| FORD   | RESEARCH   |
+| MILLER | ACCOUNTING |
++--------+------------+
+```
+Ansi 92 Syntax
+```sql
+SELECT ENAME, DNAME
+FROM EMP INNER JOIN DEPT
+ON EMP.DEPTNO = DEPT.DEPTNO;
+```
+```
++--------+------------+
+| ENAME  | DNAME      |
++--------+------------+
+| SMITH  | RESEARCH   |
+| ALLEN  | SALES      |
+| WARD   | SALES      |
+| JONES  | RESEARCH   |
+| MARTIN | SALES      |
+| BLAKE  | SALES      |
+| CLARK  | ACCOUNTING |
+| SCOTT  | RESEARCH   |
+| KING   | ACCOUNTING |
+| TURNER | SALES      |
+| ADAMS  | RESEARCH   |
+| JAMES  | SALES      |
+| FORD   | RESEARCH   |
+| MILLER | ACCOUNTING |
++--------+------------+
+```
+
+### Best Practice to Write Join Operations is using ALIAS
+
+```SQL
+SELECT e.ENAME, d.DNAME, e.DEPTNO
+FROM EMP e JOIN DEPT d
+ON e.DEPTNO = d.DEPTNO;
+```
+```
++--------+------------+--------+
+| ENAME  | DNAME      | DEPTNO |
++--------+------------+--------+
+| SMITH  | RESEARCH   |     20 |
+| ALLEN  | SALES      |     30 |
+| WARD   | SALES      |     30 |
+| JONES  | RESEARCH   |     20 |
+| MARTIN | SALES      |     30 |
+| BLAKE  | SALES      |     30 |
+| CLARK  | ACCOUNTING |     10 |
+| SCOTT  | RESEARCH   |     20 |
+| KING   | ACCOUNTING |     10 |
+| TURNER | SALES      |     30 |
+| ADAMS  | RESEARCH   |     20 |
+| JAMES  | SALES      |     30 |
+| FORD   | RESEARCH   |     20 |
+| MILLER | ACCOUNTING |     10 |
++--------+------------+--------+
+```
+
+### Display ename, dname, sal for those who earn sal > 2000
+
+```SQL
+SELECT EMP.ENAME, DEPT.DNAME, EMP.SAL
+    FROM EMP
+    INNER JOIN
+    DEPT ON
+    EMP.DEPTNO = DEPT.DEPTNO
+    WHERE EMP.SAL > 2000;
+```
+```
++-------+------------+------+
+| ENAME | DNAME      | SAL  |
++-------+------------+------+
+| JONES | RESEARCH   | 2975 |
+| BLAKE | SALES      | 2850 |
+| CLARK | ACCOUNTING | 2450 |
+| SCOTT | RESEARCH   | 3000 |
+| KING  | ACCOUNTING | 5000 |
+| FORD  | RESEARCH   | 3000 |
++-------+------------+------+
+```
+
+## EXAMPLE OF NON-EQUI JOIN:
+
+## SUBSTR
+
+SubsStr is a function which will extract a part of string.
+
+### Syntax: 
+```sql
+SubStr(Column Name Or String,
+    From which position to extract
+    [, number of characters to extract]
+)
+```
+
+```sql
+SELECT SUBSTR('ABCDEFGHIJ', 3, 4);
+SELECT SUBSTR('ABCDEFGHIJ', 3);
+SELECT SUBSTR('ABCDEFGHIJ', 85);
+```
+```
++----------------------------+
+| SUBSTR('ABCDEFGHIJ', 3, 4) |
++----------------------------+
+| CDEF                       |
++----------------------------+
+
++-------------------------+
+| SUBSTR('ABCDEFGHIJ', 3) |
++-------------------------+
+| CDEFGHIJ                |
++-------------------------+
+
++--------------------------+
+| SUBSTR('ABCDEFGHIJ', 85) |
++--------------------------+
+|                          |
++--------------------------+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
