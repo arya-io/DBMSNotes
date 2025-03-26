@@ -1206,13 +1206,23 @@ SELECT * FROM CUSTOMER_TRANSACTION;
 +--------+------------+
 ```
 
-Foreign Key should be initialised at table level, i.e., while creating table.
+### Foreign Key Definition
 
+- **Foreign Key** should be initialized at the table level, i.e., while creating the table.
+
+```sql
 Constraint FK Foreign Key(CustID) References CUSTOMER_MASTER(CustID);
-Constraint Constraint_Name Foreign Key(Column name of child table)
-References Parent Table Name (Column name of parent table)
+```
 
-## COMPOSTIE PRIMARY KEY
+Syntax for adding a foreign key constraint:
+
+```sql
+Constraint Constraint_Name Foreign Key(Column_name_of_child_table)
+References Parent_Table_Name (Column_name_of_parent_table);
+```
+
+## COMPOSITE PRIMARY KEY
+A **Composite Primary Key** is a primary key that consists of two or more columns.
 ```sql
 CREATE TABLE orders
     (orderid varchar(10),
@@ -1237,6 +1247,9 @@ SELECT * FROM orders;
 
 ## CHECK CONSTRAINT AT TABLE LEVEL:
 
+### Column Level Check Constraint:
+A check constraint applied directly to a single column.
+
 ```sql
 CREATE TABLE t2
     (a int,
@@ -1245,7 +1258,12 @@ CREATE TABLE t2
     d int check(d > c)
     );
 ```
-This is column level.
+This defines a **column-level** constraint on the column `d`, ensuring that `d > c`.
+
+---
+
+### Table Level Check Constraint:
+A check constraint applied at the **table level**, typically after all column definitions.
 
 ```sql
 CREATE TABLE t2
@@ -1256,22 +1274,27 @@ CREATE TABLE t2
     );
 ```
 
-This is table level. We have added one comma after int.
+This is a **table-level** constraint, ensuring that `d > c` is enforced across the table.
 
-`CONSTRAINTS SHOULD BE ADDED AT TABLE LEVEL ONLY.`
-`NOT NULL CAN BE ONLY DEFINED AT COLUMN LEVEL.`
+---
 
-## CHAR v/s VARCHAR
+### Important Notes:
+- **Constraints** should be added at the **table level** for consistency and flexibility.
+- The **NOT NULL** constraint can only be defined at the **column level**.
 
-Difference Table to be created.
 
-- VARCHAR stands for Varying Length.
-- CHAR is fixed length.
-- Space wise VARCHAR is good.
-- Data Retrieval is faster in CHAR.
-- CHAR'S max size is 255.
-- VARCHAR'S max size is 16383.
-- Size changes with respect to versions.
+## CHAR vs VARCHAR
+
+| **Feature**               | **CHAR**                                 | **VARCHAR**                         |
+|---------------------------|------------------------------------------|-------------------------------------|
+| **Meaning**               | Fixed Length                             | Varying Length                      |
+| **Storage Efficiency**     | Takes fixed space even for shorter data  | Space-efficient (only uses required space) |
+| **Data Retrieval Speed**   | Faster retrieval                         | Slower compared to CHAR             |
+| **Max Size**               | 255 characters                           | 16,383 characters (depends on version) |
+| **Space Utilization**      | Less efficient (fixed-size storage)      | More efficient (space-saving for variable lengths) |
+| **Size Variability**       | Fixed size, regardless of content length | Adjusts size based on content length |
+| **Max Size Variability**   | Fixed at 255                             | Depends on version, generally much larger |
+
 
 ## DATE FUNCTION
 
@@ -1283,6 +1306,12 @@ SELECT ENAME,
     DAY(HIREDATE) AS "Date"
     FROM emp;
 ```
+This query retrieves employee names (`ENAME`) along with their hire dates (`HIREDATE`). Additionally, it extracts the **year**, **month**, and **day** from the `HIREDATE` field and displays them with aliases for better readability.
+
+- `YEAR(HIREDATE)`: Extracts the year from the `HIREDATE`.
+- `MONTH(HIREDATE)`: Extracts the month from the `HIREDATE`.
+- `DAY(HIREDATE)`: Extracts the day from the `HIREDATE`.
+
 ```
 +--------+------------+------+-------+------+
 | ENAME  | HIREDATE   | Year | Month | Date |
@@ -1319,15 +1348,20 @@ SELECT *
 +-------+-------+-------+------+------------+------+------+--------+
 ```
 
-`Internally Date is a Number.`
+`Internally, Date is treated as a numeric value in SQL.`
 
 ## Summary Queries:
 
-ANSI SQL has "Aggregate Function" to summarize the date values.
-e.g.: SUM, MIN, MAX, COUNT, AVG
+ANSI SQL provides "Aggregate Functions" to summarize data values, such as:
+- **SUM**: Adds up numeric values.
+- **MIN**: Returns the minimum value.
+- **MAX**: Returns the maximum value.
+- **COUNT**: Counts the number of rows.
+- **AVG**: Calculates the average value.
 
-They return a single value for a group of values.
-If GROUP BY clause is missing the entire table or filtered rows can become a Group.
+These functions return a single value for a group of values.
+
+**Note**: If the `GROUP BY` clause is missing, the entire table or filtered rows become a single group.
 
 ```sql
 SELECT SUM(SAL) FROM EMP;
@@ -1371,20 +1405,61 @@ SELECT AVG(SAL) FROM EMP;
 +-----------+
 ```
 
-`AGGREGATE FUNCTIONS WILL IGNORE NULL VALUES`
+### How the AVG() Function Handles NULL Values:
 
+The `AVG()` function in SQL calculates the average of a numeric column. When there are `NULL` values in the column, it **ignores** those `NULL` values in the calculation.
+
+- It only considers rows where the column has a non-NULL value.
+- The total sum is divided by the number of non-NULL rows, not by the total number of rows.
+
+#### Formula for Average:
+`Average = (Sum of Non-NULL Values) / (Count of Non-NULL Values)`
+
+
+#### Example:
+
+Suppose we have the following data in the `COMM` column:
+
+| EMPNO | COMM  |
+|-------|-------|
+| 7369  | NULL  |
+| 7499  | 300   |
+| 7521  | 500   |
+| 7566  | NULL  |
+| 7698  | 800   |
+
+**Steps to calculate the average**:
+1. Add the **non-NULL** values:  
+   `300 + 500 + 800 = 1600`
+
+2. Count the **non-NULL** values:  
+   `3` values (300, 500, and 800)
+
+3. Divide the sum by the count of non-NULL values:  
+   `1600 / 3 = 533.33`
+
+Thus, the `AVG(COMM)` will return **533.33** in this case, ignoring the `NULL` values.
+
+#### SQL Query:
 ```sql
-SELECT AVG(COMM) FROM EMP;
+SELECT AVG(COMM) AS average_commission
+FROM emp;
 ```
 ```
-+-----------+
-| AVG(COMM) |
-+-----------+
-|  550.0000 |
-+-----------+
++--------------------+
+| average_commission |
++--------------------+
+| 550.0000           |
++--------------------+
 ```
+NULL values are excluded from both the sum and the count when calculating averages, ensuring that only valid, non-NULL entries are considered.
 
-`When Calculating Average, it will consider only Not Null Values.`
+This means that:
+- The sum is calculated based only on the non-NULL values.
+- The count of values is based only on the non-NULL values.
+- `NULL` entries are completely ignored in the calculation of the average.
+
+This behavior allows for accurate calculation of averages even when some data points are missing (i.e., are `NULL`).
 
 ```SQL
 SELECT MAX(ENAME), MIN(ENAME) FROM EMP;
@@ -1417,10 +1492,17 @@ SELECT SUM(ENAME), AVG(ENAME) FROM EMP;
 +------------+------------+
 ```
 
-COUNT(COLUMN_NAME) IGNORES THE VALUE OF NULL IF PRESENT.
+`COUNT(COLUMN_NAME)` ignores the `NULL` values if present.
 
-```SQL
-SELECT COUNT(COMM) FROM EMP;
+- It only counts the rows where the column has a non-NULL value.
+- `NULL` values are completely excluded from the count.
+
+This ensures that the count reflects the number of meaningful entries in the column.
+
+For example:
+```sql
+SELECT COUNT(COMM) 
+FROM emp;
 ```
 ```
 +-------------+
@@ -1430,18 +1512,9 @@ SELECT COUNT(COMM) FROM EMP;
 +-------------+
 ```
 
-```SQL
-SELECT COUNT(*) FROM EMP;
-```
-```
-+----------+
-| COUNT(*) |
-+----------+
-|       14 |
-+----------+
-```
+This query will return the count of non-NULL values in the `COMM` column.
 
-`COUNT(1) IS FASTER THAN COUNT('STRING') AND COUNT(*)`
+`COUNT` is used to count rows with actual data, ignoring any `NULL` values. This makes it useful when you only want to consider valid or non-empty values for specific columns.
 
 ```SQL
 SELECT COUNT(*) FROM EMP;
@@ -1453,6 +1526,17 @@ SELECT COUNT(*) FROM EMP;
 |       14 |
 +----------+
 ```
+
+`COUNT(1)` is considered to be faster than `COUNT('STRING')` and `COUNT(*)`.
+
+- **COUNT(1)**: Counts all the rows in a table, but the "1" is a constant value for each row. It's efficient as the database engine just evaluates the constant.
+  
+- **COUNT('STRING')**: Counts all rows where the column contains non-null values, but using a string here can cause unnecessary evaluation overhead.
+
+- **COUNT(*)**: Counts all rows, but involves counting every column, although most modern databases optimize this to just count rows.
+
+Thus, `COUNT(1)` can be marginally faster due to simpler evaluation logic.
+
 ```SQL
 SELECT COUNT('CDAC') FROM EMP;
 ```
@@ -1476,7 +1560,7 @@ SELECT COUNT(420) FROM EMP;
 
 ### Display total of salaries of employees from job type 'Clerk'
 
-```SQL
+```sql
 SELECT SUM(SAL)
     FROM EMP
     WHERE JOB = 'CLERK';
@@ -1489,11 +1573,31 @@ SELECT SUM(SAL)
 +----------+
 ```
 
-`Above Aggregation Function (SUM) is fast and filter took time.`
+Above Aggregation Function (SUM) is fast, but the filtering process (WHERE clause) took more time.
+
+The aggregation function like `SUM()` is optimized for fast execution because it only needs to add up the values, which is a simple operation. However, the filtering process (WHERE clause) takes more time because:
+
+- **Row-by-Row Evaluation:** The filtering process checks each row in the table to see if it matches the condition (in this case, `JOB = 'CLERK'`). For large datasets, this can involve scanning a lot of rows.
+
+- **Indexing Impact:** If the `JOB` column is not indexed, the database needs to perform a **full table scan**, checking each row individually, which is slower than reading from an indexed column.
+
+- **Predicate Complexity:** The WHERE clause condition might involve additional overhead, such as comparing strings, which takes longer than simple arithmetic operations.
+
+So, while the `SUM()` function itself is quick, the time-consuming part is filtering the rows before performing the aggregation. If the `JOB` column is indexed, the filtering process can be made faster.
 
 ## DISTINCT
 
-DISTINCT is the clause in ANSI SQL which will eliminate duplicates.
+`DISTINCT` is a clause in ANSI SQL that is used to eliminate duplicate rows from the result set.
+
+### Syntax:
+```sql
+SELECT DISTINCT column1, column2, ...
+FROM table_name;
+```
+
+Notes:
+- `DISTINCT` applies to all selected columns, meaning the combination of values across all selected columns must be unique.
+- It helps in retrieving only unique values, reducing redundancy in the result set.
 
 ```SQL
 SELECT DISTINCT JOB FROM EMP;
@@ -1512,9 +1616,18 @@ SELECT DISTINCT JOB FROM EMP;
 
 WHAT IF THERE ARE NULL VALUES IN THE COLUMN?
 
-```SQL
+When using the `DISTINCT` clause with columns that contain `NULL` values, **`NULL` is treated as a distinct value**.
+
+```sql
 SELECT DISTINCT COMM FROM EMP;
 ```
+
+The result set will include `NULL` as one of the distinct values because **`NULL` is treated as a unique entry**.
+
+### Important Notes:
+- **`NULL` is not compared with other values**; it is considered a separate, distinct entry.
+- If there are multiple `NULL` values in the column, **only one `NULL`** will appear in the result set when using `DISTINCT`.
+
 ```
 +------+
 | COMM |
@@ -1548,12 +1661,23 @@ SELECT DISTINCT JOB, DEPTNO FROM EMP;
 +-----------+--------+
 ```
 
+### Important Notes:
+- `DISTINCT` applies to **all columns** in the select statement.
+- The uniqueness is determined by the **combination of values** across all selected columns.
+- Even if individual columns have duplicate values, the result set will include **distinct combinations** of the selected columns.
+
+
 ## GROUP BY CLAUSE
+
+The `GROUP BY` clause is used to arrange identical data into groups.
+
+### Example:
 ```sql
 SELECT JOB
 FROM emp
 GROUP BY JOB;
 ```
+
 ```
 +-----------+
 | JOB       |
@@ -1566,11 +1690,23 @@ GROUP BY JOB;
 +-----------+
 ```
 
-GROUP BY AND DISTINCT both eliminate Duplicates.
+### Notes:
+- The `GROUP BY` clause groups rows that have the same values in the specified columns.
+- It is typically used with **aggregate functions** (e.g., `SUM`, `COUNT`, `AVG`, etc.) to perform operations on each group of data.
+- If an aggregate function is used, all columns in the `SELECT` statement must either be included in the `GROUP BY` clause or be part of an aggregate function.
 
-Difference:
-- GROUP BY is the extension of DISTINCT.
-- It can do the aggregation in each distinct value. This cannot be done by distinct clause.
+## GROUP BY vs DISTINCT
+
+### Similarity:
+- Both `GROUP BY` and `DISTINCT` eliminate duplicate values from the result set.
+
+### Differences:
+- **GROUP BY** is an extension of `DISTINCT` and allows for performing **aggregations** (e.g., `SUM`, `COUNT`, `AVG`, etc.) on each distinct value or group.
+- **DISTINCT** simply removes duplicates without performing any aggregation.
+
+### Key Points:
+- **GROUP BY** can aggregate values for each distinct group of data (e.g., calculating total salary for each job type).
+- **DISTINCT** only removes duplicate rows and cannot perform aggregation.
 
 ### Display job wise total salaries.
 ```sql
@@ -1629,11 +1765,33 @@ SELECT DEPTNO, JOB, SUM(SAL)
 +--------+-----------+----------+
 ```
 
-`If the order of columns is changed in GROUP BY Clause, then there is no change in Output.`
+- **Column Order in GROUP BY Clause:**
+    - If the order of columns is changed in the `GROUP BY` clause, there is **no change in the output**. The grouping logic remains the same regardless of the order of the columns.
 
-`Whenever you use Aggregate Function in SELECT, it should also come in GROUP BY Clause.`
+- **Aggregate Functions in SELECT:**
+    - Whenever you use an aggregate function in the `SELECT` statement, the non-aggregated columns must also be included in the `GROUP BY` clause. This ensures that each unique group is calculated properly and the aggregation is done on each group.
+    
+    - If you don't include the non-aggregated columns in the `GROUP BY` clause, the query will likely result in an error or unexpected results.
+
 
 ## GROUP BY ON EXPRESSIONS
+
+You can group data based on expressions or derived columns.
+
+### Example:
+
+```sql
+SELECT DEPTNO, SAL + COMM AS Total_Compensation
+FROM EMP
+GROUP BY DEPTNO, SAL + COMM;
+```
+
+Notes:
+The `GROUP BY` clause can include expressions or calculations such as `SAL + COMM`.
+
+This allows you to group data based on the result of an expression rather than just a single column.
+
+Each group will be based on the unique values of the expression.
 
 ### Display year wise count of employees getting hired
 
@@ -1655,8 +1813,12 @@ GROUP BY YEAR(HIREDATE);
 
 ## HAVING CLAUSE
 
-WHERE CLAUSE filters original data of records.
-HAVING CLAUSE can filter summary records (based on Aggregate Values).
+- The `WHERE` clause filters original rows of data.
+- The `HAVING` clause is used to filter summarized or grouped data, typically based on **aggregate values**.
+
+Notes:
+- The `HAVING` clause is used in conjunction with the `GROUP BY` clause to filter the groups of rows returned by aggregate functions (e.g., `SUM`, `COUNT`).
+- It is similar to `WHERE`, but `HAVING` operates on **aggregated data**, while `WHERE` operates on **individual rows**.
 
 ### Display deptno wise total where total > 10000
 
@@ -1673,7 +1835,8 @@ SELECT DEPTNO, SUM(SAL) AS "TOTAL" FROM emp
 +--------+-------+
 ```
 
-This will return empty set 👇🏻
+This query will return an empty result set because the `HAVING` clause filters out any groups where the `COUNT(EMPNO) > 1`. Since `EMPNO` is a unique column (no duplicates per employee number), no group will satisfy this condition.
+
 ```sql
 SELECT EMPNO, MAX(SAL)
     FROM EMP
@@ -1681,57 +1844,137 @@ SELECT EMPNO, MAX(SAL)
     HAVING COUNT(EMPNO) > 1; -- No Output, but it is correct
 ```
 
-`We can mention those column name in HAVING CLAUSE only which are mentioned in Projection (SELECT ColumnName) or GROUP BY CLAUSE.`
+Important Notes:
 
-## EXECUTION FO ALL 6 CLAUSES OF SELECT STATEMENT
+- The `HAVING` clause is applied **after** the grouping of data.
+  
+- In the `HAVING` clause, you can only refer to the columns mentioned in the `SELECT` clause or those in the `GROUP BY` clause.
+
+## Execution Order of All 6 Clauses of a SELECT Statement
+
+1. **FROM**: The first step is to specify the tables from which to retrieve data.
+
+2. **WHERE**: This clause filters rows before grouping or aggregation is applied. It acts on individual rows.
+
+3. **GROUP BY**: Groups rows that share the same values in specified columns. Used with aggregate functions.
+
+4. **HAVING**: This filters the grouped records created by `GROUP BY`. It is applied after the aggregation.
+
+5. **SELECT**: Specifies which columns or expressions to return, including applying aggregate functions.
+
+6. **ORDER BY**: The last clause that sorts the result set based on one or more columns or expressions.
 
 ### Display job wise highest salaries, excluding president, for those jobs who have highest > 2800. Display output highest salary wise ascending.
 
-```sql
-SELECT JOB, MAX(SAL) FROM emp
-    WHERE JOB <> 'PRESIDENT'
-    GROUP BY JOB
-    HAVING MAX(SAL) > 2800
-    ORDER BY MAX(SAL);
-```
-```
-+---------+----------+
-| JOB     | MAX(SAL) |
-+---------+----------+
-| MANAGER |     2975 |
-| ANALYST |     3000 |
-+---------+----------+
-```
+### Optimized and Less Optimized Query Comparison
 
-Above is the Optimised Solution. The below approach is less optimised. We have used the WHERE CLAUSE Condition in HAVING CLAUSE. Why?
+ The example shows two different approaches to solving the same problem, with one being more optimized than the other.
+---
+
+### Optimized Query
 
 ```sql
-SELECT JOB, MAX(SAL) FROM emp
-    GROUP BY JOB
-    HAVING MAX(SAL) > 2800 AND JOB <> 'PRESIDENT'
-    ORDER BY MAX(SAL);
+SELECT JOB, MAX(SAL)
+FROM emp
+WHERE JOB <> 'PRESIDENT' -- Filter out before grouping
+GROUP BY JOB
+HAVING MAX(SAL) > 2800 -- Condition on aggregated data
+ORDER BY MAX(SAL); -- Sort the result by salary in ascending order
 ```
+
+### Explanation:
+
+- **WHERE Clause**: Filters out rows where `JOB` is `'PRESIDENT'` before the grouping and aggregation (`MAX(SAL)`).
+  - By applying this condition early, the query reduces the number of rows that need to be processed.
+
+- **GROUP BY JOB**: Groups the remaining rows by job type.
+  - Now only the non-`'PRESIDENT'` jobs are grouped.
+
+- **HAVING MAX(SAL) > 2800**: Filters the grouped data to keep only those job types where the maximum salary exceeds 2800.
+  - Since the rows are already filtered, this condition is applied to a smaller set of aggregated results.
+
+- **ORDER BY MAX(SAL)**: Orders the result set based on the maximum salary in ascending order.
+
+### Less Optimized Query
+
+```sql
+SELECT JOB, MAX(SAL)
+FROM emp
+GROUP BY JOB
+HAVING MAX(SAL) > 2800 AND JOB <> 'PRESIDENT' -- Filter after grouping and aggregation
+ORDER BY MAX(SAL);
+```
+
+### Explanation:
+
+- **GROUP BY JOB**: The grouping is applied to **all** jobs, including `'PRESIDENT'`.
+  - No filtering is done at this stage, so the aggregation (`MAX(SAL)`) will calculate the maximum salary for each job, even for jobs that will later be discarded.
+
+- **HAVING MAX(SAL) > 2800 AND JOB <> 'PRESIDENT'**: Both the conditions (`MAX(SAL) > 2800` and `JOB <> 'PRESIDENT'`) are checked **after** aggregation.
+  - The `JOB <> 'PRESIDENT'` filter is applied **after** the maximum salary is already calculated, meaning the aggregation was unnecessarily done for `'PRESIDENT'` as well, which is then discarded.
+
+- **ORDER BY MAX(SAL)**: Orders the result set based on the maximum salary, the same as in the optimized query.
+
+### Key Differences in Optimization:
+
+- **Early Filtering (Optimized Query)**:
+  - The first query filters rows before grouping using the `WHERE` clause, which reduces the number of rows the database needs to process for the aggregation.
+
+- **Late Filtering (Less Optimized Query)**:
+  - The second query performs the aggregation for all job types, including `'PRESIDENT'`, and then removes `'PRESIDENT'` afterward in the `HAVING` clause, which is less efficient since resources are wasted on unneeded calculations.
+
+---
+
+### Conclusion:
+
+- The **Optimized Query** performs filtering **before** grouping and aggregation, making it more efficient.
+- The **Less Optimized Query** performs filtering **after** the aggregation, which results in unnecessary calculations. This leads to slower performance, especially on larger datasets.
+
+---
+
+### Why is the Filtering Process Important?
+
+- **Filter Early, Work Less**: Filtering rows before grouping (using the `WHERE` clause) reduces the number of rows that need to be processed by the `GROUP BY` and aggregation functions, saving computational resources.
+  
+- **Post-Aggregation Filtering**: Filtering after aggregation (using the `HAVING` clause) leads to unnecessary work being done on rows that will ultimately be discarded, which can slow down query execution.
+
+Thus, applying the `WHERE` clause for early filtering is a good practice to optimize query performance, particularly when dealing with large datasets.
+
 
 ## JOINS IN SQL
 
-- Due to RDBMS design the information gets spread across multiple tables via common fields.
-- But due to this design when we want to display columns of those tables based on matching values of common fields then join technique needs to be used.
+- In relational database management systems (RDBMS), data is often spread across multiple tables with common fields.
+- To retrieve data from multiple tables based on matching values in those common fields, we use the SQL **JOIN** technique.
 
-There are 3 types of JOINS:
-1. INNER
-2. OUTER
-3. CROSS
+### Types of JOINS:
+1. **INNER JOIN**
+2. **OUTER JOIN**
+3. **CROSS JOIN**
 
-1. INNER
-    A)Equi- Joins
-    B)Non equi-joins
+---
 
-a)Equi-join:Based on only matching values of common fieLds.
-Display ename and dname from emp and dept tables
+### 1. INNER JOIN
+An **INNER JOIN** returns only the rows that have matching values in both tables.
 
-ANSI 89 Syntax:
-```SQL
-SELECT ENAME ,DNAME
+#### A) Equi-Joins:
+- Join based on equality between columns in both tables (e.g., `table1.column = table2.column`).
+
+#### B) Non-Equi Joins:
+- Joins based on a non-equality condition (e.g., `table1.column > table2.column`).
+
+
+### a) Equi-Join: Based on Matching Values of Common Fields
+
+An **Equi-Join** retrieves rows from two or more tables based on matching values in common fields (columns). The result will only show rows where the join condition is satisfied.
+
+---
+
+### Example: Display `ename` and `dname` from `emp` and `dept` tables
+
+#### **ANSI 89 Syntax:**
+
+```sql
+SELECT ENAME, DNAME
 FROM EMP, DEPT
 WHERE EMP.DEPTNO = DEPT.DEPTNO;
 ```
@@ -1755,7 +1998,8 @@ WHERE EMP.DEPTNO = DEPT.DEPTNO;
 | MILLER | ACCOUNTING |
 +--------+------------+
 ```
-Ansi 92 Syntax
+
+#### **ANSI 92 Syntax:**
 ```sql
 SELECT ENAME, DNAME
 FROM EMP INNER JOIN DEPT
@@ -1781,6 +2025,14 @@ ON EMP.DEPTNO = DEPT.DEPTNO;
 | MILLER | ACCOUNTING |
 +--------+------------+
 ```
+
+**Notes:**
+
+- In the **ANSI 89** syntax, the tables are separated by commas, and the join condition is specified in the `WHERE` clause.
+  
+- In the **ANSI 92** syntax, the `INNER JOIN` keyword is used, and the join condition is specified with the `ON` clause. 
+
+- The **ANSI 92** syntax is preferred for better readability and separation of the join condition from the filtering logic.
 
 ### Best Practice to Write Join Operations is using ALIAS
 
@@ -1810,6 +2062,11 @@ ON e.DEPTNO = d.DEPTNO;
 +--------+------------+--------+
 ```
 
+**Notes:**
+
+- Using **table aliases** (e for EMP and d for DEPT) helps in making the query cleaner and more readable.
+- Table aliases reduce the repetition of table names when referencing columns, making the SQL code more concise and easier to maintain.
+
 ### Display ename, dname, sal for those who earn sal > 2000
 
 ```SQL
@@ -1833,19 +2090,66 @@ SELECT EMP.ENAME, DEPT.DNAME, EMP.SAL
 +-------+------------+------+
 ```
 
-## EXAMPLE OF NON-EQUI JOIN:
+### Non-Equi Join Example:
+
+A **Non-Equi Join** is a join where the common field between tables is matched using conditions other than equality (`=`), such as greater than (`>`), less than (`<`), etc.
+
+#### Scenario:
+We want to match records from two tables based on a range of values rather than exact equality.
+
+```sql
+SELECT e.ENAME, s.GRADE
+FROM EMP e, SALGRADE s
+WHERE e.SAL BETWEEN s.LOSAL AND s.HISAL;
+```
+
+### Explanation:
+- **e.SAL BETWEEN s.LOSAL AND s.HISAL**: This condition checks whether the salary (SAL) of an employee falls within the salary grade range (LOSAL to HISAL) in the SALGRADE table.
+
+### Output Example:
+```
++--------+-------+
+| ENAME  | GRADE |
++--------+-------+
+| SMITH  |     1 |
+| ALLEN  |     3 |
+| WARD   |     2 |
+| JONES  |     4 |
+| MARTIN |     2 |
+| BLAKE  |     4 |
+| CLARK  |     4 |
+| SCOTT  |     4 |
+| KING   |     5 |
+| TURNER |     3 |
+| ADAMS  |     1 |
+| JAMES  |     1 |
+| FORD   |     4 |
+| MILLER |     2 |
++--------+-------+
+```
+
+### Notes:
+- Non-equi joins are commonly used when the join condition is based on ranges or complex comparisons.
 
 ## SUBSTR
 
-SubsStr is a function which will extract a part of string.
+**SUBSTR** is a function that extracts a part of a string.
 
 ### Syntax: 
 ```sql
-SubStr(Column Name Or String,
-    From which position to extract
-    [, number of characters to extract]
+SUBSTR(Column_Name_Or_String, 
+       From_Position_To_Extract, 
+       [Number_Of_Characters_To_Extract]
 )
 ```
+
+- **Column_Name_Or_String**: The string or column from which you want to extract a substring.
+
+- **From_Position_To_Extract**: The position in the string from where the extraction starts.
+
+- **Number_Of_Characters_To_Extract** *(optional)*: The number of characters to extract from the starting position.
+
+  - If the number of characters is omitted, the substring will start from the given position and continue to the end of the string.
 
 ```sql
 SELECT SUBSTR('ABCDEFGHIJ', 3, 4);
@@ -1872,22 +2176,9 @@ SELECT SUBSTR('ABCDEFGHIJ', 85);
 +--------------------------+
 ```
 
+### Explanation:
+- **`SUBSTR('ABCDEFGHIJ', 3, 4)`**: Extracts 4 characters starting from position 3, resulting in `'CDEF'`.
 
+- **`SUBSTR('ABCDEFGHIJ', 3)`**: Extracts the substring starting from position 3 to the end, resulting in `'CDEFGHIJ'`.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- **`SUBSTR('ABCDEFGHIJ', 85)`**: Since position 85 exceeds the length of the string, it returns an empty result.
