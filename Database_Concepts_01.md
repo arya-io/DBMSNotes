@@ -2599,3 +2599,132 @@ LIMIT 5 OFFSET 3;
 +-------+--------+----------+------+------------+------+------+--------+
 ```
 
+## Referential Integrity
+
+When records are present in the parent and the child tables then by default the records from the parent tables cannot be deleted if the dependency exists in the child tables.
+You cannot delete child table when it is dependent on parent table.
+
+## Entity Types
+
+Entity means table name, entity means subject area.
+person, place, object, event or concept about which an organization (or users) want to maintain data abut (or track)
+
+There are two types of Entities in RDBMS:
+- Weak Entity
+- Strong Entity
+
+The above two types are only applicable for child tables, i.e., where there is Foreign Key.
+
+### Clause to be mentioned in Foreign Key Definition:
+On Delete Cascade - When the parent records are deleted then the corresponding called On Delete Cascade.
+
+Weak Entity are those which depend on other tables.
+Strong Entity are those which are independent.
+
+### ON Delete Set Null
+
+## Attributes
+
+Attributes describe properties of entity.
+Properties of entity are attributes.
+Attributes tell the characterisitcs of that entity.
+Every entity has at least one attribute.
+
+## ER Diagram
+
+- Symbolic notations of tables and relationships.
+- Used for conceptual data modeling.
+- Developed by Peter Chen in 1976.
+- made up of entities, attributes and cardinality.
+
+## Cardinality
+
+Cardinality refers to the number of occurrences of commmon column of one entity that can or must be linked with number of occurrences of common column of another entity.
+There are three types of cardinalities:
+1 to 1
+1 to many
+many to many
+
+Cardinality is often represented in ERDs using specific notation, such as:
+(1, M)
+(1, N)
+(M, 1)
+(M, N)
+or symbols (crow's foot notation)
+(1, *)
+
+Mapping cardinality is an important activity.
+
+### One to One Relationship
+Employee -> Office
+
+### One to Many Relationship
+- described as 1:M
+- e.g., One Faculty teaches One or Multiple Students, i.e., One Faculty associated with many students
+- Total Participation at both the ends.
+
+- total participation at one end and partial participation at the other end.
+- e.g., System Analyst is in charge of Projects.
+
+### Many to Many Relationship
+
+- described as M:N
+- many instances of one entity relate to many instances of another entity
+- must be separated into additional 1:M
+- e.g., Salesperson is assigned to call on Customer
+- e.g., Users have Permissions
+
+## Junction/Link/Bridge/Associative Table
+These tables are used when dealing with many-to-many relationships in a database.
+
+## Attribute Types
+
+- Simple
+- Composite
+- Single Valued
+- Multi Valued
+- Derived Attribute
+
+### Simple
+The attribute which is not divided into sub parts.
+Example - Customer_ID, RollNo
+
+### Composite
+Can be divided into smaller subparts, which represent more basic attributes with independent meanings of their own.
+For example, the Address attribute of the employee entity can be subdivide into Street, City, State and Zip.
+
+### Multivalued Attribute
+May have upper and lower and upper bounds on the number of values for an individual entity.
+For example, the colors attribute of a car may have between one and have five values, if we assume that a car can have at most five colors.
+
+### Derived Attribute
+For example, the Age attirbute of a person.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
