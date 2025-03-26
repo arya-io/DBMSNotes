@@ -2521,22 +2521,81 @@ Normalization is a technique
 #### 4NF:
 - Addresses Multivalued dependencies.
 
+## LIMIT
 
+```sql
+SELECT *
+FROM emp
+LIMIT 5;
+```
+```
++-------+--------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+----------+------+------------+------+------+--------+
+|  7369 | SMITH  | CLERK    | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7499 | ALLEN  | SALESMAN | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|  7521 | WARD   | SALESMAN | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7566 | JONES  | MANAGER  | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7654 | MARTIN | SALESMAN | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
++-------+--------+----------+------+------------+------+------+--------+
+```
 
+```sql
+SELECT * FROM emp
+    WHERE SAL <= 2800
+    LIMIT 2;
+```
+```
++-------+-------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+----------+------+------------+------+------+--------+
+|  7369 | SMITH | CLERK    | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7499 | ALLEN | SALESMAN | 7698 | 1981-05-20 | 1600 |  300 |     30 |
++-------+-------+----------+------+------------+------+------+--------+
+```
+```sql
+SELECT DISTINCT SAL
+From emp
+ORDER BY SAL DESC
+LIMIT 4;
+```
+```
++------+
+| SAL  |
++------+
+| 5000 |
+| 3000 |
+| 2975 |
+| 2850 |
++------+
+```
 
+Internal Execution:
+1. FROM
+2. DISTINCT SAL
+3. ORDER BY SAL DESC
+4. LIMIT 4
 
+## LIMIT WITH OFFSET
 
+Offset is handy to skip some number of rows from top.
 
+#### Display 4th to 8th Records.
 
-
-
-
-
-
-
-
-
-
-
-
+```sql
+SELECT *
+FROM emp
+LIMIT 5 OFFSET 3;
+```
+```
++-------+--------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+----------+------+------------+------+------+--------+
+|  7566 | JONES  | MANAGER  | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7654 | MARTIN | SALESMAN | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7698 | BLAKE  | MANAGER  | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK  | MANAGER  | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST  | 7566 | 1982-12-09 | 3000 | NULL |     20 |
++-------+--------+----------+------+------------+------+------+--------+
+```
 
