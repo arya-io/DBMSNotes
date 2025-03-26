@@ -2182,3 +2182,211 @@ SELECT SUBSTR('ABCDEFGHIJ', 85);
 - **`SUBSTR('ABCDEFGHIJ', 3)`**: Extracts the substring starting from position 3 to the end, resulting in `'CDEFGHIJ'`.
 
 - **`SUBSTR('ABCDEFGHIJ', 85)`**: Since position 85 exceeds the length of the string, it returns an empty result.
+
+## MUL
+
+## JOINING THREE TABLES
+```sql
+SELECT ename, dname, pname
+FROM e ON d
+ON e.deptno = d.deptno
+JOIN p
+ON d.pcode = p.pcode;
+```
+
+This can be continued for 4th, 5th tables as well.
+
+```sql
+SELECT ename, dname, pname
+FROM e ON d
+ON e.deptno = d.deptno
+JOIN p
+ON d.pcode = p.pcode
+JOIN s
+ON p.sid = s.sid;
+```
+
+If there are 'N' tables, then minimum 'N-1' Join Conditions have to be there.
+
+## OUTER JOIN
+
+OUTER JOIN is extension of INNER JOIN.
+Sometimes we don't see matching records.
+So in order to see matching records, we use OUTER JOIN.
+
+We have two tables:
+- emp1
+```
++-------+----------+--------+
+| empno | ename    | deptno |
++-------+----------+--------+
+| E1    | Smith    |     10 |
+| E2    | Roger    |     20 |
+| E3    | Martin   |     10 |
+| E4    | Kim      |     30 |
+| E5    | Glen     |     77 |
+| E6    | Richards |     80 |
++-------+----------+--------+
+```
+
+- dept1
+```
++--------+------------+
+| deptno | dname      |
++--------+------------+
+|     10 | Accounts   |
+|     20 | Production |
+|     30 | Marketing  |
+|     40 | Inspection |
+|     50 | R&D        |
++--------+------------+
+```
+
+### LEFT OUTER JOIN
+
+![Alt text](LOJ.png)
+
+```sql
+SELECT ename, dname, emp1.deptno
+    FROM emp1 LEFT OUTER JOIN dept1
+    ON emp1.deptno = dept1.deptno;
+```
+```
++----------+------------+--------+
+| ename    | dname      | deptno |
++----------+------------+--------+
+| Smith    | Accounts   |     10 |
+| Roger    | Production |     20 |
+| Martin   | Accounts   |     10 |
+| Kim      | Marketing  |     30 |
+| Glen     | NULL       |     77 |
+| Richards | NULL       |     80 |
++----------+------------+--------+
+```
+
+### RIGHT OUTER JOIN
+
+![Alt text](ROJ.png)
+
+```sql
+SELECT ename, dname, dept1.deptno
+    FROM emp1 RIGHT OUTER JOIN dept1
+    ON emp1.deptno = dept1.deptno;
+```
+```
++--------+------------+--------+
+| ename  | dname      | deptno |
++--------+------------+--------+
+| Martin | Accounts   |     10 |
+| Smith  | Accounts   |     10 |
+| Roger  | Production |     20 |
+| Kim    | Marketing  |     30 |
+| NULL   | Inspection |     40 |
+| NULL   | R&D        |     50 |
++--------+------------+--------+
+```
+
+### FULL OUTER JOIN
+
+Combination of Inner + Remaining of Left + Remaining of Right
+
+![Alt text](FOJ.png)
+
+```sql
+SELECT ename, dname, dept1.deptno, emp1.deptno
+    FROM emp1 FULL OUTER JOIN dept1
+    ON emp1.deptno = dept1.deptno;
+```
+```
+MYSQL DOESN'T SUPPORT FULL OUTER JOIN. WHY?
+Because it is not built for typical transactional processes.
+But we can perform FULL OUTER JOIN using UNION of LEFT OUTER JOIN and RIGHT OUTER JOIN.
+```
+```sql
+SELECT * FROM emp1 e
+    LEFT JOIN dept1 d
+    ON e.deptno = d.deptno
+    UNION
+    SELECT * FROM emp1 e
+    RIGHT JOIN dept1 d
+    ON e.deptno = d.deptno;
+```
+```
++-------+----------+--------+--------+------------+
+| empno | ename    | deptno | deptno | dname      |
++-------+----------+--------+--------+------------+
+| E1    | Smith    |     10 |     10 | Accounts   |
+| E2    | Roger    |     20 |     20 | Production |
+| E3    | Martin   |     10 |     10 | Accounts   |
+| E4    | Kim      |     30 |     30 | Marketing  |
+| E5    | Glen     |     77 |   NULL | NULL       |
+| E6    | Richards |     80 |   NULL | NULL       |
+| NULL  | NULL     |   NULL |     40 | Inspection |
+| NULL  | NULL     |   NULL |     50 | R&D        |
++-------+----------+--------+--------+------------+
+```
+
+## Using WHERE Clause in JOINS (Data Filtering Using JOINS)
+
+```sql
+SELECT ename, dname, emp1.deptno, dept1.deptno
+FROM emp1 LEFT JOIN dept1
+ON emp1.deptno = dept1.deptno
+WHERE dept1.deptno IS NULL;
+```
+```
++----------+-------+--------+--------+
+| ename    | dname | deptno | deptno |
++----------+-------+--------+--------+
+| Glen     | NULL  |     77 |   NULL |
+| Richards | NULL  |     80 |   NULL |
++----------+-------+--------+--------+
+```
+
+# CROSS JOIN
+
+It gives Cartesian Product.
+Cross is also a keyword in SQL.
+
+
+- No requirement to give ON clause.
+- Cross Join can be used on any group of tables.
+- It can work on non-relational tables. But Inner and Outer can work on Relational Tables.
+
+
+```sql
+SELECT ename, dname
+FROM emp CROSS JOIN dept;
+```
+
+The above code will give 56 rows of output.
+
+```sql
+SELECT scheme, roi, code, month, (roi * month) as "Final Value"
+FROM rates CROSS JOIN period;
+```
+
+This gives 84 rows of output.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
