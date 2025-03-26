@@ -2368,8 +2368,158 @@ FROM rates CROSS JOIN period;
 
 This gives 84 rows of output.
 
+### Self Join
 
+Points to remember to build logic for SELF JOIN:
+- Have replica of two tables on a sheet of paper with different aliases.
+- Then perform the SELF JOIN.
+Joining The Same Table with itself.
+There is no Self Keyword.
 
+```sql
+SELECT e.ename as "Sub Ordinate", m.ename as "Manager"
+FROM emp e JOIN emp m
+ON e.mgr = m.empno;
+```
+```
++--------------+---------+
+| Sub Ordinate | Manager |
++--------------+---------+
+| SMITH        | FORD    |
+| ALLEN        | BLAKE   |
+| WARD         | BLAKE   |
+| JONES        | KING    |
+| MARTIN       | BLAKE   |
+| BLAKE        | KING    |
+| CLARK        | KING    |
+| SCOTT        | JONES   |
+| TURNER       | BLAKE   |
+| ADAMS        | SCOTT   |
+| JAMES        | BLAKE   |
+| FORD         | JONES   |
+| MILLER       | CLARK   |
++--------------+---------+
+
+13 rows as Output
+```
+
+```sql
+SELECT e.ename as "Sub Ordinate", m.ename as "Manager"
+FROM emp e LEFT JOIN emp m
+ON e.mgr = m.empno;
+```
+```
++--------------+---------+
+| Sub Ordinate | Manager |
++--------------+---------+
+| SMITH        | FORD    |
+| ALLEN        | BLAKE   |
+| WARD         | BLAKE   |
+| JONES        | KING    |
+| MARTIN       | BLAKE   |
+| BLAKE        | KING    |
+| CLARK        | KING    |
+| SCOTT        | JONES   |
+| TURNER       | BLAKE   |
+| ADAMS        | SCOTT   |
+| JAMES        | BLAKE   |
+| FORD         | JONES   |
+| MILLER       | CLARK   |
++--------------+---------+
+
+14 rows as Output
+```
+
+When only Primary Key is different and the rest of the data is same, in that moment we can use Self Join.
+
+#### 
+Primary Keys are System Generated. Therefore, uniqueness is maintained.
+
+#### To display the duplicate rows which have unique PK but the remaining entire record getting duplicated.
+
+```sql
+INSERT INTO emp VALUES
+(7999, 'MARTIN', 'SALESMAN', 7698, '1981-09-20', 1250, 1400, 30);
+
+SELECT e.*
+FROM emp e JOIN emp m
+ON e.empno <> m.empno
+AND e.ename = m.ename
+AND e.job = m.job
+AND e.sal = m.sal;
+```
+```
++-------+--------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+----------+------+------------+------+------+--------+
+|  7999 | MARTIN | SALESMAN | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7654 | MARTIN | SALESMAN | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
++-------+--------+----------+------+------------+------+------+--------+
+```
+
+```sql
+SELECT ename
+FROM emp
+GROUP BY ename
+HAVING COUNT(ename) > 1;
+```
+```
++--------+
+| ename  |
++--------+
+| MARTIN |
++--------+
+```
+
+`If cardinality is one to one or one to many, then only outer and inner join will work.
+Otherwise, it will not work when it is many to many cardinality.`
+
+## WRT Emp and Dept Tables
+
+### Display dname wise total salaries.
+
+```sql
+SELECT d.dname, SUM(e.sal) FROM emp e
+JOIN dept d ON e.deptno = d.deptno
+GROUP BY d.dname;
+```
+```        
++------------+------------+
+| dname      | SUM(e.sal) |
++------------+------------+
+| RESEARCH   |      10875 |
+| SALES      |      10650 |
+| ACCOUNTING |       8750 |
++------------+------------+
+```
+
+## Normalization
+
+In Leyman terms, it is used to shorten a long data, i.e., normalize big data.
+To remove data redundancy.
+To streamline data.
+
+Normalization is a technique 
+
+#### 1NF:
+- If you have two repeating columns (groups) for a single value, separate them and create two individual tables.
+- There should be one composite key.
+- Other columns should be dependent on the entire combination, i.e., composite key.
+- Those remaining keys should not be dependent on each other.
+
+#### 2NF:
+- 3 Tables.
+- Only relevant when Composite Key is present.
+
+#### 3NF:
+- All non key columns should be dependent only on PK column.
+- If any non key column is dependent on another non key column then it is wrong.
+- This type of dependency is known as Transitive Dependency.
+- Transitive Dependency means one non key column is dependent on another non key column.
+- We should remove Transitive Dependency.
+
+#### 4NF:
+- Addresses Multivalued dependencies.
 
 
 
