@@ -3308,20 +3308,214 @@ WHERE SAL > (SELECT MAX(SAL)
 +-------+-------+-----------+------+------------+------+------+--------+
 ```
 
+## Exists Operator
 
+Returns TRUE or FALSE
 
+### Display records of employee who earn sal > than Smith's sal:
 
+```sql
+SELECT *
+FROM emp
+WHERE SAL > (SELECT SAL
+             FROM emp
+             WHERE ENAME = 'SMITH');
 
+SELECT *
+FROM emp
+WHERE EXISTS (SELECT *
+             FROM dept
+             WHERE deptno = 108);
+```
+Gives Output as Empty Set.
 
+```sql
+SELECT *
+FROM emp
+WHERE EXISTS (SELECT *
+             FROM dept
+             WHERE deptno = 20);
+```
+This will output 14 rows as Result.
 
+```sql
+SELECT *
+FROM emp
+WHERE EXISTS (SELECT NULL
+             FROM dept
+             WHERE deptno = 20);
+```
 
+The above query is optimal to write as NULL.
+To avoid unnecessary results.
 
+## CURDATE()
 
+Date Functions are always proprietory.
 
+```sql
+SELECT CURDATE();
+```
+```
++------------+
+| CURDATE()  |
++------------+
+| 2025-03-27 |
++------------+
+```
+```sql
+SELECT DAYNAME(CURDATE());
+```
+```
++--------------------+
+| DAYNAME(CURDATE()) |
++--------------------+
+| Thursday           |
++--------------------+
+```
 
+## NOT EXISTS
 
+Opposite of Exists.
 
+```sql
+SELECT *
+FROM emp
+WHERE EXISTS (SELECT *
+             FROM dept
+             WHERE deptno = 108);
+```
 
+It will show all 14 records.
+
+## SET OPERATORS
+
+They will combine the output rows of two or multiple select statements.
+These are used in non-relational tables.
+When one or two columns are same, then they are relational tables.
+JOINS work on relational tables.
+SETS work on non-relational tables.
+
+There are 4 Set Operators
+1. Union All
+2. Union
+3. Intersect
+4. Except or Minus
+
+### UNION ALL
+
+```sql
+SELECT * FROM India
+UNION ALL
+SELECT * FROM Australia;
+```
+
+This query will combine both the tables.
+
+```sql
+SELECT Pname from India
+UNION ALL
+SELECT Pname from Australia;
+```
+
+### UNION
+
+Remove duplicates.
+
+```sql
+SELECT Pname from India
+UNION
+SELECT Pname from Australia;
+```
+```
++-----------------+
+| Pname           |
++-----------------+
+| Washing Machine |
+| LCD             |
+| Refrigerator    |
+| Chairs          |
+| Dinning Table   |
+| Sofa            |
++-----------------+
+```
+
+Rules
+1. Number of columns in each SELECT statement should be identical.
+2. In case columns are not identical, we can use NULL.
+
+```sql
+SELECT Pname, Qty
+FROM India
+UNION
+SELECT Pname, NULL
+FROM Australia;
+```
+```
++-----------------+------+
+| Pname           | Qty  |
++-----------------+------+
+| Washing Machine |    1 |
+| LCD             |    1 |
+| Refrigerator    |    1 |
+| Chairs          |    4 |
+| Chairs          |    6 |
+| LCD             |    2 |
+| LCD             | NULL |
+| Dinning Table   | NULL |
+| Sofa            | NULL |
+| Washing Machine | NULL |
+| Refrigerator    | NULL |
++-----------------+------+
+```
+
+### INTERSECT
+
+```sql
+SELECT pname FROM India
+INTERSECT
+SELECT pname FROM Australia;
+```
+```
++-----------------+
+| Pname           |
++-----------------+
+| Washing Machine |
+| LCD             |
+| Refrigerator    |
++-----------------+
+```
+
+### EXCEPT
+
+```sql
+SELECT pname FROM India
+EXCEPT
+SELECT pname FROM Australia;
+```
+```
++--------+
+| Pname  |
++--------+
+| Chairs |
++--------+
+```
+
+Interchanging the table names will alter the result.
+
+```sql
+SELECT pname FROM Australia
+EXCEPT
+SELECT pname FROM India;
+```
+```
++---------------+
+| Pname         |
++---------------+
+| Dinning Table |
+| Sofa          |
++---------------+
+```
 
 
 
