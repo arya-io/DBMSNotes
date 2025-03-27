@@ -3396,6 +3396,8 @@ When one or two columns are same, then they are relational tables.
 JOINS work on relational tables.
 SETS work on non-relational tables.
 
+### DIFFERENCE BETWEEN SETS AND JOINS.
+
 There are 4 Set Operators
 1. Union All
 2. Union
@@ -3517,6 +3519,156 @@ SELECT pname FROM India;
 +---------------+
 ```
 
+# Derived Tables
+
+"Derived Tables" or aka "Inline Views" or aka "Sub Query in From Clause"
+Another table is called as Regular Table.
+
+```sql
+SELECT * FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
+```
+
+The above query works.
+The below query doesn't work.
+
+```sql
+SELECT JOB FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
+```
+
+### To display, names, salaries, job, average salary and difference(raise) with average salary of those employees who earn more than the average salary in their own jobs.
+```sql
+SELECT A.ENAME, A.SAL, A.JOB, B.SALAVG,(A.SAL-B.SALAVG) AS "Raise"
+FROM EMP A INNER JOIN (SELECT JOB,
+                       ROUND(AVG(SAL), 2) AS SALAVG
+                       FROM EMP
+                       GROUP BY JOB) B
+ON A.JOB = B.JOB
+WHERE A.SAL > B.SALAVG;
+```
+```
++--------+------+----------+---------+--------+
+| ENAME  | SAL  | JOB      | SALAVG  | Raise  |
++--------+------+----------+---------+--------+
+| ALLEN  | 1600 | SALESMAN | 1400.00 | 200.00 |
+| JONES  | 2975 | MANAGER  | 2758.33 | 216.67 |
+| BLAKE  | 2850 | MANAGER  | 2758.33 |  91.67 |
+| TURNER | 1500 | SALESMAN | 1400.00 | 100.00 |
+| ADAMS  | 1100 | CLERK    | 1037.50 |  62.50 |
+| MILLER | 1300 | CLERK    | 1037.50 | 262.50 |
++--------+------+----------+---------+--------+
+```
+
+### Display the name, sal, deptno, highest sal of that deptno and difference of employees who are earning sal less than the highest of their own deptno.
+
+```sql
+SELECT E.ENAME, E.SAL, E.DEPTNO, D.HIGHEST, (D.HIGHEST-E.SAL) AS "LESS"
+FROM EMP E JOIN (SELECT DEPTNO, MAX(SAL) AS HIGHEST
+                 FROM EMP
+                 GROUP BY DEPTNO) D
+ON E.DEPTNO = D.DEPTNO
+WHERE E.SAL < D.HIGHEST
+ORDER BY E.DEPTNO;
+```
+```
++--------+------+--------+---------+------+
+| ENAME  | SAL  | DEPTNO | HIGHEST | LESS |
++--------+------+--------+---------+------+
+| CLARK  | 2450 |     10 |    5000 | 2550 |
+| MILLER | 1300 |     10 |    5000 | 3700 |
+| SMITH  |  800 |     20 |    3000 | 2200 |
+| JONES  | 2975 |     20 |    3000 |   25 |
+| ADAMS  | 1100 |     20 |    3000 | 1900 |
+| ALLEN  | 1600 |     30 |    2850 | 1250 |
+| WARD   | 1250 |     30 |    2850 | 1600 |
+| MARTIN | 1250 |     30 |    2850 | 1600 |
+| TURNER | 1500 |     30 |    2850 | 1350 |
+| JAMES  |  950 |     30 |    2850 | 1900 |
++--------+------+--------+---------+------+
+```
+
+Try to write FROM Clause first in order to improve thought process to solve complicated problems.
+
+### Display entire records of Top 4 Salary Values.
+
+```sql
+SELECT E.*
+FROM (SELECT DISTINCT SAL
+      FROM EMP
+      ORDER BY SAL DESC
+      LIMIT 4) TOP4 JOIN EMP E
+ON TOP4.SAL = E.SAL;
+```
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
+
+### Display the 4th highest salary value:
+
+```sql
+SELECT MIN(SAL) AS "4TH HIGHEST SALARY"
+FROM (SELECT DISTINCT SAL
+FROM EMP
+ORDER BY SAL DESC
+LIMIT 4) TOP4;
+```
+```
++--------------------+
+| 4TH HIGHEST SALARY |
++--------------------+
+|               2850 |
++--------------------+
+```
+
+### Display ename, dname, sal, loc for those employees who earn sal > 2000 and who are from locations Dallas and New York.
+
+```sql
+SELECT ENAME, DNAME, SAL, LOC
+FROM EMP E JOIN DEPT D
+ON E.DEPTNO = D.DEPTNO
+WHERE E.SAL > 2000 AND D.LOC IN ('DALLAS', 'NEW YORK');
+```
+```
++-------+------------+------+----------+
+| ENAME | DNAME      | SAL  | LOC      |
++-------+------------+------+----------+
+| JONES | RESEARCH   | 2975 | DALLAS   |
+| CLARK | ACCOUNTING | 2450 | NEW YORK |
+| SCOTT | RESEARCH   | 3000 | DALLAS   |
+| KING  | ACCOUNTING | 5000 | NEW YORK |
+| FORD  | RESEARCH   | 3000 | DALLAS   |
++-------+------------+------+----------+
+```
+
+Above is Traditional/Conventional Way
+Below is Optimised Way
+
+```sql
+SELECT ENAME, DNAME, SAL, LOC
+FROM (SELECT * FROM EMP WHERE SAL > 2000) E JOIN
+                                        (SELECT * FROM DEPT WHERE LOC IN ('DALLAS', 'NEW YORK')) D
+ON E.DEPTNO = D.DEPTNO;
+```
+```
++-------+------------+------+----------+
+| ENAME | DNAME      | SAL  | LOC      |
++-------+------------+------+----------+
+| JONES | RESEARCH   | 2975 | DALLAS   |
+| CLARK | ACCOUNTING | 2450 | NEW YORK |
+| SCOTT | RESEARCH   | 3000 | DALLAS   |
+| KING  | ACCOUNTING | 5000 | NEW YORK |
+| FORD  | RESEARCH   | 3000 | DALLAS   |
++-------+------------+------+----------+
+```
+
+## Valid Column Combination Hints
 
 
 
