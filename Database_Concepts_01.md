@@ -58,7 +58,7 @@ A **delimiter** was used to separate fields within these files.
 
 ---
 
-![Alt text](Databases.png)
+![Alt text](Images/Databases.png)
 
 ## Data Integrity Rules:
 
@@ -2185,34 +2185,137 @@ SELECT SUBSTR('ABCDEFGHIJ', 85);
 
 ## MUL
 
-## JOINING THREE TABLES
+In databases, **MUL** is a term commonly used in database management systems (especially MySQL) to describe a **"Multiple Key"** or an index that is not unique. This term can be seen when looking at table structures, specifically when foreign keys or non-unique indexes are created.
+
+## What is MUL?
+
+- **MUL** stands for "Multiple." It indicates that the column is indexed but does **not require uniqueness**. The same value can appear multiple times in the indexed column.
+- This is typically associated with **foreign keys** or regular indexes in cases where duplicates are allowed.
+
+### How MUL Relates to Foreign Keys
+
+When a **foreign key** is created in a table, the corresponding column often gets marked with **MUL** in the database's internal description of the table (like when you use the `SHOW COLUMNS` command in MySQL). This happens because foreign keys are not unique; multiple rows can have the same foreign key value. For example, multiple orders can reference the same customer ID.
+
+### Example
+
+Consider the following tables in MySQL:
+
+```sql
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderDate DATE,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+```
+## Example Explanation
+
+In this example:
+
+- The `CustomerID` in the `Customers` table is a **primary key** (hence unique).
+- The `CustomerID` in the `Orders` table is a **foreign key**, and in MySQL’s internal schema, this column might be marked as **MUL** because it allows multiple orders to reference the same `CustomerID`.
+
+### Viewing MUL in MySQL
+
+If you use `SHOW COLUMNS` or `DESCRIBE` on the `Orders` table, you might see something like this for the `CustomerID`:
+
+```sql
+SHOW COLUMNS FROM Orders;
+```
+
+The output might look like this:
+
+| Field      | Type    | Null | Key | Default | Extra |
+|------------|---------|------|-----|---------|-------|
+| OrderID    | int(11) | NO   | PRI | NULL    |       |
+| CustomerID | int(11) | YES  | MUL | NULL    |       |
+| OrderDate  | date    | YES  |     | NULL    |       |
+
+Here, **MUL** for `CustomerID` means that it can have multiple (non-unique) occurrences and is indexed for faster lookups.
+
+### Summary
+
+- **MUL** indicates that a column is indexed but allows non-unique values.
+- In the case of foreign keys, MySQL often designates the foreign key column with **MUL** because multiple rows can reference the same foreign key value.
+
+## Joining Three Tables
+
+The SQL query for joining three tables would look like this:
+
 ```sql
 SELECT ename, dname, pname
-FROM e ON d
+FROM e 
+JOIN d
 ON e.deptno = d.deptno
 JOIN p
 ON d.pcode = p.pcode;
 ```
 
-This can be continued for 4th, 5th tables as well.
+## Explanation of SQL Query for Joining Tables
+
+In this query:
+
+- **`e`** represents the employee table.
+- **`d`** represents the department table.
+- **`p`** represents the project table.
+
+The `JOIN` conditions ensure that you're matching records across these tables using `deptno` (department number) and `pcode` (project code).
+
+### Adding a 4th Table
+
+You can continue joining additional tables like this:
 
 ```sql
 SELECT ename, dname, pname
-FROM e ON d
+FROM e 
+JOIN d
 ON e.deptno = d.deptno
 JOIN p
 ON d.pcode = p.pcode
 JOIN s
 ON p.sid = s.sid;
 ```
+In this example:
 
-If there are 'N' tables, then minimum 'N-1' Join Conditions have to be there.
+- **`s`** represents the new table you're joining, and the condition `p.sid = s.sid` connects it to the previous table.
+
+## General Rule for N Tables
+
+If there are 'N' tables, then you need at least **N-1 Join Conditions** to properly connect them. For example, to join 5 tables, you'll need at least 4 join conditions.
+
+```sql
+-- Example for joining N tables:
+SELECT col1, col2, col3, ..., colN
+FROM table1
+JOIN table2 ON condition1
+JOIN table3 ON condition2
+...
+JOIN tableN ON condition(N-1);
+```
+
+### Key Points:
+
+- **N-1 Join Conditions** are necessary to join **N** tables.
+  
+- Always ensure that there’s a proper condition to match rows across the tables.
 
 ## OUTER JOIN
 
-OUTER JOIN is extension of INNER JOIN.
-Sometimes we don't see matching records.
-So in order to see matching records, we use OUTER JOIN.
+- **OUTER JOIN** is an extension of **INNER JOIN**.
+- Sometimes, we don't see matching records across tables.
+- To view both matching and non-matching records, we use **OUTER JOIN**.
+
+### Types of OUTER JOIN:
+1. **LEFT OUTER JOIN** (or **LEFT JOIN**): Returns all records from the left table and the matched records from the right table. If no match, the result is `NULL` from the right table.
+   
+2. **RIGHT OUTER JOIN** (or **RIGHT JOIN**): Returns all records from the right table and the matched records from the left table. If no match, the result is `NULL` from the left table.
+   
+3. **FULL OUTER JOIN**: Returns all records when there is a match in either the left or right table. If there is no match, the result is `NULL` for unmatched rows.
 
 We have two tables:
 - emp1
@@ -2244,7 +2347,11 @@ We have two tables:
 
 ### LEFT OUTER JOIN
 
-![Alt text](LOJ.png)
+- **LEFT OUTER JOIN** (or **LEFT JOIN**) returns all records from the **left** table and the matched records from the **right** table.
+- If there are no matches from the right table, the result is `NULL` for the columns from the right table.
+- This allows you to see **all records from the left table** regardless of whether there is a match in the right table.
+
+![Alt text](Images/LOJ.png)
 
 ```sql
 SELECT ename, dname, emp1.deptno
@@ -2264,9 +2371,21 @@ SELECT ename, dname, emp1.deptno
 +----------+------------+--------+
 ```
 
+### Key Points
+
+- **LEFT OUTER JOIN** includes all records from the left table.
+  
+- If no match exists in the right table, the columns from the right table will show `NULL`.
+
+
 ### RIGHT OUTER JOIN
 
-![Alt text](ROJ.png)
+- **RIGHT OUTER JOIN** (or **RIGHT JOIN**) returns all records from the **right** table and the matched records from the **left** table.
+- If there are no matches from the left table, the result is `NULL` for the columns from the left table.
+- This allows you to see **all records from the right table**, even if there is no matching record in the left table.
+
+
+![Alt text](Images/ROJ.png)
 
 ```sql
 SELECT ename, dname, dept1.deptno
@@ -2286,30 +2405,43 @@ SELECT ename, dname, dept1.deptno
 +--------+------------+--------+
 ```
 
+### Key Points
+
+- **RIGHT OUTER JOIN** includes all records from the right table.
+
+- If no match exists in the left table, the columns from the left table will show `NULL`.
+
+
 ### FULL OUTER JOIN
 
-Combination of Inner + Remaining of Left + Remaining of Right
+- **FULL OUTER JOIN** is a combination of **Inner Join**, the **remaining unmatched records from the Left table**, and the **remaining unmatched records from the Right table**.
 
-![Alt text](FOJ.png)
+![Alt text](Images/FOJ.png)
+
+### Example
 
 ```sql
 SELECT ename, dname, dept1.deptno, emp1.deptno
-    FROM emp1 FULL OUTER JOIN dept1
-    ON emp1.deptno = dept1.deptno;
+FROM emp1 
+FULL OUTER JOIN dept1
+ON emp1.deptno = dept1.deptno;
 ```
-```
-MYSQL DOESN'T SUPPORT FULL OUTER JOIN. WHY?
-Because it is not built for typical transactional processes.
-But we can perform FULL OUTER JOIN using UNION of LEFT OUTER JOIN and RIGHT OUTER JOIN.
-```
+### Note: MySQL Doesn't Support FULL OUTER JOIN. Why?
+
+- MySQL doesn't support **FULL OUTER JOIN** because it is not typically built for complex transactional processes that require full joins.
+
+### Workaround for FULL OUTER JOIN in MySQL
+
+You can perform a **FULL OUTER JOIN** using the **UNION** of **LEFT OUTER JOIN** and **RIGHT OUTER JOIN**:
+
 ```sql
 SELECT * FROM emp1 e
-    LEFT JOIN dept1 d
-    ON e.deptno = d.deptno
-    UNION
-    SELECT * FROM emp1 e
-    RIGHT JOIN dept1 d
-    ON e.deptno = d.deptno;
+LEFT JOIN dept1 d
+ON e.deptno = d.deptno
+UNION
+SELECT * FROM emp1 e
+RIGHT JOIN dept1 d
+ON e.deptno = d.deptno;
 ```
 ```
 +-------+----------+--------+--------+------------+
@@ -2326,11 +2458,18 @@ SELECT * FROM emp1 e
 +-------+----------+--------+--------+------------+
 ```
 
+This approach combines the results from both **LEFT OUTER JOIN** and **RIGHT OUTER JOIN**, effectively simulating a **FULL OUTER JOIN**.
+
 ## Using WHERE Clause in JOINS (Data Filtering Using JOINS)
+
+You can use the **WHERE** clause to filter data when performing joins. This is especially useful when you want to return specific records based on conditions.
+
+### Example:
 
 ```sql
 SELECT ename, dname, emp1.deptno, dept1.deptno
-FROM emp1 LEFT JOIN dept1
+FROM emp1 
+LEFT JOIN dept1
 ON emp1.deptno = dept1.deptno
 WHERE dept1.deptno IS NULL;
 ```
@@ -2343,42 +2482,59 @@ WHERE dept1.deptno IS NULL;
 +----------+-------+--------+--------+
 ```
 
+### Explanation:
+- In this example, a **LEFT JOIN** is performed between the `emp1` and `dept1` tables.
+  
+- The **WHERE** clause filters the result to show only the records where `dept1.deptno` is `NULL`, meaning these employees do not have a matching department.
+
+
 # CROSS JOIN
 
-It gives Cartesian Product.
-Cross is also a keyword in SQL.
+A **CROSS JOIN** gives the **Cartesian Product** of two tables. It pairs every row from the first table with every row from the second table.
 
+- No requirement to give an **ON** clause.
+- **CROSS JOIN** can be used on any group of tables.
+- It can work on **non-relational tables**, while **Inner** and **Outer Joins** are used for **relational tables**.
 
-- No requirement to give ON clause.
-- Cross Join can be used on any group of tables.
-- It can work on non-relational tables. But Inner and Outer can work on Relational Tables.
-
+### Example 1:
 
 ```sql
 SELECT ename, dname
-FROM emp CROSS JOIN dept;
+FROM emp 
+CROSS JOIN dept;
 ```
+The above query will give a Cartesian product of the `emp` and `dept` tables.
 
-The above code will give 56 rows of output.
+If `emp` has 7 rows and `dept` has 8 rows, the result will contain **56 rows** (7 x 8 = 56).
+
+### Example 2:
 
 ```sql
-SELECT scheme, roi, code, month, (roi * month) as "Final Value"
-FROM rates CROSS JOIN period;
+SELECT scheme, roi, code, month, (roi * month) AS "Final Value"
+FROM rates 
+CROSS JOIN period;
 ```
+This query multiplies every row in the `rates` table by every row in the `period` table.
 
-This gives 84 rows of output.
+If `rates` has 12 rows and `period` has 7 rows, the result will contain **84 rows** (12 x 7 = 84).
+
+### Key Points:
+- **CROSS JOIN** produces a **Cartesian product**, where each row from the first table is combined with every row from the second.
 
 ### Self Join
 
-Points to remember to build logic for SELF JOIN:
-- Have replica of two tables on a sheet of paper with different aliases.
-- Then perform the SELF JOIN.
-Joining The Same Table with itself.
-There is no Self Keyword.
+A **Self Join** is when a table is joined with itself. The key points to remember while building logic for a Self Join are:
+
+- Have a replica of the table with different aliases.
+- There is no specific **SELF JOIN** keyword in SQL.
+- Joining the same table with itself.
+
+### Example:
 
 ```sql
-SELECT e.ename as "Sub Ordinate", m.ename as "Manager"
-FROM emp e JOIN emp m
+SELECT e.ename AS "Sub Ordinate", m.ename AS "Manager"
+FROM emp e 
+JOIN emp m
 ON e.mgr = m.empno;
 ```
 ```
@@ -2399,13 +2555,15 @@ ON e.mgr = m.empno;
 | FORD         | JONES   |
 | MILLER       | CLARK   |
 +--------------+---------+
-
-13 rows as Output
 ```
+It gives 13 Rows as Output
+
+Using **LEFT JOIN** with **Self Join**:
 
 ```sql
-SELECT e.ename as "Sub Ordinate", m.ename as "Manager"
-FROM emp e LEFT JOIN emp m
+SELECT e.ename AS "Sub Ordinate", m.ename AS "Manager"
+FROM emp e 
+LEFT JOIN emp m
 ON e.mgr = m.empno;
 ```
 ```
@@ -2426,14 +2584,16 @@ ON e.mgr = m.empno;
 | FORD         | JONES   |
 | MILLER       | CLARK   |
 +--------------+---------+
-
-14 rows as Output
 ```
+It gives 14 rows as Output.
 
-When only Primary Key is different and the rest of the data is same, in that moment we can use Self Join.
+### Key Points:
+- **Self Join** is useful when comparing rows in a table with other rows in the same table.
+- You can use **LEFT JOIN** in a **Self Join** to include unmatched rows.
+- When only the **Primary Key** is different but the rest of the data is the same, **Self Join** can be used.
+- **Primary Keys** are system-generated, ensuring uniqueness.
 
-#### 
-Primary Keys are System Generated. Therefore, uniqueness is maintained.
+
 
 #### To display the duplicate rows which have unique PK but the remaining entire record getting duplicated.
 
@@ -2471,10 +2631,10 @@ HAVING COUNT(ename) > 1;
 +--------+
 ```
 
-`If cardinality is one to one or one to many, then only outer and inner join will work.
-Otherwise, it will not work when it is many to many cardinality.`
+If cardinality is **one-to-one** or **one-to-many**, then only **outer** and **inner join** will work.  
+Otherwise, it will not work when it is **many-to-many** cardinality.
 
-## WRT Emp and Dept Tables
+## With Respect To Emp and Dept Tables
 
 ### Display dname wise total salaries.
 
@@ -2495,33 +2655,86 @@ GROUP BY d.dname;
 
 ## Normalization
 
-In Leyman terms, it is used to shorten a long data, i.e., normalize big data.
-To remove data redundancy.
-To streamline data.
+Normalization is a process used in databases to reduce redundancy and improve data integrity. It involves organizing the data in such a way that it becomes easier to maintain, update, and query without unnecessary duplication.
 
-Normalization is a technique 
+The primary goal of normalization is to break down large, complex tables into smaller, more manageable ones, ensuring that each table has a clear and unique purpose. This process is achieved by following several "normal forms," each with specific rules and criteria.
 
-#### 1NF:
-- If you have two repeating columns (groups) for a single value, separate them and create two individual tables.
-- There should be one composite key.
-- Other columns should be dependent on the entire combination, i.e., composite key.
-- Those remaining keys should not be dependent on each other.
+### 1NF (First Normal Form):
+- Ensures that the table has a **primary key** and that all columns contain atomic values (i.e., no repeating groups or arrays).
+- **No multivalued attributes** are allowed; every value must be singular (no lists or multiple values in a single cell).
+- If a column contains multiple sets of values for a single row, separate them into different rows or tables.
+- Example: If an "Order" table has multiple products in a single cell, split them into separate rows with a reference to the same order.
 
-#### 2NF:
-- 3 Tables.
-- Only relevant when Composite Key is present.
+### 2NF (Second Normal Form):
+- Builds on **1NF** and applies only when the table has a **composite primary key**.
+- All **non-key** attributes must be **fully dependent** on the entire composite key, not just part of it.
+- If an attribute depends only on a part of the composite key, it must be moved to a different table.
+- Example: In a table with `OrderID` and `ProductID` as a composite key, if `ProductName` depends only on `ProductID`, it should be in a separate product table.
 
-#### 3NF:
-- All non key columns should be dependent only on PK column.
-- If any non key column is dependent on another non key column then it is wrong.
-- This type of dependency is known as Transitive Dependency.
-- Transitive Dependency means one non key column is dependent on another non key column.
-- We should remove Transitive Dependency.
+### 3NF (Third Normal Form):
+- Builds on **2NF** and aims to remove **transitive dependencies**.
+- In 3NF, all columns that are not part of the primary key must be dependent **only** on the primary key.
+- **Transitive dependency**: When a non-key column depends on another non-key column rather than the primary key.
+- Example: If `CustomerID` is the primary key, and `CustomerAddress` depends on `CustomerID`, that’s correct. But if `CustomerCity` depends on `CustomerAddress`, that’s a transitive dependency and should be removed by creating a new table for addresses.
 
-#### 4NF:
-- Addresses Multivalued dependencies.
+### 4NF (Fourth Normal Form):
+- Deals with **multivalued dependencies**, where one column in a table can have multiple independent values for a single record.
+- **Multivalued dependency**: When a primary key maps to multiple independent values of two or more attributes, it can lead to redundancy.
+- Example: If a student can enroll in multiple courses and also have multiple skills, having both in the same table can create unnecessary duplication. 4NF would split these into separate tables (e.g., Student-Course and Student-Skills).
+
+### 5NF (Fifth Normal Form) – Optional:
+- Ensures that the table is split into smaller tables in such a way that it can be **rejoined** to recreate the original table without data redundancy.
+- Deals with cases where data relationships become complex, ensuring that a table can be split into multiple tables without losing data integrity or introducing redundancy.
+
+### Key Benefits of Normalization:
+1. **Reduces Data Redundancy**: By breaking down large tables, you avoid storing duplicate information.
+2. **Increases Data Integrity**: Reduces the likelihood of anomalies during insert, update, or delete operations.
+3. **Simplifies Data Maintenance**: Smaller, more focused tables are easier to maintain and query.
+4. **Improves Query Performance**: Well-structured tables can lead to more efficient queries by the database engine.
+
+### Drawbacks of Normalization:
+- **Complex Joins**: The more tables you have, the more joins are required for queries, which can sometimes impact performance.
+- **Over-Normalization**: Over-normalizing can lead to unnecessary complexity, with too many small tables that make it harder to retrieve data.
+
+### Denormalization – When to Use It:
+In some cases, it might be more practical to **denormalize** your database, particularly when read performance is critical. Denormalization involves merging some tables back together to avoid complex joins at the cost of some redundancy.
+
+---
+
+**Normalization Example:**
+
+| **Orders** (Before 1NF) |  
+|-------------------------|  
+| OrderID | Customer | Products  |  
+| 1       | John     | Product1, Product2 |  
+| 2       | Sarah    | Product3, Product4 |  
+
+**Orders** (After 1NF):
+| OrderID | Customer | Product   |  
+|---------|----------|-----------|  
+| 1       | John     | Product1  |  
+| 1       | John     | Product2  |  
+| 2       | Sarah    | Product3  |  
+| 2       | Sarah    | Product4  |  
+
+This example shows the transformation of a table that violates 1NF (repeating groups of products) into a table that adheres to 1NF by making each product atomic.
+
+---
+
+Following these normalization forms helps in creating efficient, scalable, and reliable databases that reduce anomalies and make data management easier.
+
 
 ## LIMIT
+
+The `LIMIT` clause is used in SQL to restrict the number of rows returned in the result set of a query. It is particularly useful when you only want to retrieve a subset of data, such as the first few rows or a specific range of rows, for performance optimization or data exploration.
+
+### Basic Syntax
+
+```sql
+SELECT column1, column2, ...
+FROM table_name
+LIMIT number_of_rows;
+```
 
 ```sql
 SELECT *
@@ -2570,15 +2783,82 @@ LIMIT 4;
 +------+
 ```
 
-Internal Execution:
-1. FROM
-2. DISTINCT SAL
-3. ORDER BY SAL DESC
-4. LIMIT 4
+## Internal Execution of a Query with LIMIT
 
-## LIMIT WITH OFFSET
+When a query is executed in SQL with the `LIMIT` clause, the steps are processed in a specific internal order to ensure the results are returned correctly. Here’s how the execution proceeds step by step:
 
-Offset is handy to skip some number of rows from top.
+1. **FROM**: 
+   - The first step is to retrieve data from the specified table(s).
+   
+2. **DISTINCT SAL**: 
+   - If you have a `DISTINCT` keyword, SQL filters out duplicate values from the selected column(s). In this case, it ensures distinct salary (`sal`) values.
+
+3. **ORDER BY SAL DESC**: 
+   - The result set is then ordered based on the salary (`sal`) in descending order, with the highest salary appearing first.
+
+4. **LIMIT 4**: 
+   - Finally, after sorting, the `LIMIT` clause restricts the result set to only 4 rows.
+
+### Example:
+
+```sql
+SELECT DISTINCT sal
+FROM employees
+ORDER BY sal DESC
+LIMIT 4;
+```
+
+## LIMIT with OFFSET
+
+The `OFFSET` clause is used in conjunction with `LIMIT` to skip a specified number of rows before starting to return the rows. This is particularly useful for pagination or when you want to skip a certain number of rows from the top of a result set.
+
+### Syntax for LIMIT with OFFSET
+
+```sql
+SELECT column1, column2, ...
+FROM table_name
+LIMIT number_of_rows OFFSET start_position;
+```
+
+### LIMIT with OFFSET
+
+- **number_of_rows**: Specifies the number of rows to return.
+- **start_position**: Defines the starting point by skipping a specific number of rows before returning the result.
+
+### Example:
+
+```sql
+SELECT ename, sal
+FROM employees
+ORDER BY sal DESC
+LIMIT 4 OFFSET 3;
+```
+
+### In this query:
+
+- It skips the first 3 rows after sorting by salary.
+- Then it returns the next 4 rows from the result set.
+
+### Key Points:
+
+- **Offset for Pagination**:
+  - `OFFSET` is particularly useful for pagination. When paginating, you want to skip a specific number of rows. For example, if you're displaying 10 records per page and need to show the 2nd page, you would use:
+
+  ```sql
+  SELECT ename, sal
+  FROM employees
+  ORDER BY sal DESC
+  LIMIT 10 OFFSET 10;
+  ```
+
+This query skips the first 10 rows and returns the next 10 rows.
+
+### Zero Offset:
+- If you set `OFFSET 0`, the query will start returning rows from the very first row.
+
+### Efficient Data Fetching:
+- By using `LIMIT` and `OFFSET` together, you can efficiently fetch a portion of the dataset. This approach is especially helpful for paginating large datasets, as it allows you to control which portion of the data you need to display or process.
+```
 
 #### Display 4th to 8th Records.
 
@@ -2601,104 +2881,200 @@ LIMIT 5 OFFSET 3;
 
 ## Referential Integrity
 
-When records are present in the parent and the child tables then by default the records from the parent tables cannot be deleted if the dependency exists in the child tables.
-You cannot delete child table when it is dependent on parent table.
+- **Referential Integrity** ensures that relationships between tables remain consistent.
+- When records are present in both parent and child tables, the records from the parent table **cannot be deleted** if they are referenced by records in the child table.
+
+### Key Points:
+- **Parent-Child Relationship**: The parent table contains the primary key, while the child table contains a foreign key that references the parent.
+- If a record exists in the **child table**, you **cannot delete** the corresponding record from the **parent table**.
+- You also cannot delete the **child table** when it depends on the **parent table**.
+
+This rule maintains the integrity of the database by preventing orphaned records or inconsistencies.
 
 ## Entity Types
 
-Entity means table name, entity means subject area.
-person, place, object, event or concept about which an organization (or users) want to maintain data abut (or track)
+In a relational database, an **Entity** refers to a subject area or a table name. It can be a **person**, **place**, **object**, **event**, or **concept** that an organization or user wants to maintain or track data about.
 
-There are two types of Entities in RDBMS:
-- Weak Entity
-- Strong Entity
+### Types of Entities in RDBMS:
+1. **Weak Entity**
+2. **Strong Entity**
 
-The above two types are only applicable for child tables, i.e., where there is Foreign Key.
+These two types are only applicable to **child tables**, i.e., tables where there is a **Foreign Key** relationship.
 
-### Clause to be mentioned in Foreign Key Definition:
-On Delete Cascade - When the parent records are deleted then the corresponding called On Delete Cascade.
+### 1. Weak Entity
+- A **Weak Entity** is dependent on other tables (typically a parent table).
+- It does not have a **primary key** of its own and relies on a **foreign key** to establish its identity.
+- Weak entities are often associated with **On Delete Cascade**, where deleting a parent record automatically deletes corresponding child records.
 
-Weak Entity are those which depend on other tables.
-Strong Entity are those which are independent.
+### 2. Strong Entity
+- A **Strong Entity** is independent and does not rely on any other table.
+- It has a **primary key** that uniquely identifies each record in the table and does not depend on foreign keys from other tables.
 
-### ON Delete Set Null
+### Foreign Key Clause:
+- **On Delete Cascade**: This clause is used in foreign key definitions to ensure that when parent records are deleted, corresponding child records in the weak entity (dependent table) are also deleted automatically.
+
+In summary, weak entities depend on other tables, while strong entities are self-sufficient and independent.
+
+### ON DELETE SET NULL
+
+- The **ON DELETE SET NULL** clause is used in a **foreign key** definition to specify that when a record in the parent table is deleted, the corresponding foreign key values in the child table will be set to **NULL**.
+- This is useful when the relationship between the parent and child should be broken upon deletion, but the child record itself should not be deleted.
+
+#### Key Points:
+- **NULL** is set only for the foreign key column(s), leaving the rest of the child record intact.
+- It works only if the foreign key column allows **NULL** values.
+  
+#### Example:
+
+```sql
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+    ON DELETE SET NULL
+);
+```
+
+In this example, if a **customer** is deleted from the `customers` table, the `customer_id` in the `orders` table for that customer will be set to **NULL**, but the order record itself will remain intact.
+
+### Use Case:
+The **ON DELETE SET NULL** clause is particularly useful when you want to retain records in the child table but allow the relationship with the parent table to be nullified upon deletion. 
+
+For example, in a scenario where an order might still be relevant even after a customer has been removed (such as for historical record-keeping), the relationship can be broken by setting the `customer_id` to **NULL**, while the order details remain in the system for reference or auditing purposes.
 
 ## Attributes
 
-Attributes describe properties of entity.
-Properties of entity are attributes.
-Attributes tell the characterisitcs of that entity.
-Every entity has at least one attribute.
+**Attributes** describe the properties or characteristics of an entity. They provide more details about the entity and help define its specific traits.
 
-## ER Diagram
+- **Attributes** represent data fields in a table.
+- They describe **properties** of an entity.
+- Every entity has at least one attribute, which defines its characteristics.
+- For example, in an **employee** entity, attributes could include `ename` (employee name), `emp_id`, `salary`, and `department`.
 
-- Symbolic notations of tables and relationships.
-- Used for conceptual data modeling.
-- Developed by Peter Chen in 1976.
-- made up of entities, attributes and cardinality.
+### Key Points:
+- Attributes define **specific characteristics** of an entity.
+- They help in describing and identifying each instance of the entity.
+- In a database, **columns** represent attributes of an entity (i.e., a table).
+
+Example:
+For an **Employee** entity:
+- Attributes: `EmployeeID`, `Name`, `DOB`, `Position`, `Salary`.
+
+## ER Diagram (Entity-Relationship Diagram)
+
+- **ER Diagram** (Entity-Relationship Diagram) is a visual representation of entities and their relationships in a database.
+- It uses **symbolic notations** to represent tables (entities) and relationships.
+- ER Diagrams are primarily used for **conceptual data modeling** to represent the structure of a database.
+- Developed by **Peter Chen** in **1976**.
+- An ER Diagram is composed of three main components:
+  - **Entities**: Represented as rectangles, these are the tables or subjects of interest.
+  - **Attributes**: Represented as ovals, these are the properties that describe entities.
+  - **Relationships**: Represented as diamonds, they depict the association between entities.
+  - **Cardinality**: Specifies the relationship's numeric mapping (one-to-one, one-to-many, many-to-many) between entities.
+ 
+  - 
+![Alt Text](Images/er.png)
+
+### Key Points:
+- **Entities**: Represent real-world objects (e.g., Employee, Department).
+- **Attributes**: Describe the characteristics of entities (e.g., Employee ID, Name, Salary).
+- **Relationships**: Define how entities are related (e.g., an employee works in a department).
+- **Cardinality**: Defines the numeric relationship (e.g., one department has many employees).
+
+### Example Notations:
+- **Rectangle**: Represents an entity (e.g., Employee, Department).
+- **Oval**: Represents an attribute (e.g., Name, Salary).
+- **Diamond**: Represents a relationship between entities (e.g., Works_In).
+- **Lines**: Connect entities and attributes or relationships, indicating associations.
 
 ## Cardinality
 
-Cardinality refers to the number of occurrences of commmon column of one entity that can or must be linked with number of occurrences of common column of another entity.
-There are three types of cardinalities:
-1 to 1
-1 to many
-many to many
+**Cardinality** refers to the number of instances of a common column in one entity that can or must be linked with the number of instances of a common column in another entity.
 
-Cardinality is often represented in ERDs using specific notation, such as:
-(1, M)
-(1, N)
-(M, 1)
-(M, N)
-or symbols (crow's foot notation)
-(1, *)
+There are three types of cardinalities in database relationships:
 
-Mapping cardinality is an important activity.
+1. **One-to-One (1:1)**: One instance of an entity is associated with only one instance of another entity.
+   ![Alt Text](Images/oto.png)
+   - **Example**: An **Employee** is assigned to one **Office**.
 
-### One to One Relationship
-Employee -> Office
+3. **One-to-Many (1:M)**: One instance of an entity is associated with multiple instances of another entity.
+   ![Alt Text](Images/otm.png)
+   - **Example**: One **Faculty** teaches multiple **Students**. In this case, the **Faculty** is related to many **Students**.
+   - **Note**: There can be **total participation** at both ends or **total participation at one end** and **partial participation at the other**.
 
-### One to Many Relationship
-- described as 1:M
-- e.g., One Faculty teaches One or Multiple Students, i.e., One Faculty associated with many students
-- Total Participation at both the ends.
+4. **Many-to-Many (M:N)**: Many instances of one entity are associated with many instances of another entity.
+   ![Alt Text](Images/mtm.png)
+   - **Example**: A **Salesperson** is assigned to call on many **Customers**, and each **Customer** may be called on by many **Salespersons**.
+   - **Important**: In practice, M:N relationships should be separated into additional **1:M relationships** for easier management.
 
-- total participation at one end and partial participation at the other end.
-- e.g., System Analyst is in charge of Projects.
+### Cardinality Representation
+Cardinality is often represented in ERDs using specific notation:
+- **(1, M)** or **(1, *)** for one-to-many.
+- **(M, N)** for many-to-many.
 
-### Many to Many Relationship
+### Types of Cardinality Relationships
 
-- described as M:N
-- many instances of one entity relate to many instances of another entity
-- must be separated into additional 1:M
-- e.g., Salesperson is assigned to call on Customer
-- e.g., Users have Permissions
+#### One-to-One Relationship
+- **Example**: An **Employee** has a unique **Office**.
+- **Mapping**: Each employee can only be linked to one office, and each office is assigned to only one employee.
 
-## Junction/Link/Bridge/Associative Table
-These tables are used when dealing with many-to-many relationships in a database.
+#### One-to-Many Relationship
+- **Example**: One **Faculty** can teach multiple **Students**.
+- **Mapping**: One entity instance is related to many instances of another entity.
+- **Participation**:
+  - **Total participation** at both ends or **partial participation** at one end, as seen when a **System Analyst** is in charge of multiple **Projects**.
+
+#### Many-to-Many Relationship
+- **Example**: **Users** have multiple **Permissions**, and **Permissions** are assigned to multiple **Users**.
+- **Mapping**: Many instances of one entity relate to many instances of another entity.
+- **Important**: Many-to-many relationships should be broken down into **one-to-many relationships** using an intermediate table.
+
+### Junction/Link/Bridge/Associative Table
+When dealing with many-to-many relationships, an additional table called a **Junction Table** (also known as a **Link Table**, **Bridge Table**, or **Associative Table**) is used to split the M:N relationship into two 1:M relationships.
+- **Example**: For **Salespersons** and **Customers**, a junction table may contain entries for each pair, establishing the relationships between the two entities.
+
+### Example Notations:
+- **(1, M)**: One-to-many.
+- **(M, N)**: Many-to-many.
+- **Crow’s foot notation**: A common way of representing cardinality visually in ER diagrams, where a single line represents "one" and a "crow’s foot" represents "many."
 
 ## Attribute Types
 
-- Simple
-- Composite
-- Single Valued
-- Multi Valued
-- Derived Attribute
+Attributes define the properties or characteristics of an entity in a database. There are different types of attributes based on their nature and structure:
 
-### Simple
-The attribute which is not divided into sub parts.
-Example - Customer_ID, RollNo
+### 1. Simple Attribute
+![Alt Text](Images/simple.png)
+- A simple attribute is one that cannot be further divided into smaller subparts.
+- **Example**: `Customer_ID`, `RollNo`, `SSN`.
 
-### Composite
-Can be divided into smaller subparts, which represent more basic attributes with independent meanings of their own.
-For example, the Address attribute of the employee entity can be subdivide into Street, City, State and Zip.
+### 2. Composite Attribute
+![Alt Text](Images/composite.png)
+- A composite attribute can be subdivided into smaller parts, each representing more basic attributes with independent meanings of their own.
+- **Example**: The `Address` attribute can be divided into `Street`, `City`, `State`, and `Zip`.
 
-### Multivalued Attribute
-May have upper and lower and upper bounds on the number of values for an individual entity.
-For example, the colors attribute of a car may have between one and have five values, if we assume that a car can have at most five colors.
+### 3. Single-Valued Attribute
+![Alt Text](Images/single.png)
+- A single-valued attribute holds only one value for a particular entity.
+- **Example**: `Date_of_Birth`, `Phone_Number` (if restricted to one phone number per person).
 
-### Derived Attribute
-For example, the Age attirbute of a person.
+### 4. Multi-Valued Attribute
+![Alt Text](Images/multi.png)
+- A multi-valued attribute can have more than one value for a single entity.
+- **Example**: The `Colors` attribute of a car may have multiple values if a car can have multiple colors. If a car can have at most five colors, the attribute would have a lower bound of one and an upper bound of five.
+
+### 5. Derived Attribute
+![Alt Text](Images/derived.png)
+- A derived attribute is calculated from other attributes. It is not stored directly in the database but is derived when needed.
+- **Example**: `Age` is derived from the `Date_of_Birth` attribute.
+
+### Example Summary:
+- **Simple Attribute**: Cannot be divided, e.g., `Customer_ID`.
+- **Composite Attribute**: Can be divided, e.g., `Address` → `Street`, `City`, `State`.
+- **Single-Valued Attribute**: Holds one value, e.g., `SSN`.
+- **Multi-Valued Attribute**: Holds multiple values, e.g., `Colors` of a car.
+- **Derived Attribute**: Calculated from other data, e.g., `Age` derived from `Date_of_Birth`.
+
 
 
 
