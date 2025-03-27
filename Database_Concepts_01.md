@@ -3075,6 +3075,254 @@ Attributes define the properties or characteristics of an entity in a database. 
 - **Multi-Valued Attribute**: Holds multiple values, e.g., `Colors` of a car.
 - **Derived Attribute**: Calculated from other data, e.g., `Age` derived from `Date_of_Birth`.
 
+## SUB QUERIES
+
+There are two types of Sub Queries:
+
+Correlated and Non-Correlated
+
+Below is an example of Non-correlated Sub Query.
+Here child query is executed first. Returns data to its parent query.
+
+### Display records of employees who earn sal > than Smith's salary.
+
+```sql
+SELECT *
+FROM emp
+WHERE SAL > (SELECT SAL
+FROM emp
+WHERE ENAME = 'SMITH');
+```
+```
++-------+--------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|  7521 | WARD   | SALESMAN  | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7654 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK  | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING   | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7844 | TURNER | SALESMAN  | 7698 | 1981-08-09 | 1500 |    0 |     30 |
+|  7876 | ADAMS  | CLERK     | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK     | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
+|  7934 | MILLER | CLERK     | 7782 | 1982-01-23 | 1300 | NULL |     10 |
+|  7999 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
++-------+--------+-----------+------+------------+------+------+--------+
+```
+
+### Display the name and salary of the highest earner(s).
+
+```sql
+SELECT ENAME, SAL AS "Highest Salary"
+FROM emp
+WHERE SAL = (SELECT MAX(SAL)
+FROM emp);
+```
+```
++-------+----------------+
+| ENAME | Highest Salary |
++-------+----------------+
+| KING  |           5000 |
++-------+----------------+
+```
+
+### Hints of when to use Sub Query
+
+1. Whenever there is derived value in the where clause for comparison then the Sub Query technique can be used!!!!
+2. Whenever aggregate value has to be compared in the where clause without using group by clause.
+
+### Single Row Sub Query
+When the child query returns only one value to its parent, then this Sub query is termed as Single Row sub query.
+
+### Multi Row Sub Query
+When the child query returns more than one value to its parent.
+
+IN, ANY, ALL Operators should be used in multi row.
+
+ALL acts as Logical AND.
+
+```sql
+SELECT *
+    FROM emp
+    WHERE SAL > ANY(SELECT SAL
+    FROM emp
+    WHERE DEPTNO = 20);
+```
+```
++-------+--------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+-----------+------+------------+------+------+--------+
+|  7499 | ALLEN  | SALESMAN  | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|  7521 | WARD   | SALESMAN  | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7566 | JONES  | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7654 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7698 | BLAKE  | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK  | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7788 | SCOTT  | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING   | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7844 | TURNER | SALESMAN  | 7698 | 1981-08-09 | 1500 |    0 |     30 |
+|  7876 | ADAMS  | CLERK     | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK     | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  7902 | FORD   | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
+|  7934 | MILLER | CLERK     | 7782 | 1982-01-23 | 1300 | NULL |     10 |
+|  7999 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
++-------+--------+-----------+------+------------+------+------+--------+
+```
+```sql
+SELECT *
+    FROM emp
+    WHERE SAL > ALL(SELECT SAL
+    FROM emp
+    WHERE DEPTNO = 20);
+```
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
+
+### Display ENAME, DEPTNO and SAL for those employees who have matching DEPTNO as per dept table.
+
+```sql
+SELECT e.ENAME, e.DEPTNO, e.SAL
+FROM emp e JOIN dept d
+ON e.deptno = d.deptno;
+```
+
+Above code is using JOIN
+Below code is using SUB QUERY
+
+```sql
+SELECT ENAME,
+DEPTNO,
+SAL
+FROM emp
+WHERE DEPTNO IN(SELECT DEPTNO
+FROM dept);
+```
+```
++--------+--------+------+
+| ENAME  | DEPTNO | SAL  |
++--------+--------+------+
+| SMITH  |     20 |  800 |
+| ALLEN  |     30 | 1600 |
+| WARD   |     30 | 1250 |
+| JONES  |     20 | 2975 |
+| MARTIN |     30 | 1250 |
+| BLAKE  |     30 | 2850 |
+| CLARK  |     10 | 2450 |
+| SCOTT  |     20 | 3000 |
+| KING   |     10 | 5000 |
+| TURNER |     30 | 1500 |
+| ADAMS  |     20 | 1100 |
+| JAMES  |     30 |  950 |
+| FORD   |     20 | 3000 |
+| MILLER |     10 | 1300 |
+| MARTIN |     30 | 1250 |
++--------+--------+------+
+```
+
+Same output can be fetched using ANY.
+
+This method is more effective than Join Operation.
+One reason is because we are not displaying the columns of the another table, i.e., dept.
+
+In ANSI SQL and other Databases, ORDER BY clause cannot be used in SUB QUERY. It only supports in MySQL.
+
+### Display the entire records of employees as per TOP 4 Salary Values.
+
+```sql
+SELECT E.*
+FROM (SELECT DISTINCT SAL
+      FROM emp
+      ORDER BY SAL DESC
+      LIMIT 4) S JOIN EMP E
+ON S.SAL = E.SAL;
+```
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
+```sql
+CREATE TABLE EmpC1
+AS
+SELECT * FROM emp;
+
+CREATE TABLE EmpC2
+AS
+SELECT * FROM emp;
+
+CREATE TABLE EmpC3
+AS
+SELECT * FROM emp;
+```
+
+### Delete records of highest earner(s) from EmpC1 Table.
+
+```sql
+DELETE FROM EmpC1
+WHERE SAL = (SELECT MAX(SAL)
+             FROM EmpC1
+);
+```
+
+This works on Oracle and not on MySQL.
+
+Child Query will always be SELECT.
+Parent Query can be any.
+
+## Nested Sub Query: Inside a Sub Query there will be another Sub Query.
+
+### Display records who have sal greater than Ford's job's highest salary
+
+```sql
+SELECT *
+FROM emp
+WHERE SAL > (SELECT MAX(SAL)
+             FROM emp
+             WHERE JOB = (SELECT JOB
+                          FROM emp
+                          WHERE ENAME = 'FORD'
+                          )
+             );
+```
+
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
