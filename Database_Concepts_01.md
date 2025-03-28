@@ -3947,15 +3947,129 @@ When writing SQL queries, especially those involving joins, subqueries, and set 
 8. **Join Keys Must Be Unique or Well-Defined**  
    Ensure that columns used in joins represent unique or well-defined relationships, such as primary keys or foreign keys, to avoid unnecessary data duplication.
 
-By following these guidelines, you can ensure proper column combinations in your SQL queries, which will help avoid common errors and improve the accuracy and efficiency of query results.
+By following these guidelines, we can ensure proper column combinations in our SQL queries, which will help avoid common errors and improve the accuracy and efficiency of query results.
 
+## Correlated Subqueries
 
+Display employees records who earn salary less than the average salary **of their own job.**
 
+```sql
+SELECT * FROM EMP
+WHERE SAL < (SELECT AVG(SAL)
+             FROM EMP
+             WHERE JOB = 'CLERK'
+             )
+AND
+JOB = 'CLERK';
+```
+```
++-------+-------+-------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB   | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-------+------+------------+------+------+--------+
+|  7369 | SMITH | CLERK | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7900 | JAMES | CLERK | 7698 | 1981-12-03 |  950 | NULL |     30 |
++-------+-------+-------+------+------------+------+------+--------+
+```
 
+```sql
+SELECT * FROM EMP E
+WHERE SAL < (SELECT AVG(SAL)
+             FROM EMP
+             WHERE JOB = E.JOB);
+```
+```
++-------+--------+----------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB      | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+----------+------+------------+------+------+--------+
+|  7369 | SMITH  | CLERK    | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7521 | WARD   | SALESMAN | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|  7654 | MARTIN | SALESMAN | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|  7782 | CLARK  | MANAGER  | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7900 | JAMES  | CLERK    | 7698 | 1981-12-03 |  950 | NULL |     30 |
++-------+--------+----------+------+------------+------+------+--------+
+```
 
+Parent query takes each row and submits it to child query.
+Child query gets executed for each row.
 
+If the **parent table's alias is referred or used in the Child Table's where clause**, then sql considers that type of query as **correlated**.
+The parent query table and the child query table is same so the table alias (E) is must to identify the row transferred by the parent query to the child query.
 
+### MECHANISM:
 
+Generally when CORRELATED mechanism is used with "SELECT" STATEMENT then it can be "slow" in processing if volume of rows is high. So it is less used with "SELECT" statement. With "SELECT" Inline Views (aka Derived Tables) or CTE or Window Functions are the "BEST" technique.
+
+But, Correlated Sub Query is "BEST" when it gets used with "UPDATE" and/or "DELETE" statements. Actually, it is widely used in "Projects".
+
+1. Mechanism starts with Outer Query(OQ).
+2. OQ gives first row to Sub Query (SQ).
+3. SQ gets executed for "that" row.
+4. OQ gives next row to SQ.
+5. SQ gets executed for "that" row.
+6. The mechanism continues till the last row is submitted by OQ to SQ.
+
+## Correlated Queries in Update Statement
+```sql
+ALTER TABLE table_name
+ADD column_name data_type [constraints];
+
+UPDATE emp_1
+SET dname = (SELECT dname
+             FROM dept
+             WHERE emp_1.deptno = dept.deptno);
+```
+
+```sql
+SELECT DISTINCT SAL AS "Fourth Highest Salary"
+FROM EMP e
+WHERE 4 = (SELECT COUNT(DISTINCT SAL) FROM EMP
+WHERE SAL >= e.SAL);
+```
+```
++-----------------------+
+| Fourth Highest Salary |
++-----------------------+
+|                  2850 |
++-----------------------+
+```
+
+It will store value from lowest to highest for iteration and then compare count with 4.
+For example, it will take 800 first. Then count greater than or equal to 800 is 12.
+It will do so till 4 is not matched.
+4 is matched when e.SAL stores 2850.
+
+The above method is the toughest to carry out execution of this query.
+This is not the total bad method because we have used DISTINCT here.
+
+`We can get same output with multiple techniques.
+SQL is tricky.`
+
+## EXISTS AND NOT EXISTS WITH CORRELATED SUB QUERIES
+
+### To display ename and sal from emp table who have their deptno matching as per dept table.
+
+```sql
+
+SELECT ename, sal
+FROM emp
+WHERE deptno IN (SELECT deptno
+                 FROM dept);
+```
+
+Below method uses Boolean Value, so it is faster.
+```sql
+SELECT ename, sal
+FROM emp
+WHERE EXISTS (SELECT NULL
+              FROM dept
+              WHERE emp.deptno = dept.deptno);
+```
+
+When we want to show records of only one table (columns of only one table) based on join
+
+**CORRELATED WITH UPDATE AND DELETE AND EXISTS AND NOT EXISTS.**
+
+CORRELATED comes under Advanced SQL.
 
 
 
