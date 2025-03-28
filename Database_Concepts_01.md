@@ -3077,21 +3077,28 @@ Attributes define the properties or characteristics of an entity in a database. 
 
 ## SUB QUERIES
 
-There are two types of Sub Queries:
+A **Sub Query** is a query nested inside another query, allowing complex operations and logic to be applied when retrieving data. There are two types of subqueries:
 
-Correlated and Non-Correlated
+### 1. Correlated Sub Query
+- In a **correlated subquery**, the inner query depends on the outer query for its execution. The subquery is executed repeatedly, once for each row processed by the outer query.
+- The subquery refers to columns from the outer query.
 
-Below is an example of Non-correlated Sub Query.
-Here child query is executed first. Returns data to its parent query.
+### 2. Non-Correlated Sub Query
+- In a **non-correlated subquery**, the inner query is independent of the outer query and executes only once.
+- The result of the subquery is passed to the outer query, which then uses this result to filter or process its own data.
 
-### Display records of employees who earn sal > than Smith's salary.
+---
+
+### Example of a Non-Correlated Sub Query
+
+The following query displays records of employees who earn a salary greater than **Smith's** salary. Here, the inner query retrieves Smith's salary first, and this result is used in the outer query to filter employees:
 
 ```sql
 SELECT *
 FROM emp
 WHERE SAL > (SELECT SAL
-FROM emp
-WHERE ENAME = 'SMITH');
+             FROM emp
+             WHERE ENAME = 'SMITH');
 ```
 ```
 +-------+--------+-----------+------+------------+------+------+--------+
@@ -3130,20 +3137,39 @@ FROM emp);
 +-------+----------------+
 ```
 
-### Hints of when to use Sub Query
+### Hints for When to Use a Sub Query
 
-1. Whenever there is derived value in the where clause for comparison then the Sub Query technique can be used!!!!
-2. Whenever aggregate value has to be compared in the where clause without using group by clause.
+1. **Derived Values in WHERE Clause**: Use subqueries when you need to compare a derived or calculated value in the `WHERE` clause of your main query.
+   
+   - Example: Filtering records based on a comparison with a specific value obtained from another query.
+
+2. **Aggregate Value Comparison**: Subqueries are useful when you want to compare an aggregate value (e.g., `MAX`, `SUM`) without using a `GROUP BY` clause.
+
+---
 
 ### Single Row Sub Query
-When the child query returns only one value to its parent, then this Sub query is termed as Single Row sub query.
+- A **Single Row Sub Query** occurs when the inner (child) query returns **only one value** to the outer (parent) query.
+  
+- These subqueries are typically used when the comparison requires a single value for conditions like `=`, `>`, `<`.
+
+---
 
 ### Multi Row Sub Query
-When the child query returns more than one value to its parent.
+- A **Multi Row Sub Query** occurs when the inner (child) query returns **more than one value** to the outer (parent) query.
 
-IN, ANY, ALL Operators should be used in multi row.
+- In these cases, operators such as `IN`, `ANY`, or `ALL` must be used to handle multiple rows of data.
 
-ALL acts as Logical AND.
+- **Operators Used in Multi Row Sub Queries**:
+  - `IN`: Compares if a value exists within a list of values returned by the subquery.
+  - `ANY`: Compares the outer query's value to **any one** of the values returned by the subquery.
+  - `ALL`: Compares the outer query's value to **all** values returned by the subquery, acting as a **Logical AND**.
+
+---
+
+### Key Points:
+- **Single Row Sub Query**: Returns a single value; typically used with operators like `=`, `<`, `>`.
+- **Multi Row Sub Query**: Returns multiple values; operators like `IN`, `ANY`, `ALL` should be used.
+- **ALL** acts as a **Logical AND**, meaning the condition must be true for all returned values.
 
 ```sql
 SELECT *
@@ -3187,25 +3213,30 @@ SELECT *
 +-------+-------+-----------+------+------------+------+------+--------+
 ```
 
-### Display ENAME, DEPTNO and SAL for those employees who have matching DEPTNO as per dept table.
+### Example: Display ENAME, DEPTNO, and SAL for Employees with Matching DEPTNO in the dept Table
+
+1. **Using JOIN**:
+   The following query uses a `JOIN` to match employees' `DEPTNO` with the department `DEPTNO`:
+
+   ```sql
+   SELECT e.ENAME, e.DEPTNO, e.SAL
+   FROM emp e 
+   JOIN dept d
+   ON e.deptno = d.deptno;
+   ```
+   This query joins the `emp` and `dept` tables based on the `DEPTNO` field, retrieving the `ENAME`, `DEPTNO`, and `SAL` of employees whose `DEPTNO` matches a department in the `dept` table.
+
+### Using Subquery
+The following query uses a subquery to achieve the same result by checking if the `DEPTNO` exists in the `dept` table:
 
 ```sql
-SELECT e.ENAME, e.DEPTNO, e.SAL
-FROM emp e JOIN dept d
-ON e.deptno = d.deptno;
-```
-
-Above code is using JOIN
-Below code is using SUB QUERY
-
-```sql
-SELECT ENAME,
-DEPTNO,
-SAL
+SELECT ENAME, DEPTNO, SAL
 FROM emp
-WHERE DEPTNO IN(SELECT DEPTNO
-FROM dept);
+WHERE DEPTNO IN (SELECT DEPTNO
+                 FROM dept);
 ```
+
+
 ```
 +--------+--------+------+
 | ENAME  | DEPTNO | SAL  |
@@ -3228,12 +3259,48 @@ FROM dept);
 +--------+--------+------+
 ```
 
-Same output can be fetched using ANY.
+In this query, the **subquery** retrieves all `DEPTNO` values from the `dept` table.
 
-This method is more effective than Join Operation.
-One reason is because we are not displaying the columns of the another table, i.e., dept.
+The outer query then selects employees from the `emp` table whose `DEPTNO` matches any of the values returned by the subquery.
 
-In ANSI SQL and other Databases, ORDER BY clause cannot be used in SUB QUERY. It only supports in MySQL.
+---
+
+### Key Points:
+
+- **JOIN**: Efficient for combining data from two or more related tables when the relationships between them are clearly defined. It typically improves performance and is suitable for fetching data from multiple tables in a single query.
+
+- **SUBQUERY**: Useful when retrieving a derived set of data from another table to be used for comparison or filtering in the main query. Subqueries are often used when the main query depends on the output of another query for conditions.
+
+
+The same output can be fetched using the `ANY` operator.
+
+This method is often more effective than a **JOIN** operation in certain cases because we are not displaying columns from the other table (in this case, `dept`). The **JOIN** fetches data from both tables, whereas using **SUBQUERY** with `ANY` or `IN` limits data retrieval to only the relevant columns from one table.
+
+Example using `ANY`:
+
+```sql
+SELECT ENAME, DEPTNO, SAL
+FROM emp
+WHERE DEPTNO = ANY (SELECT DEPTNO FROM dept);
+```
+
+### Key Points:
+
+- **Efficiency with Subqueries**: Subqueries can be more optimized compared to joins, particularly when you do not need to display data from the related table (e.g., `dept`). This method focuses only on the target table (e.g., `emp`), simplifying the query and potentially improving performance.
+
+- **ANSI SQL Limitation**: In **ANSI SQL** and most databases, the `ORDER BY` clause cannot be used in a **SUBQUERY**. However, this is supported in **MySQL**, where `ORDER BY` can be used within a subquery to sort the result.
+
+  For example, this query is valid in MySQL:
+
+  ```sql
+  SELECT ENAME, SAL
+  FROM emp
+  WHERE DEPTNO IN (SELECT DEPTNO FROM dept ORDER BY DEPTNO DESC);
+  ```
+
+This type of query with `ORDER BY` is valid in **MySQL** but not in other databases.
+
+In most databases that adhere to **ANSI SQL standards**, the `ORDER BY` clause is not allowed in a **subquery**. However, in MySQL, you can use `ORDER BY` within subqueries to sort results, providing additional flexibility in how data is processed before it's passed to the outer query.
 
 ### Display the entire records of employees as per TOP 4 Salary Values.
 
@@ -3245,6 +3312,17 @@ FROM (SELECT DISTINCT SAL
       LIMIT 4) S JOIN EMP E
 ON S.SAL = E.SAL;
 ```
+### Explanation:
+
+- **Inner Query**: 
+   - Retrieves the **top 4 distinct salary values** from the `emp` table in descending order using `ORDER BY SAL DESC` and `LIMIT 4`.
+   - This query ensures that only the highest 4 distinct salaries are selected.
+
+- **Outer Query**:
+   - The **outer query** then performs a `JOIN` between the top 4 salaries returned by the inner query and the `emp` table.
+   - This `JOIN` is based on matching the salary (`SAL`) from the inner query with the salary in the `emp` table.
+   - The result displays the **entire records** (all columns) of the employees who have one of these top 4 salary values.
+
 ```
 +-------+-------+-----------+------+------------+------+------+--------+
 | EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
@@ -3270,7 +3348,7 @@ AS
 SELECT * FROM emp;
 ```
 
-### Delete records of highest earner(s) from EmpC1 Table.
+### Delete Records of Highest Earner(s) from `EmpC1` Table
 
 ```sql
 DELETE FROM EmpC1
@@ -3279,14 +3357,27 @@ WHERE SAL = (SELECT MAX(SAL)
 );
 ```
 
-This works on Oracle and not on MySQL.
+### Explanation:
 
-Child Query will always be SELECT.
-Parent Query can be any.
+- This query deletes the records of employees who have the **highest salary** in the `EmpC1` table.
+  
+- The **subquery** (`SELECT MAX(SAL)`) retrieves the highest salary from the `EmpC1` table.
+  
+- The **main query** deletes all records where the salary (`SAL`) matches the highest salary returned by the subquery.
 
-## Nested Sub Query: Inside a Sub Query there will be another Sub Query.
+### Important Notes:
 
-### Display records who have sal greater than Ford's job's highest salary
+- This query works in **Oracle**, but may not work in **MySQL** due to potential restrictions on modifying a table referenced in the subquery.
+  
+- The **Child Query** (subquery) must always be a `SELECT` statement.
+  
+- The **Parent Query** (outer query) can be any DML (Data Manipulation Language) operation, such as `DELETE`, `UPDATE`, or `SELECT`.
+
+
+## Nested Sub Query: 
+A **Nested Sub Query** occurs when a subquery is placed inside another subquery.
+
+### Example: Display records of employees whose salary is greater than the highest salary for Ford's job.
 
 ```sql
 SELECT *
@@ -3299,7 +3390,6 @@ WHERE SAL > (SELECT MAX(SAL)
                           )
              );
 ```
-
 ```
 +-------+-------+-----------+------+------------+------+------+--------+
 | EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
@@ -3308,11 +3398,45 @@ WHERE SAL > (SELECT MAX(SAL)
 +-------+-------+-----------+------+------------+------+------+--------+
 ```
 
-## Exists Operator
+### Explanation:
 
-Returns TRUE or FALSE
+1. **Innermost Subquery**: 
+   - This part of the query retrieves the job title of 'FORD' from the `emp` table:
+   ```sql
+   (SELECT JOB FROM emp WHERE ENAME = 'FORD')
+   ```
 
-### Display records of employee who earn sal > than Smith's sal:
+   It identifies the specific job that 'FORD' holds.
+
+### Middle Subquery:
+
+Using the job retrieved from the innermost query, this subquery finds the highest salary (`MAX(SAL)`) for employees with the same job as 'FORD':
+
+```sql
+(SELECT MAX(SAL) FROM emp WHERE JOB = ...)
+```
+
+2. **Outermost Subquery**:
+   - The outer query retrieves all employee records from the `emp` table where the salary is greater than the maximum salary found in the middle subquery:
+
+   ```sql
+   SELECT * FROM emp WHERE SAL > ...
+   ```
+
+### Summary:
+This query combines multiple layers of subqueries. 
+
+- The innermost subquery retrieves Ford's job from the `emp` table.
+- The middle subquery finds the highest salary for employees with that same job.
+- The outer query filters and displays employees whose salary exceeds that highest salary.
+
+This multi-level approach helps to break down complex filtering logic into manageable steps, with each subquery refining the results passed to the outer query.
+
+## EXISTS Operator
+
+The `EXISTS` operator is used to check for the existence of rows in a subquery. It returns `TRUE` if the subquery returns one or more rows, and `FALSE` if it returns no rows.
+
+### Example 1: Display records of employees who earn more than Smith's salary
 
 ```sql
 SELECT *
@@ -3320,38 +3444,49 @@ FROM emp
 WHERE SAL > (SELECT SAL
              FROM emp
              WHERE ENAME = 'SMITH');
-
-SELECT *
-FROM emp
-WHERE EXISTS (SELECT *
-             FROM dept
-             WHERE deptno = 108);
 ```
-Gives Output as Empty Set.
+
+### Example 2: EXISTS Operator Example
+This query will return an empty set because there are no rows where `deptno = 108` in the `dept` table:
 
 ```sql
 SELECT *
 FROM emp
 WHERE EXISTS (SELECT *
-             FROM dept
-             WHERE deptno = 20);
+              FROM dept
+              WHERE deptno = 108);
 ```
-This will output 14 rows as Result.
+
+### Example 3: Another EXISTS Example
+This query will output 14 rows, as there are rows in the `dept` table where `deptno = 20`:
+
+```sql
+SELECT *
+FROM emp
+WHERE EXISTS (SELECT *
+              FROM dept
+              WHERE deptno = 20);
+```
+
+### Optimized Query using EXISTS
+When using the `EXISTS` operator, the subquery doesn't need to return actual values. It only checks for the existence of rows, so the query can be optimized by using `SELECT NULL`:
 
 ```sql
 SELECT *
 FROM emp
 WHERE EXISTS (SELECT NULL
-             FROM dept
-             WHERE deptno = 20);
+              FROM dept
+              WHERE deptno = 20);
 ```
 
-The above query is optimal to write as NULL.
-To avoid unnecessary results.
+This version of the query is more optimal, as it avoids unnecessary data retrieval while still checking for the existence of matching rows.
+
+By using `SELECT NULL` in the subquery, we focus purely on whether the condition is met (i.e., if there are any matching rows in the `dept` table with `deptno = 20`), without pulling any actual data. This reduces overhead and improves performance, especially in cases with large datasets.
 
 ## CURDATE()
 
 Date Functions are always proprietory.
+The `CURDATE()` function is used to retrieve the current date in SQL.
 
 ```sql
 SELECT CURDATE();
@@ -3363,6 +3498,10 @@ SELECT CURDATE();
 | 2025-03-27 |
 +------------+
 ```
+The above query returns the current date in the format `YYYY-MM-DD`.
+
+### Example - Getting the Day Name:
+
 ```sql
 SELECT DAYNAME(CURDATE());
 ```
@@ -3374,37 +3513,80 @@ SELECT DAYNAME(CURDATE());
 +--------------------+
 ```
 
+In this query, `DAYNAME()` is used to retrieve the name of the day corresponding to the current date returned by `CURDATE()`. This function is useful when you need to extract the weekday name from a date in SQL.
+
 ## NOT EXISTS
 
-Opposite of Exists.
+The `NOT EXISTS` operator is the opposite of the `EXISTS` operator. It checks whether no rows are returned by the subquery. 
+
+### Example with `EXISTS`
 
 ```sql
 SELECT *
 FROM emp
 WHERE EXISTS (SELECT *
-             FROM dept
-             WHERE deptno = 108);
+              FROM dept
+              WHERE deptno = 108);
 ```
 
-It will show all 14 records.
+This query checks for the existence of rows in the `dept` table with `deptno = 108`. Since no such records exist in the `dept` table, the `EXISTS` condition evaluates to `FALSE`, and the query will return an empty result.
+
+If you were to use `NOT EXISTS` in place of `EXISTS`, it would return all 14 records in the `emp` table, because the condition evaluates to `TRUE` (as no rows with `deptno = 108` exist in the `dept` table).
+
+### Example with `NOT EXISTS`
+
+```sql
+SELECT *
+FROM emp
+WHERE NOT EXISTS (SELECT *
+                  FROM dept
+                  WHERE deptno = 108);
+```
+
+This query will show all 14 records from the `emp` table because the `NOT EXISTS` condition is true.
 
 ## SET OPERATORS
 
-They will combine the output rows of two or multiple select statements.
-These are used in non-relational tables.
-When one or two columns are same, then they are relational tables.
-JOINS work on relational tables.
-SETS work on non-relational tables.
+Set operators are used to combine the output rows of two or more `SELECT` statements. They are especially useful for working with non-relational tables, where the structure of the tables may not be fully aligned.
 
-### DIFFERENCE BETWEEN SETS AND JOINS.
+### Key Points:
+- **Non-relational Tables**: Used when tables do not share all the same columns or structure.
+- **Relational Tables**: If one or more columns are the same between tables, they are considered relational, and you would typically use **JOINS** to combine them.
+- **Sets vs Joins**: 
+  - **Joins** are used with relational tables to combine rows based on related columns.
+  - **Sets** are used with non-relational tables to combine outputs where relationships are not directly defined by common columns.
 
-There are 4 Set Operators
-1. Union All
-2. Union
-3. Intersect
-4. Except or Minus
 
-### UNION ALL
+### Difference Between Sets and Joins
+
+| **Criteria**             | **Sets**                                        | **Joins**                                        |
+|--------------------------|------------------------------------------------|--------------------------------------------------|
+| **Definition**            | Combines results of two or more `SELECT` queries | Combines rows from two or more tables based on related columns |
+| **Usage**                 | Used for **non-relational** tables             | Used for **relational** tables                    |
+| **Required Conditions**   | Tables don't need to have common columns       | Requires at least one common column between tables |
+| **Key Operators**         | `UNION`, `INTERSECT`, `EXCEPT`, `MINUS`        | `INNER JOIN`, `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN` |
+| **Duplicate Handling**    | Handles duplicates differently depending on operator (`UNION ALL` vs `UNION`) | Automatically returns matching rows between tables |
+| **Performance**           | Generally faster for simple combinations       | Can be slower depending on the complexity of joins |
+| **Example Use Case**      | Merging two lists with non-relational data     | Joining customer and orders tables based on a common `customer_id` |
+
+**Summary**:
+- **Sets** are useful when combining outputs from **non-relational** data sources.
+- **Joins** are best for combining rows from **related** tables based on common columns.
+
+## Set Operators
+
+There are 4 Set Operators:
+1. **UNION ALL**
+2. **UNION**
+3. **INTERSECT**
+4. **EXCEPT** (or **MINUS**)
+
+### 1. UNION ALL
+
+- The `UNION ALL` operator combines the result sets of two or more `SELECT` queries.
+- It **does not remove** duplicates, meaning all rows from both queries will be included in the final result, even if they are the same.
+
+#### Example 1: Combine all records from two tables
 
 ```sql
 SELECT * FROM India
@@ -3412,23 +3594,32 @@ UNION ALL
 SELECT * FROM Australia;
 ```
 
-This query will combine both the tables.
+This query will combine all records from the `India` and `Australia` tables, including duplicates, if any.
+
+### Example 2: Combine specific column from two tables
 
 ```sql
-SELECT Pname from India
+SELECT Pname 
+FROM India
 UNION ALL
-SELECT Pname from Australia;
+SELECT Pname 
+FROM Australia;
 ```
+
+In this query, the `Pname` (Player Name) column from the `India` table is combined with the `Pname` column from the `Australia` table. Again, duplicates will not be removed, so all player names from both tables will be included in the result.
+
+**Key Point**: When using `UNION ALL`, no duplicate rows are removed, which can be useful when you want to keep all entries.
 
 ### UNION
 
-Remove duplicates.
+The `UNION` operator is used to combine the result sets of two or more `SELECT` statements and removes duplicate entries.
 
 ```sql
-SELECT Pname from India
+SELECT Pname FROM India
 UNION
-SELECT Pname from Australia;
+SELECT Pname FROM Australia;
 ```
+
 ```
 +-----------------+
 | Pname           |
@@ -3442,9 +3633,12 @@ SELECT Pname from Australia;
 +-----------------+
 ```
 
-Rules
-1. Number of columns in each SELECT statement should be identical.
-2. In case columns are not identical, we can use NULL.
+### Rules:
+
+1. The number of columns in each `SELECT` statement must be identical.
+2. If the columns are not identical, `NULL` can be used to balance the column count.
+
+**Key Point**: `UNION` automatically removes duplicate rows, while `UNION ALL` retains all duplicates.
 
 ```sql
 SELECT Pname, Qty
@@ -3472,6 +3666,8 @@ FROM Australia;
 ```
 
 ### INTERSECT
+
+The `INTERSECT` operator returns only the common rows between the two tables.
 
 ```sql
 SELECT pname FROM India
@@ -3503,7 +3699,9 @@ SELECT pname FROM Australia;
 +--------+
 ```
 
-Interchanging the table names will alter the result.
+In this case, the `EXCEPT` operator returns rows that are present in the first table (`India`) but not in the second table (`Australia`).
+
+### Interchanging the Table Names Alters the Result:
 
 ```sql
 SELECT pname FROM Australia
@@ -3519,21 +3717,39 @@ SELECT pname FROM India;
 +---------------+
 ```
 
+When the tables are swapped, the `EXCEPT` operator returns rows that are in `Australia` but not in `India`.
+
+### Key Point:
+- **INTERSECT**: Returns only the common rows between the two tables.
+- **EXCEPT**: Returns rows that are in the first table but not in the second.
+- **Order matters** with the `EXCEPT` operator; swapping the tables changes the result.
+
 # Derived Tables
 
-"Derived Tables" or aka "Inline Views" or aka "Sub Query in From Clause"
-Another table is called as Regular Table.
+"Derived Tables," also known as "Inline Views" or "Subquery in the FROM Clause," are subqueries that act as temporary tables within the main query. These derived tables are often used to simplify complex queries by breaking them into smaller, more manageable steps.
 
+### Example of a Working Query with a Derived Table:
 ```sql
-SELECT * FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
+SELECT * 
+FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
 ```
 
-The above query works.
-The below query doesn't work.
+In this query:
 
+A subquery in the `FROM` clause creates a derived table `abc` with the columns `ENAME`, `DEPTNO`, and `SAL`.
+
+The main query selects all columns (`*`) from the derived table.
+
+### Example of a Non-Working Query:
 ```sql
-SELECT JOB FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
+SELECT JOB 
+FROM (SELECT ENAME, DEPTNO, SAL FROM EMP) abc;
 ```
+
+This query will not work because the derived table `abc` contains only the columns `ENAME`, `DEPTNO`, and `SAL`. The `JOB` column is not part of this derived table, so trying to select it in the outer query results in an error.
+
+### Key Point:
+The columns available in the outer query are restricted to those specified in the derived table (the subquery). You cannot reference columns that are not included in the derived table.
 
 ### To display, names, salaries, job, average salary and difference(raise) with average salary of those employees who earn more than the average salary in their own jobs.
 ```sql
@@ -3558,7 +3774,7 @@ WHERE A.SAL > B.SALAVG;
 +--------+------+----------+---------+--------+
 ```
 
-### Display the name, sal, deptno, highest sal of that deptno and difference of employees who are earning sal less than the highest of their own deptno.
+### Display the name, salary, department number, highest salary of the department, and the difference for employees earning less than the highest salary in their department.
 
 ```sql
 SELECT E.ENAME, E.SAL, E.DEPTNO, D.HIGHEST, (D.HIGHEST-E.SAL) AS "LESS"
@@ -3586,39 +3802,62 @@ ORDER BY E.DEPTNO;
 +--------+------+--------+---------+------+
 ```
 
-Try to write FROM Clause first in order to improve thought process to solve complicated problems.
+### Explanation:
+- The **subquery** in the FROM clause calculates the highest salary (`HIGHEST`) for each department (`DEPTNO`).
+- The **main query** retrieves employees whose salary (`SAL`) is less than the highest salary in their respective department.
+- The final output includes:
+  - The employee's name (`ENAME`)
+  - Their salary (`SAL`)
+  - Their department number (`DEPTNO`)
+  - The highest salary in that department (`HIGHEST`)
+  - The difference between the highest salary and the employee's salary (`LESS`)
 
-### Display entire records of Top 4 Salary Values.
+### Display Entire Records of Top 4 Salary Values
 
 ```sql
 SELECT E.*
 FROM (SELECT DISTINCT SAL
       FROM EMP
       ORDER BY SAL DESC
-      LIMIT 4) TOP4 JOIN EMP E
+      LIMIT 4) TOP4 
+JOIN EMP E
 ON TOP4.SAL = E.SAL;
 ```
+
+This query retrieves the entire records for employees who have the top 4 highest salary values.
+
+### Explanation:
+
+**Subquery**:  
+The subquery selects distinct salary values (`SAL`) from the `EMP` table, orders them in descending order, and limits the results to the top 4 highest salaries.
+
+**Main Query**:  
+The main query joins the result of the subquery (`TOP4`) with the `EMP` table to match employees whose salary is one of the top 4 highest values.
+
+### Output Example:
 ```
-+-------+-------+-----------+------+------------+------+------+--------+
-| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
-+-------+-------+-----------+------+------------+------+------+--------+
-|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
-|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
-|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
-|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
-|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
-+-------+-------+-----------+------+------------+------+------+--------+
++-------+-------+-----------+------+------------+------+------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM |
++-------+-------+-----------+------+------------+------+------+
+|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |
+|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |
+|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |
+|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |
++-------+-------+-----------+------+------------+------+------+
 ```
 
-### Display the 4th highest salary value:
+### Display the 4th Highest Salary Value:
 
 ```sql
 SELECT MIN(SAL) AS "4TH HIGHEST SALARY"
 FROM (SELECT DISTINCT SAL
-FROM EMP
-ORDER BY SAL DESC
-LIMIT 4) TOP4;
+      FROM EMP
+      ORDER BY SAL DESC
+      LIMIT 4) TOP4;
 ```
+
+### Output Example:
 ```
 +--------------------+
 | 4TH HIGHEST SALARY |
@@ -3627,7 +3866,13 @@ LIMIT 4) TOP4;
 +--------------------+
 ```
 
-### Display ename, dname, sal, loc for those employees who earn sal > 2000 and who are from locations Dallas and New York.
+**Explanation:**
+
+The subquery selects distinct salary values from the `EMP` table, orders them in descending order, and limits the result to the top 4 highest salaries.
+
+The main query uses `MIN(SAL)` to return the smallest salary from the subquery result, which corresponds to the 4th highest salary.
+
+### Display ename, dname, sal, loc for employees who earn a salary greater than 2000 and are from locations Dallas and New York.
 
 ```sql
 SELECT ENAME, DNAME, SAL, LOC
@@ -3635,6 +3880,7 @@ FROM EMP E JOIN DEPT D
 ON E.DEPTNO = D.DEPTNO
 WHERE E.SAL > 2000 AND D.LOC IN ('DALLAS', 'NEW YORK');
 ```
+
 ```
 +-------+------------+------+----------+
 | ENAME | DNAME      | SAL  | LOC      |
@@ -3647,13 +3893,12 @@ WHERE E.SAL > 2000 AND D.LOC IN ('DALLAS', 'NEW YORK');
 +-------+------------+------+----------+
 ```
 
-Above is Traditional/Conventional Way
-Below is Optimised Way
+### Optimized Version:
 
 ```sql
 SELECT ENAME, DNAME, SAL, LOC
-FROM (SELECT * FROM EMP WHERE SAL > 2000) E JOIN
-                                        (SELECT * FROM DEPT WHERE LOC IN ('DALLAS', 'NEW YORK')) D
+FROM (SELECT * FROM EMP WHERE SAL > 2000) E
+JOIN (SELECT * FROM DEPT WHERE LOC IN ('DALLAS', 'NEW YORK')) D
 ON E.DEPTNO = D.DEPTNO;
 ```
 ```
@@ -3668,8 +3913,41 @@ ON E.DEPTNO = D.DEPTNO;
 +-------+------------+------+----------+
 ```
 
+### Explanation:
+
+- **Conventional Way:** In the first query, we use a direct `JOIN` between the `EMP` and `DEPT` tables, applying the filters for salary greater than 2000 and locations `Dallas` and `New York` in the `WHERE` clause.
+
+- **Optimized Way:** In the optimized version, we first filter the `EMP` and `DEPT` tables separately in subqueries and then perform the `JOIN`. This approach can be more efficient, especially with large datasets, as the filtering is done before the join operation.
+
 ## Valid Column Combination Hints
 
+When writing SQL queries, especially those involving joins, subqueries, and set operations, it's important to follow certain guidelines to ensure valid column combinations. Here’s a summary of key hints:
+
+1. **Matching Data Types**  
+   Ensure that columns used in conditions (like in `JOIN` or `WHERE` clauses) have matching or compatible data types.
+
+2. **Column Count in Set Operations**  
+   For set operations like `UNION`, `INTERSECT`, or `EXCEPT`, the number of columns in each `SELECT` statement must be the same. Corresponding columns must have compatible data types.
+
+3. **Using NULL for Non-Identical Columns**  
+   If the number of columns in two `SELECT` statements is not the same in a set operation, `NULL` can be used to fill in missing columns to ensure uniformity.
+
+4. **Derived Tables (Subqueries in FROM Clause)**  
+   When using derived tables (subqueries in the `FROM` clause), the outer query can only reference columns that are returned by the subquery.
+
+5. **Aliases for Disambiguation**  
+   Use table or column aliases to differentiate between columns from different tables when they have the same name.
+
+6. **Handling Duplicate Columns in Joins**  
+   If columns with the same name exist in different tables being joined, qualify the column names using the table or alias to avoid ambiguity.
+
+7. **Using GROUP BY with Aggregates**  
+   When using aggregate functions (like `SUM`, `COUNT`), all non-aggregated columns in the `SELECT` list must be included in the `GROUP BY` clause.
+
+8. **Join Keys Must Be Unique or Well-Defined**  
+   Ensure that columns used in joins represent unique or well-defined relationships, such as primary keys or foreign keys, to avoid unnecessary data duplication.
+
+By following these guidelines, you can ensure proper column combinations in your SQL queries, which will help avoid common errors and improve the accuracy and efficiency of query results.
 
 
 
