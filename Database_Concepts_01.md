@@ -4071,19 +4071,147 @@ When we want to show records of only one table (columns of only one table) based
 
 CORRELATED comes under Advanced SQL.
 
+## VIEWS
 
+Views enable us to show certain columns / rows of the base table to the user.
+Unwanted columns/rows are NOT shown as a part of Business Requirement.
 
+Views are "Virtual Tables".
 
+### Example 1:
 
+```sql
+CREATE VIEW emp_data
+    AS
+    SELECT EMPNO, ENAME, DEPTNO, JOB, MGR
+    FROM emp;
 
+SELECT * FROM emp_data;
+```
+```
++-------+--------+--------+-----------+------+
+| EMPNO | ENAME  | DEPTNO | JOB       | MGR  |
++-------+--------+--------+-----------+------+
+|  7369 | SMITH  |     20 | CLERK     | 7902 |
+|  7499 | ALLEN  |     30 | SALESMAN  | 7698 |
+|  7521 | WARD   |     30 | SALESMAN  | 7698 |
+|  7566 | JONES  |     20 | MANAGER   | 7839 |
+|  7654 | MARTIN |     30 | SALESMAN  | 7698 |
+|  7698 | BLAKE  |     30 | MANAGER   | 7839 |
+|  7782 | CLARK  |     10 | MANAGER   | 7839 |
+|  7788 | SCOTT  |     20 | ANALYST   | 7566 |
+|  7839 | KING   |     10 | PRESIDENT | NULL |
+|  7844 | TURNER |     30 | SALESMAN  | 7698 |
+|  7876 | ADAMS  |     20 | CLERK     | 7788 |
+|  7900 | JAMES  |     30 | CLERK     | 7698 |
+|  7902 | FORD   |     20 | ANALYST   | 7566 |
+|  7934 | MILLER |     10 | CLERK     | 7782 |
++-------+--------+--------+-----------+------+
+```
 
+### Example 2:
+```sql
+CREATE VIEW clerk_data
+AS
+SELECT *
+FROM emp
+WHERE job = 'CLERK';
 
+SELECT * FROM clerk_data;
+```
+```
++-------+--------+-------+------+------------+------+------+--------+
+| EMPNO | ENAME  | JOB   | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+--------+-------+------+------------+------+------+--------+
+|  7369 | SMITH  | CLERK | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7876 | ADAMS  | CLERK | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7900 | JAMES  | CLERK | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  7934 | MILLER | CLERK | 7782 | 1982-01-23 | 1300 | NULL |     10 |
++-------+--------+-------+------+------------+------+------+--------+
+```
 
+### Dropping a View:
+```sql
+DROP VIEW VIEW_NAME;
+```
 
+Dropping a View will not have impact on Original Table.
+But Dropping a Table will have a major impact on View. Because View is a copy of the Table.
 
+There are two types of Views:
+1. Simple View
+2. Complex View
 
+Complex Views are those views which have aggregate functions, group by clause, etc.
 
+```sql
+CREATE VIEW clerk_data2
+AS
+SELECT *
+FROM emp
+WHERE JOB = 'CLERK'
+with check option;
+```
 
+INSERT INTO clerk_data2(empno, ename, job, deptno)
+VALUES (3, 'C', 'MANAGER', 10); -- Error
+
+INSERT INTO clerk_data2 (empno, ename, job, deptno)
+VALUES (3, 'C', 'CLERK', 10) -- Works fine now!!  
+
+SELECT view_definition
+FROM information_schema.views
+WHERE table_name = 'CLERK_DATA';
+
+SELECT table_type
+FROM information_schema.tables
+WHERE table_type = '
+
+```sql
+CREATE VIEW emp_summary
+AS
+SELECT deptno, SUM(SAL) AS "Total"
+FROM emp
+GROUP BY deptno;
+```
+```
++--------+-------+
+| deptno | Total |
++--------+-------+
+|     20 | 10875 |
+|     30 |  9400 |
+|     10 |  8750 |
++--------+-------+
+```
+
+```sql
+CREATE VIEW clerk_20_data
+    AS
+    SELECT *
+    FROM clerk_data
+    WHERE deptno = 20;
+
+SELECT * FROM clerk_20_data;
+```
+```
++-------+-------+-------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB   | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-------+------+------------+------+------+--------+
+|  7369 | SMITH | CLERK | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7876 | ADAMS | CLERK | 7788 | 1983-12-01 | 1100 | NULL |     20 |
++-------+-------+-------+------+------------+------+------+--------+
+```
+
+Child View cannot 
+Complex Views are read only.
+View is also called as Table in MySQL.
+
+```sql
+DELETE FROM emp_summary;
+-- ERROR 1288 (HY000): The target table emp_summary of the DELETE is not updatable
+```
+
+We can create a VIEW from another VIEW.
 
 
 
