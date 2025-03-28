@@ -4213,6 +4213,81 @@ DELETE FROM emp_summary;
 
 We can create a VIEW from another VIEW.
 
+## Commit & RollBack Commands:
+
+MySQL be default has AutoCommit for the DML Commands.
+
+But in MySQL Commit & Rollback commands are NOT applicable for DDL and DCL commands.
+DDL and DCL commands are AutoCommit commands in MySQL.
+
+We can have a explicit transaction using command "Start Transaction".
+It will get finished either by Commit or Rollback commands.
+
+```sql
+CREATE TABLE tr4(a int);
+START TRANSACTION;
+DROP TABLE tr4;
+SELECT * FROM tr4;
+ROLLBACK;
+SELECT * FROM tr4;
+```
+
+After doing ROLLBACK too, the tr4 doesn't come back.
+
+## 12 Rules of Codd
+
+Rule 1: The Information Rule
+"All information in a relational data base is represented explicitly at the logical level and in exactly one way - **by values in tables**."
+
+Rule 2: Guaranteed Access Rule
+"Each and every datum (atomic value) in a relational data base is guaranteed to be logically accessible by resorting to a combination of table name, **primary key value and column name**."
+
+Rule 3: Systematic Treatment of NULL Values.
+"NULL values (distinct from the empty character string or a string of blank characters and distinct from zero or any other number) are supported in fully relational DBMS for representing missing information and inapplicable information in a systematic way, independent of data type."
+
+Rule 4: Dynamic online catalog based on the relational model.
+The database must contain certain **system tables** whose columns describe the structure of the database itself.
+
+Rule 5: Comprehensive data sub-language Rule
+Mandates using a relational database language, such as SQL, although SQL is not specifically required. The language must be able to support all the central functions of a DBMS - creating a database, retrieving and entering data, implementing database security, and so on.
+
+Rule 6: View Updating Rule.
+- "All views that are theoretically updatable are also updatable by the system."
+- Not only can the user modify data, but so can the RDBMS when the user is not logged in.
+
+Rule 7: High level insert, update and delete.
+- Stresses the set-oriented nature of a relational database. It requires that rows be treated as sets in insert, delete, and update operations. The rule is designed to prohibit implementations that only support row-at-a-time, navigational modification of the database.
+- 
+
+Rule 8: Physical Data Independence.
+"Application programs and terminal activities remain logically unimpaired whenever any changes are made in either storeage representations or access methods."
+You should be able to move the database from one disk volume to another, change the physical layout of the files, and so on.
+
+Rule 9: Logical Data Independence.
+"Application programs and terminal activities remain logically unimpaired when information-preserving changes of any kind that theoretically permit un-impairment are made to the base tables."
+Consider what happens when you add a table to a database. Since relations are logically independen of one anoter, adding a table should have absolutely no impact on any other table.
+
+Rule 10: Integrity independence.
+- "Integrity constraints specific to a particular relational data base must be definable in the relational data sub-language and storable in the catalog, not in the application programs."
+- If a column only accepts certain values, then it is the RDBMS which enforces these constraints and not the user program, this means that an invalid value can never be entered into this column, whilst if the constraints were enforced via programs there is always a chance that a buggy program might allow incorrect values into the system.
+
+Rule 11: Distribution Independence.
+A distributed database is a database where the data are stored on more than one computer. The database is therefore the union of all its parts.
+
+Rule 12: Non-subversion Rule.
+The final rule could also be called the "no cheating" rule.
+"If a relational system has a low-level (single-record-at-a-time) language, that low level cannot be used to subvert or bypass the integrity Rules and constraints expressed in the higher level relational language (multiple-records-at-time)."
+
+
+
+
+
+
+
+
+
+
+
 
 
 
