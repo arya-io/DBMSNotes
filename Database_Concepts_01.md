@@ -4191,10 +4191,9 @@ WHERE EXISTS (SELECT NULL
 
 ## VIEWS
 
-Views enable us to show certain columns / rows of the base table to the user.
-Unwanted columns/rows are NOT shown as a part of Business Requirement.
+Views allow us to display specific columns or rows of a base table to the user while hiding unwanted columns/rows as per business requirements. This helps in controlling access to sensitive or unnecessary data.
 
-Views are "Virtual Tables".
+Views are **virtual tables**, meaning they don't store data themselves but display data derived from the base tables.
 
 ### Example 1:
 
@@ -4226,6 +4225,18 @@ SELECT * FROM emp_data;
 |  7934 | MILLER |     10 | CLERK     | 7782 |
 +-------+--------+--------+-----------+------+
 ```
+In this example:
+
+- A view named `emp_data` is created, which includes only selected columns (`EMPNO`, `ENAME`, `DEPTNO`, `JOB`, `MGR`) from the `emp` table.
+- The `SELECT * FROM emp_data;` query retrieves data from the view, displaying only the specified columns while hiding the rest of the data from the `emp` table.
+
+### Benefits of Views:
+- **Data Abstraction**: Views allow you to show only the necessary columns or rows to the user while abstracting irrelevant or sensitive data.
+- **Security**: They provide an additional layer of security by limiting access to specific parts of a table.
+- **Simplicity**: Views can simplify complex queries by encapsulating frequently used joins or filtering logic.
+- **Logical Independence**: If the base tables' structure changes (e.g., column names), the view can often remain the same without altering the application code.
+
+Views offer great flexibility in controlling what information is visible to different users without modifying the underlying base tables. This makes them an essential tool in database management and security.
 
 ### Example 2:
 ```sql
@@ -4253,40 +4264,63 @@ SELECT * FROM clerk_data;
 DROP VIEW VIEW_NAME;
 ```
 
-Dropping a View will not have impact on Original Table.
-But Dropping a Table will have a major impact on View. Because View is a copy of the Table.
+### Impact of Dropping a View:
+- Dropping a view only removes the virtual table (view) from the database.
+- It does not affect the underlying base table.
+- The data in the original table remains intact.
 
-There are two types of Views:
-1. Simple View: View based on SELECT * From TableName are called simple views.
-2. Complex View: Complex Views are those views which have aggregate functions, group by clause, etc.
+### Impact of Dropping a Table:
+- Dropping a base table will cause the view to break since views are dependent on the original table.
+- A view is a virtual representation of the table, so if the base table is dropped, the view will no longer function because its source data is lost.
 
-1. Simple View
-Based on a single table.
-Does not include functions, joins, or groupings.
-Typically allows DML (Data Manipulation Language) operations like INSERT, UPDATE, or DELETE.
+### Key Points:
+- Dropping a **view** has no effect on the base table.
+- Dropping the **base table** renders the view unusable, as the view depends on the table.
 
+## Types of Views
+
+### 1. Simple View:
+- Based on a single table.
+- Does not include functions, joins, or groupings.
+- Typically allows DML (Data Manipulation Language) operations like `INSERT`, `UPDATE`, or `DELETE`.
+
+#### Example:
 ```sql
 CREATE VIEW clerk_data2
 AS
 SELECT *
 FROM emp
 WHERE JOB = 'CLERK'
-with check option;
+WITH CHECK OPTION;
 ```
 
+### WITH CHECK OPTION in Views:
+The `WITH CHECK OPTION` ensures that any DML (Data Manipulation Language) operations on the view conform to the condition in the `WHERE` clause.
+
+- Only rows where `JOB = 'CLERK'` can be inserted, updated, or deleted in the view.
+
+#### Example Queries:
+```sql
 INSERT INTO clerk_data2(empno, ename, job, deptno)
-VALUES (3, 'C', 'MANAGER', 10); -- Error as entry can be done by CLERK Only.
+VALUES (3, 'C', 'MANAGER', 10); 
+-- Error: Only 'CLERK' can be entered.
 
-INSERT INTO clerk_data2 (empno, ename, job, deptno)
-VALUES (3, 'C', 'CLERK', 10) -- Works fine now!!  
+INSERT INTO clerk_data2(empno, ename, job, deptno)
+VALUES (3, 'C', 'CLERK', 10); 
+-- Works fine.
+```
 
-As in WHERE Clause of the View CLERK is mentioned, then under such cases only CLERK can be able to make entry.
+### Explanation:
+The `WHERE` clause of the view restricts insertions to rows where `JOB = 'CLERK'`. Only entries satisfying this condition will be allowed for DML operations like `INSERT`, `UPDATE`, or `DELETE`.
 
-2. Complex View
-Based on multiple tables.
-Includes functions, joins, groupings, and aggregations.
-Often read-only (may not allow DML operations).
+---
 
+### Complex View:
+- **Based on multiple tables.**
+- Includes **functions, joins, groupings**, and **aggregations**.
+- Often **read-only**, meaning that DML operations like `INSERT`, `UPDATE`, and `DELETE` may not be allowed.
+
+#### Example:
 ```sql
 CREATE VIEW emp_summary
 AS
@@ -4294,6 +4328,8 @@ SELECT deptno, SUM(SAL) AS "Total"
 FROM emp
 GROUP BY deptno;
 ```
+
+Output:
 ```
 +--------+-------+
 | deptno | Total |
@@ -4304,9 +4340,25 @@ GROUP BY deptno;
 +--------+-------+
 ```
 
-Further views can be made from views.
-We can create a VIEW from another VIEW.
+### Explanation:
+This view provides a summary of salaries (`SUM(SAL)`) grouped by department number (`deptno`). It is classified as a **complex view** because it uses an aggregate function (`SUM`) and the `GROUP BY` clause to calculate total salaries for each department.
 
+---
+
+### Key Points:
+- **Simple View:**  
+  - Based on a single table.  
+  - Allows DML operations (`INSERT`, `UPDATE`, `DELETE`).  
+  - Does not involve complex logic, such as functions, joins, or groupings.
+  
+- **Complex View:**  
+  - Based on multiple tables.  
+  - Includes complex logic such as **groupings**, **aggregate functions**, and **joins**.  
+  - Often **read-only**, meaning DML operations may not be allowed.
+
+Further views can be made from existing views. This means that **we can create a VIEW from another VIEW** to further refine or filter the data.
+
+### Example:
 ```sql
 CREATE VIEW clerk_20_data
     AS
@@ -4316,6 +4368,7 @@ CREATE VIEW clerk_20_data
 
 SELECT * FROM clerk_20_data;
 ```
+
 ```
 +-------+-------+-------+------+------------+------+------+--------+
 | EMPNO | ENAME | JOB   | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
@@ -4325,78 +4378,109 @@ SELECT * FROM clerk_20_data;
 +-------+-------+-------+------+------------+------+------+--------+
 ```
 
-Complex Views are read only.
-View is also called as Table in MySQL.
+### Key Points:
 
+#### Complex Views are Read-Only:
+- **Complex Views**, especially those involving **groupings**, **aggregate functions**, or **multiple tables**, are typically **read-only**.
+- You **cannot** perform DML (Data Manipulation Language) operations like `INSERT`, `UPDATE`, or `DELETE` on complex views.
+  
+#### Views in MySQL:
+- In MySQL, **views** are referred to as **virtual tables**. They allow you to retrieve data, but modifying data directly is **not always possible**, especially for complex views.
+  
+### Example of a Read-Only View:
 ```sql
 DELETE FROM emp_summary;
 -- ERROR 1288 (HY000): The target table emp_summary of the DELETE is not updatable
 ```
 
-## Commit & RollBack Commands:
+This error occurs because `emp_summary` is a **complex view** and cannot be updated or deleted directly due to its use of **aggregated data** and **grouping**. Since complex views often involve calculations or multiple tables, they become **read-only**, preventing direct DML operations like `UPDATE`, `DELETE`, or `INSERT`. To modify the data, changes need to be made to the underlying base tables rather than the view itself.
 
-MySQL by default has AutoCommit for the DML Commands.
+## Commit & Rollback Commands
 
-But in MySQL Commit & Rollback commands are NOT applicable for DDL and DCL commands.
-DDL and DCL commands are AutoCommit commands in MySQL.
+### Auto-Commit in MySQL:
+- By default, **MySQL** has **AutoCommit** enabled for **DML commands** (e.g., `INSERT`, `UPDATE`, `DELETE`).
+- This means that changes are automatically saved to the database unless you explicitly start a transaction.
 
-We can have a explicit transaction using command "Start Transaction".
-It will get finished either by Commit or Rollback commands.
+### Transaction Handling:
+- **Commit** and **Rollback** commands allow manual control over transactions.
+- You can explicitly begin a transaction using the command:
+  
+  ```sql
+  START TRANSACTION;
+  ```
 
+A transaction will end when either a **COMMIT** or **ROLLBACK** command is issued:
+
+- **COMMIT**: Saves all changes made during the transaction.
+- **ROLLBACK**: Undoes all changes made during the transaction.
+
+### Important Notes:
+- **DDL commands** (Data Definition Language, such as `CREATE`, `DROP`, `ALTER`) and **DCL commands** (Data Control Language, such as `GRANT`, `REVOKE`) are **AutoCommit** commands in MySQL.
+- This means that changes made by **DDL** and **DCL** commands cannot be rolled back, as they are committed automatically.
+
+### Example:
 ```sql
-CREATE TABLE tr4(a int);
-START TRANSACTION;
-DROP TABLE tr4;
-SELECT * FROM tr4;
-ROLLBACK;
-SELECT * FROM tr4;
+CREATE TABLE tr4(a int);    -- Creates a new table "tr4"
+START TRANSACTION;          -- Begins a new transaction
+DROP TABLE tr4;             -- Drops the table "tr4"
+SELECT * FROM tr4;          -- Attempts to select from "tr4" (shows an error as the table is dropped)
+ROLLBACK;                   -- Rolls back the transaction
+SELECT * FROM tr4;          -- Still shows an error because the table "tr4" was dropped by a DDL command (not rolled back)
 ```
 
-After doing ROLLBACK too, the tr4 doesn't come back.
+### Key Point:
+Even after issuing a **ROLLBACK**, the table `tr4` does not come back because **DDL commands** like `DROP TABLE` are **AutoCommit**. Once executed, they cannot be rolled back within a transaction.
+
+This highlights the difference in behavior between **DML** and **DDL** when handling transactions in MySQL.
+
+### Summary:
+- **DML commands** (e.g., `INSERT`, `UPDATE`, `DELETE`) can be controlled within a transaction using **COMMIT** and **ROLLBACK**.
+- **DDL** and **DCL commands** are automatically committed and cannot be rolled back, even if a transaction is explicitly started.
 
 ## 12 Rules of Codd
 
-Rule 1: The Information Rule
-"All information in a relational data base is represented explicitly at the logical level and in exactly one way - **by values in tables**."
+### Rule 1: The Information Rule
+"All information in a relational database is represented explicitly at the logical level and in exactly one way — **by values in tables**."
 
-Rule 2: Guaranteed Access Rule
-"Each and every datum (atomic value) in a relational data base is guaranteed to be logically accessible by resorting to a combination of table name, **primary key value and column name**."
+### Rule 2: Guaranteed Access Rule
+"Each and every datum (atomic value) in a relational database is guaranteed to be logically accessible by resorting to a combination of table name, **primary key value, and column name**."
 
-Rule 3: Systematic Treatment of NULL Values.
-"NULL values (distinct from the empty character string or a string of blank characters and distinct from zero or any other number) are supported in fully relational DBMS for representing missing information and inapplicable information in a systematic way, independent of data type."
+### Rule 3: Systematic Treatment of NULL Values
+"NULL values (distinct from the empty character string or a string of blank characters, and distinct from zero or any other number) are supported in fully relational DBMS for representing missing or inapplicable information in a systematic way, independent of data type."
 
-Rule 4: Dynamic online catalog based on the relational model.
+### Rule 4: Dynamic Online Catalog Based on the Relational Model
 The database must contain certain **system tables** whose columns describe the structure of the database itself.
 
-Rule 5: Comprehensive data sub-language Rule
-Mandates using a relational database language, such as SQL, although SQL is not specifically required. The language must be able to support all the central functions of a DBMS - creating a database, retrieving and entering data, implementing database security, and so on.
+### Rule 5: Comprehensive Data Sub-language Rule
+Mandates using a relational database language, such as SQL. The language must support all the central functions of a DBMS — creating a database, retrieving and entering data, implementing database security, etc.
 
-Rule 6: View Updating Rule.
+### Rule 6: View Updating Rule
 - "All views that are theoretically updatable are also updatable by the system."
 - Not only can the user modify data, but so can the RDBMS when the user is not logged in.
 
-Rule 7: High level insert, update and delete.
-- Stresses the set-oriented nature of a relational database. It requires that rows be treated as sets in insert, delete, and update operations. The rule is designed to prohibit implementations that only support row-at-a-time, navigational modification of the database.
-- 
+### Rule 7: High-Level Insert, Update, and Delete
+- Stresses the **set-oriented nature** of a relational database. It requires rows to be treated as sets in insert, delete, and update operations.
+- This rule prevents implementations from supporting only row-at-a-time, navigational modifications.
 
-Rule 8: Physical Data Independence.
-"Application programs and terminal activities remain logically unimpaired whenever any changes are made in either storeage representations or access methods."
-You should be able to move the database from one disk volume to another, change the physical layout of the files, and so on.
+### Rule 8: Physical Data Independence
+"Application programs and terminal activities remain logically unimpaired whenever any changes are made in storage representations or access methods."
+- Example: Moving the database from one disk to another or changing the physical layout of files should not affect the application.
 
-Rule 9: Logical Data Independence.
-"Application programs and terminal activities remain logically unimpaired when information-preserving changes of any kind that theoretically permit un-impairment are made to the base tables."
-Consider what happens when you add a table to a database. Since relations are logically independen of one anoter, adding a table should have absolutely no impact on any other table.
+### Rule 9: Logical Data Independence
+"Application programs and terminal activities remain logically unimpaired when information-preserving changes (such as adding a table) are made to the base tables."
+- The addition of a new table should not impact existing tables or applications.
 
-Rule 10: Integrity independence.
-- "Integrity constraints specific to a particular relational data base must be definable in the relational data sub-language and storable in the catalog, not in the application programs."
-- If a column only accepts certain values, then it is the RDBMS which enforces these constraints and not the user program, this means that an invalid value can never be entered into this column, whilst if the constraints were enforced via programs there is always a chance that a buggy program might allow incorrect values into the system.
+### Rule 10: Integrity Independence
+- "Integrity constraints specific to a relational database must be definable in the relational data sub-language and storable in the catalog, not in the application programs."
+- Example: If a column only accepts certain values, it is the RDBMS that enforces this, preventing invalid data from being entered.
 
-Rule 11: Distribution Independence.
-A distributed database is a database where the data are stored on more than one computer. The database is therefore the union of all its parts.
+### Rule 11: Distribution Independence
+A distributed database stores data on more than one computer, yet the database functions as a single unit.
 
-Rule 12: Non-subversion Rule.
-The final rule could also be called the "no cheating" rule.
-"If a relational system has a low-level (single-record-at-a-time) language, that low level cannot be used to subvert or bypass the integrity Rules and constraints expressed in the higher level relational language (multiple-records-at-time)."
+### Rule 12: Non-subversion Rule
+- Also known as the "no cheating" rule.
+- "If a relational system has a low-level (single-record-at-a-time) language, that low level cannot be used to subvert or bypass the integrity rules and constraints expressed in the higher-level relational language (multiple-records-at-a-time)."
+
 
 
 
