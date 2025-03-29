@@ -4481,8 +4481,519 @@ A distributed database stores data on more than one computer, yet the database f
 - Also known as the "no cheating" rule.
 - "If a relational system has a low-level (single-record-at-a-time) language, that low level cannot be used to subvert or bypass the integrity rules and constraints expressed in the higher-level relational language (multiple-records-at-a-time)."
 
+## Window Functions
+aka Analytical Functions
 
+```sql
+SELECT ENAME,
+SAL,
+MAX(SAL) OVER()
+FROM emp;
+```
+```
++--------+------+-----------------+
+| ENAME  | SAL  | MAX(SAL) OVER() |
++--------+------+-----------------+
+| SMITH  |  800 |            5000 |
+| ALLEN  | 1600 |            5000 |
+| WARD   | 1250 |            5000 |
+| JONES  | 2975 |            5000 |
+| MARTIN | 1250 |            5000 |
+| BLAKE  | 2850 |            5000 |
+| CLARK  | 2450 |            5000 |
+| SCOTT  | 3000 |            5000 |
+| KING   | 5000 |            5000 |
+| TURNER | 1500 |            5000 |
+| ADAMS  | 1100 |            5000 |
+| JAMES  |  950 |            5000 |
+| FORD   | 3000 |            5000 |
+| MILLER | 1300 |            5000 |
++--------+------+-----------------+
+```
 
+Before OVER() either a aggregate function OR rank is needed.
+Aggregate Function is used here to give output similar to somewhat like GROUP BY.
+Window Functions are alternate for Derived Tables.
+Aggregate Value gets returned with the help of OVER().
+OVER(): Overriding the default use of GROUP BY Functions.
+
+Example 2:
+
+```sql
+SELECT ENAME,
+DEPTNO,
+SAL,
+MAX(SAL)
+OVER(PARTITION BY DEPTNO)
+FROM emp;
+```
+
+```
++--------+--------+------+------------------------------------+
+| ENAME  | DEPTNO | SAL  | MAX(SAL) OVER(PARTITION BY DEPTNO) |
++--------+--------+------+------------------------------------+
+| CLARK  |     10 | 2450 |                               5000 |
+| KING   |     10 | 5000 |                               5000 |
+| MILLER |     10 | 1300 |                               5000 |
+| SMITH  |     20 |  800 |                               3000 |
+| JONES  |     20 | 2975 |                               3000 |
+| SCOTT  |     20 | 3000 |                               3000 |
+| ADAMS  |     20 | 1100 |                               3000 |
+| FORD   |     20 | 3000 |                               3000 |
+| ALLEN  |     30 | 1600 |                               2850 |
+| WARD   |     30 | 1250 |                               2850 |
+| MARTIN |     30 | 1250 |                               2850 |
+| BLAKE  |     30 | 2850 |                               2850 |
+| TURNER |     30 | 1500 |                               2850 |
+| JAMES  |     30 |  950 |                               2850 |
++--------+--------+------+------------------------------------+
+```
+
+GROUP BY will give you pure distinct summary and no details.
+To get summary with actual rows combined, we use Window Functions.
+
+### Difference between earlier method and this new method.
+- No derived table is being created.
+- No JOIN operation is being performed.
+- No more logic building.
+- In industry, Window Function is given higher preference.
+
+## Multiple Columns in Partition By Clause
+
+You can have Single Column as well as Multiple Columns in PARTITION BY Clause.
+
+```sql
+SELECT Trans_id, Continent, Country,
+    SUM(Sales) OVER(PARTITION BY Continent, Country) AS "Total Sales"
+    FROM Products2;
+```
+```
++----------+-----------+---------+-------------+
+| Trans_id | Continent | Country | Total Sales |
++----------+-----------+---------+-------------+
+|       47 | Asia      | China   |       22230 |
+|       46 | Asia      | China   |       22230 |
+|       45 | Asia      | China   |       22230 |
+|       44 | Asia      | China   |       22230 |
+|       43 | Asia      | China   |       22230 |
+|       41 | Asia      | China   |       22230 |
+|       40 | Asia      | China   |       22230 |
+|       39 | Asia      | China   |       22230 |
+|       38 | Asia      | China   |       22230 |
+|       37 | Asia      | China   |       22230 |
+|       36 | Asia      | China   |       22230 |
+|       35 | Asia      | China   |       22230 |
+|       42 | Asia      | China   |       22230 |
+|       48 | Asia      | China   |       22230 |
+|       49 | Asia      | China   |       22230 |
+|       50 | Asia      | China   |       22230 |
+|        4 | Asia      | India   |       18620 |
+|        5 | Asia      | India   |       18620 |
+|        6 | Asia      | India   |       18620 |
+|        7 | Asia      | India   |       18620 |
+|        8 | Asia      | India   |       18620 |
+|        9 | Asia      | India   |       18620 |
+|       10 | Asia      | India   |       18620 |
+|       11 | Asia      | India   |       18620 |
+|       12 | Asia      | India   |       18620 |
+|       13 | Asia      | India   |       18620 |
+|       19 | Asia      | India   |       18620 |
+|       20 | Asia      | India   |       18620 |
+|       21 | Asia      | India   |       18620 |
+|       22 | Asia      | India   |       18620 |
+|       23 | Asia      | India   |       18620 |
+|       24 | Asia      | India   |       18620 |
+|       25 | Asia      | India   |       18620 |
+|       26 | Asia      | India   |       18620 |
+|        1 | Asia      | India   |       18620 |
+|        2 | Asia      | India   |       18620 |
+|        3 | Asia      | India   |       18620 |
+|       51 | Europe    | France  |       15100 |
+|       52 | Europe    | France  |       15100 |
+|       53 | Europe    | France  |       15100 |
+|       54 | Europe    | France  |       15100 |
+|       55 | Europe    | France  |       15100 |
+|       56 | Europe    | France  |       15100 |
+|       57 | Europe    | France  |       15100 |
+|       58 | Europe    | France  |       15100 |
+|       59 | Europe    | France  |       15100 |
+|       60 | Europe    | France  |       15100 |
+|       61 | Europe    | France  |       15100 |
+|       62 | Europe    | France  |       15100 |
+|       63 | Europe    | France  |       15100 |
+|       64 | Europe    | France  |       15100 |
+|       65 | Europe    | France  |       15100 |
+|       66 | Europe    | France  |       15100 |
+|       30 | Europe    | UK      |      328000 |
+|       29 | Europe    | UK      |      328000 |
+|       28 | Europe    | UK      |      328000 |
+|       27 | Europe    | UK      |      328000 |
+|       34 | Europe    | UK      |      328000 |
+|       18 | Europe    | UK      |      328000 |
+|       17 | Europe    | UK      |      328000 |
+|       16 | Europe    | UK      |      328000 |
+|       15 | Europe    | UK      |      328000 |
+|       14 | Europe    | UK      |      328000 |
+|       33 | Europe    | UK      |      328000 |
+|       32 | Europe    | UK      |      328000 |
+|       31 | Europe    | UK      |      328000 |
++----------+-----------+---------+-------------+
+```
+
+How to crack SQL Interview?
+- When asked what you have learned in SQL, always start with Window Functions.
+
+## Partitioning on Expression Values:
+
+Especially suitable for date value analysis.
+
+```sql
+SELECT ENAME, YEAR(HIREDATE) AS "Year of Joining",
+MAX(SAL) OVER (PARTITION BY YEAR(HIREDATE)) "Year Wise Max Sal"
+FROM emp;
+```
+```
++--------+-----------------+-------------------+
+| ENAME  | Year of Joining | Year Wise Max Sal |
++--------+-----------------+-------------------+
+| SMITH  |            1980 |               800 |
+| ALLEN  |            1981 |              5000 |
+| WARD   |            1981 |              5000 |
+| JONES  |            1981 |              5000 |
+| MARTIN |            1981 |              5000 |
+| BLAKE  |            1981 |              5000 |
+| CLARK  |            1981 |              5000 |
+| KING   |            1981 |              5000 |
+| TURNER |            1981 |              5000 |
+| JAMES  |            1981 |              5000 |
+| FORD   |            1981 |              5000 |
+| SCOTT  |            1982 |              3000 |
+| MILLER |            1982 |              3000 |
+| ADAMS  |            1983 |              1100 |
++--------+-----------------+-------------------+
+```
+
+## Ranking Functions
+
+It is an ANSI SQL Window Function.
+We give Ranking based on Merit, based on Data Values.
+For Numeric Values, it makes more sense.
+
+```sql
+SELECT ENAME, SAL, RANK() OVER(ORDER BY SAL DESC) "Rank" FROM emp;
+```
+```
++--------+------+------+
+| ENAME  | SAL  | Rank |
++--------+------+------+
+| KING   | 5000 |    1 |
+| SCOTT  | 3000 |    2 |
+| FORD   | 3000 |    2 |
+| JONES  | 2975 |    4 |
+| BLAKE  | 2850 |    5 |
+| CLARK  | 2450 |    6 |
+| ALLEN  | 1600 |    7 |
+| TURNER | 1500 |    8 |
+| MILLER | 1300 |    9 |
+| WARD   | 1250 |   10 |
+| MARTIN | 1250 |   10 |
+| ADAMS  | 1100 |   12 |
+| JAMES  |  950 |   13 |
+| SMITH  |  800 |   14 |
++--------+------+------+
+```
+
+The above output is not good.
+
+Rank Problem: 
+If there is a tie, same rank is given.
+But the entries after that is not given proper ranking.
+Instead they are given position number.
+Therefore, the output is not efficient and is wrong.
+This is pure statistics.
+
+### Ranking Functions
+
+RANK and DENSE_RANK both provide rank to the records based on some column value or expression.
+
+1. RANK
+2. DENSE_RANK
+3. Row Num
+
+```sql
+SELECT ENAME, SAL, DENSE_RANK() OVER(ORDER BY SAL DESC) "Rank" FROM emp;
+```
+```
++--------+------+------+
+| ENAME  | SAL  | Rank |
++--------+------+------+
+| KING   | 5000 |    1 |
+| SCOTT  | 3000 |    2 |
+| FORD   | 3000 |    2 |
+| JONES  | 2975 |    3 |
+| BLAKE  | 2850 |    4 |
+| CLARK  | 2450 |    5 |
+| ALLEN  | 1600 |    6 |
+| TURNER | 1500 |    7 |
+| MILLER | 1300 |    8 |
+| WARD   | 1250 |    9 |
+| MARTIN | 1250 |    9 |
+| ADAMS  | 1100 |   10 |
+| JAMES  |  950 |   11 |
+| SMITH  |  800 |   12 |
++--------+------+------+
+```
+
+```sql
+SELECT ENAME, SAL, DENSE_RANK() OVER() "Rank" FROM emp;
+```
+```
++--------+------+------+
+| ENAME  | SAL  | Rank |
++--------+------+------+
+| SMITH  |  800 |    1 |
+| ALLEN  | 1600 |    1 |
+| WARD   | 1250 |    1 |
+| JONES  | 2975 |    1 |
+| MARTIN | 1250 |    1 |
+| BLAKE  | 2850 |    1 |
+| CLARK  | 2450 |    1 |
+| SCOTT  | 3000 |    1 |
+| KING   | 5000 |    1 |
+| TURNER | 1500 |    1 |
+| ADAMS  | 1100 |    1 |
+| JAMES  |  950 |    1 |
+| FORD   | 3000 |    1 |
+| MILLER | 1300 |    1 |
++--------+------+------+
+```
+
+The above command will give error in Oracle.
+And they have given correct error because the above command should have given error as GROUP BY CLAUSE is missing inside OVER.
+It runs successfully in MySQL, but the output does not make any sense.
+
+**ORDER BY becomes mandatory for RANK Function.**
+
+### Display ename, deptno, sal and salary rank. The salary rank should be as per deptnos, i.e., for each deptno the ranking will start again.
+
+```sql
+SELECT ENAME, DEPTNO, SAL,
+DENSE_RANK() OVER(PARTITION BY DEPTNO ORDER BY SAL DESC) AS "Salary Rank in DEPTNO"
+FROM emp;
+```
+```
++--------+--------+------+------------------------+
+| ENAME  | DEPTNO | SAL  | Salary Rank in DEPTNO  |
++--------+--------+------+------------------------+
+| KING   |     10 | 5000 |                      1 |
+| CLARK  |     10 | 2450 |                      2 |
+| MILLER |     10 | 1300 |                      3 |
+| SCOTT  |     20 | 3000 |                      1 |
+| FORD   |     20 | 3000 |                      1 |
+| JONES  |     20 | 2975 |                      2 |
+| ADAMS  |     20 | 1100 |                      3 |
+| SMITH  |     20 |  800 |                      4 |
+| BLAKE  |     30 | 2850 |                      1 |
+| ALLEN  |     30 | 1600 |                      2 |
+| TURNER |     30 | 1500 |                      3 |
+| WARD   |     30 | 1250 |                      4 |
+| MARTIN |     30 | 1250 |                      4 |
+| JAMES  |     30 |  950 |                      5 |
++--------+--------+------+------------------------+
+```
+
+```sql
+SELECT ENAME, DEPTNO, SAL,
+DENSE_RANK() OVER(PARTITION BY DEPTNO ORDER BY SAL DESC) AS "Salary Rank in DEPTNO ",
+DENSE_RANK() OVER(ORDER BY SAL DESC) AS "Overall Salary Rank"
+FROM emp;
+```
+```
++--------+--------+------+------------------------+---------------------+
+| ENAME  | DEPTNO | SAL  | Salary Rank in DEPTNO  | Overall Salary Rank |
++--------+--------+------+------------------------+---------------------+
+| KING   |     10 | 5000 |                      1 |                   1 |
+| SCOTT  |     20 | 3000 |                      1 |                   2 |
+| FORD   |     20 | 3000 |                      1 |                   2 |
+| JONES  |     20 | 2975 |                      2 |                   3 |
+| BLAKE  |     30 | 2850 |                      1 |                   4 |
+| CLARK  |     10 | 2450 |                      2 |                   5 |
+| ALLEN  |     30 | 1600 |                      2 |                   6 |
+| TURNER |     30 | 1500 |                      3 |                   7 |
+| MILLER |     10 | 1300 |                      3 |                   8 |
+| WARD   |     30 | 1250 |                      4 |                   9 |
+| MARTIN |     30 | 1250 |                      4 |                   9 |
+| ADAMS  |     20 | 1100 |                      3 |                  10 |
+| JAMES  |     30 |  950 |                      5 |                  11 |
+| SMITH  |     20 |  800 |                      4 |                  12 |
++--------+--------+------+------------------------+---------------------+
+```
+
+```sql
+SELECT ENAME, DEPTNO, SAL,
+DENSE_RANK() OVER(PARTITION BY DEPTNO ORDER BY SAL DESC) AS "Salary Rank in DEPTNO ",
+DENSE_RANK() OVER(ORDER BY SAL DESC) AS "Overall Salary Rank"
+FROM emp
+ORDER BY DEPTNO;
+```
+```
++--------+--------+------+------------------------+---------------------+
+| ENAME  | DEPTNO | SAL  | Salary Rank in DEPTNO  | Overall Salary Rank |
++--------+--------+------+------------------------+---------------------+
+| KING   |     10 | 5000 |                      1 |                   1 |
+| CLARK  |     10 | 2450 |                      2 |                   5 |
+| MILLER |     10 | 1300 |                      3 |                   8 |
+| SCOTT  |     20 | 3000 |                      1 |                   2 |
+| FORD   |     20 | 3000 |                      1 |                   2 |
+| JONES  |     20 | 2975 |                      2 |                   3 |
+| ADAMS  |     20 | 1100 |                      3 |                  10 |
+| SMITH  |     20 |  800 |                      4 |                  12 |
+| BLAKE  |     30 | 2850 |                      1 |                   4 |
+| ALLEN  |     30 | 1600 |                      2 |                   6 |
+| TURNER |     30 | 1500 |                      3 |                   7 |
+| WARD   |     30 | 1250 |                      4 |                   9 |
+| MARTIN |     30 | 1250 |                      4 |                   9 |
+| JAMES  |     30 |  950 |                      5 |                  11 |
++--------+--------+------+------------------------+---------------------+
+```
+
+### ROW_NUMBER
+
+It will provide the row numbers for the result et once the records are sorted.
+
+```sql
+SELECT ENAME, SAL, ROW_NUMBER() OVER(ORDER BY SAL DESC) FROM EMP;
+```
+```
++--------+------+--------------------------------------+
+| ENAME  | SAL  | ROW_NUMBER() OVER(ORDER BY SAL DESC) |
++--------+------+--------------------------------------+
+| KING   | 5000 |                                    1 |
+| SCOTT  | 3000 |                                    2 |
+| FORD   | 3000 |                                    3 |
+| JONES  | 2975 |                                    4 |
+| BLAKE  | 2850 |                                    5 |
+| CLARK  | 2450 |                                    6 |
+| ALLEN  | 1600 |                                    7 |
+| TURNER | 1500 |                                    8 |
+| MILLER | 1300 |                                    9 |
+| WARD   | 1250 |                                   10 |
+| MARTIN | 1250 |                                   11 |
+| ADAMS  | 1100 |                                   12 |
+| JAMES  |  950 |                                   13 |
+| SMITH  |  800 |                                   14 |
++--------+------+--------------------------------------+
+```
+
+```sql
+SELECT ENAME, SAL, ROW_NUMBER() OVER() FROM EMP;
+```
+```
++--------+------+---------------------+
+| ENAME  | SAL  | ROW_NUMBER() OVER() |
++--------+------+---------------------+
+| SMITH  |  800 |                   1 |
+| ALLEN  | 1600 |                   2 |
+| WARD   | 1250 |                   3 |
+| JONES  | 2975 |                   4 |
+| MARTIN | 1250 |                   5 |
+| BLAKE  | 2850 |                   6 |
+| CLARK  | 2450 |                   7 |
+| SCOTT  | 3000 |                   8 |
+| KING   | 5000 |                   9 |
+| TURNER | 1500 |                  10 |
+| ADAMS  | 1100 |                  11 |
+| JAMES  |  950 |                  12 |
+| FORD   | 3000 |                  13 |
+| MILLER | 1300 |                  14 |
++--------+------+---------------------+
+```
+
+Above query works only in MySQL.
+
+```sql
+SELECT ROW_NUMBER() OVER(ORDER BY EMPNO) AS "No.",
+emp.*
+FROM emp;
+```
+```
++-----+-------+--------+-----------+------+------------+------+------+--------+
+| No. | EMPNO | ENAME  | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-----+-------+--------+-----------+------+------------+------+------+--------+
+|   1 |  7369 | SMITH  | CLERK     | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|   2 |  7499 | ALLEN  | SALESMAN  | 7698 | 1981-05-20 | 1600 |  300 |     30 |
+|   3 |  7521 | WARD   | SALESMAN  | 7698 | 1981-05-22 | 1250 |  500 |     30 |
+|   4 |  7566 | JONES  | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|   5 |  7654 | MARTIN | SALESMAN  | 7698 | 1981-09-20 | 1250 | 1400 |     30 |
+|   6 |  7698 | BLAKE  | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|   7 |  7782 | CLARK  | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|   8 |  7788 | SCOTT  | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|   9 |  7839 | KING   | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  10 |  7844 | TURNER | SALESMAN  | 7698 | 1981-08-09 | 1500 |    0 |     30 |
+|  11 |  7876 | ADAMS  | CLERK     | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  12 |  7900 | JAMES  | CLERK     | 7698 | 1981-12-03 |  950 | NULL |     30 |
+|  13 |  7902 | FORD   | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
+|  14 |  7934 | MILLER | CLERK     | 7782 | 1982-01-23 | 1300 | NULL |     10 |
++-----+-------+--------+-----------+------+------------+------+------+--------+
+```
+
+```sql
+SELECT ENAME, SAL, DENSE_RANK() OVER(ORDER BY SAL DESC) FROM emp;
+```
+```
++--------+------+--------------------------------------+
+| ENAME  | SAL  | DENSE_RANK() OVER(ORDER BY SAL DESC) |
++--------+------+--------------------------------------+
+| KING   | 5000 |                                    1 |
+| SCOTT  | 3000 |                                    2 |
+| FORD   | 3000 |                                    2 |
+| JONES  | 2975 |                                    3 |
+| BLAKE  | 2850 |                                    4 |
+| CLARK  | 2450 |                                    5 |
+| ALLEN  | 1600 |                                    6 |
+| TURNER | 1500 |                                    7 |
+| MILLER | 1300 |                                    8 |
+| WARD   | 1250 |                                    9 |
+| MARTIN | 1250 |                                    9 |
+| ADAMS  | 1100 |                                   10 |
+| JAMES  |  950 |                                   11 |
+| SMITH  |  800 |                                   12 |
++--------+------+--------------------------------------+
+```
+
+How to improve the above query?
+
+```sql
+SELECT ENAME, SAL,
+DENSE_RANK() OVER(ORDER BY SAL DESC)
+FROM emp
+WHERE DENSE_RANK() OVER(ORDER BY SAL DESC) <= 4;
+
+-- ERROR 3593 (HY000): You cannot use the window function 'dense_rank' in this context.'
+```
+
+Because it queries rows during runtime. Therefore, it cannot be used.
+
+Window Functions can only appear in the SELECT or ORDER BY clauses.
+
+```sql
+SELECT *
+FROM(SELECT ENAME, SAL,
+     DENSE_RANK() OVER(ORDER BY SAL DESC) AS "Salary_Rank"
+     FROM emp) DT
+WHERE Salary_Rank <= 4;
+```
+```
++-------+------+-------------+
+| ENAME | SAL  | Salary_Rank |
++-------+------+-------------+
+| KING  | 5000 |           1 |
+| SCOTT | 3000 |           2 |
+| FORD  | 3000 |           2 |
+| JONES | 2975 |           3 |
+| BLAKE | 2850 |           4 |
++-------+------+-------------+
+```
 
 
 
