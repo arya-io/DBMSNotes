@@ -2995,7 +2995,7 @@ For an **Employee** entity:
 There are three types of cardinalities in database relationships:
 
 1. **One-to-One (1:1)**: One instance of an entity is associated with only one instance of another entity.
-   ![Alt Text](Images/oto.png)
+   ![Alt Text](Images/oto.jpeg)
    - **Example**: An **Employee** is assigned to one **Office**.
 
 3. **One-to-Many (1:M)**: One instance of an entity is associated with multiple instances of another entity.
@@ -3044,7 +3044,7 @@ When dealing with many-to-many relationships, an additional table called a **Jun
 Attributes define the properties or characteristics of an entity in a database. There are different types of attributes based on their nature and structure:
 
 ### 1. Simple Attribute
-![Alt Text](Images/simple.png)
+![Alt Text](Images/simple.jpeg)
 - A simple attribute is one that cannot be further divided into smaller subparts.
 - **Example**: `Customer_ID`, `RollNo`, `SSN`.
 
@@ -3064,7 +3064,7 @@ Attributes define the properties or characteristics of an entity in a database. 
 - **Example**: The `Colors` attribute of a car may have multiple values if a car can have multiple colors. If a car can have at most five colors, the attribute would have a lower bound of one and an upper bound of five.
 
 ### 5. Derived Attribute
-![Alt Text](Images/derived.png)
+![Alt Text](Images/derived.jpg)
 - A derived attribute is calculated from other attributes. It is not stored directly in the database but is derived when needed.
 - **Example**: `Age` is derived from the `Date_of_Birth` attribute.
 
@@ -3951,7 +3951,44 @@ By following these guidelines, we can ensure proper column combinations in our S
 
 ## Correlated Subqueries
 
-Display employees records who earn salary less than the average salary **of their own job.**
+A **correlated subquery** is a subquery that depends on the outer query for its values. In other words, the inner query is executed repeatedly for each row processed by the outer query.
+
+### Key Points:
+
+1. **Dependent on Outer Query**  
+   A correlated subquery references columns from the outer query, meaning it cannot be executed independently of the outer query.
+
+2. **Row-by-Row Execution**  
+   Unlike a regular subquery, which is executed once, a correlated subquery is executed once for every row in the outer query, which can affect performance for large datasets.
+
+3. **Uses in Filtering**  
+   Correlated subqueries are commonly used in the `WHERE` clause to filter rows based on complex conditions that involve other rows in the table.
+
+4. **Comparison to Joins**  
+   Correlated subqueries can often be rewritten as `JOIN` queries, but they offer more flexibility for certain types of row-by-row comparisons.
+
+### Example Structure:
+```sql
+SELECT column1, column2
+FROM table1 outer
+WHERE column1 > (SELECT AVG(column3)
+                 FROM table2 inner
+                 WHERE inner.column4 = outer.column4);
+```
+
+In this example, the subquery calculates an average for each row in the outer query based on the value of `column4`, which exists in both the outer and inner query.
+
+### Benefits:
+- Allows for more complex filtering and data manipulation that cannot be easily achieved using `JOIN` operations.
+- Useful for comparing each row to an aggregate value derived from other rows in the same or different tables.
+
+### Drawbacks:
+- Can lead to performance issues on large datasets due to the repeated execution of the subquery.
+- May be less efficient compared to `JOIN` operations in certain cases.
+
+By understanding how correlated subqueries work, you can apply them to solve problems that require row-level comparisons and advanced filtering logic.
+
+### Display employees records who earn salary less than the average salary **of their own job.**
 
 ```sql
 SELECT * FROM EMP
@@ -3989,35 +4026,102 @@ WHERE SAL < (SELECT AVG(SAL)
 +-------+--------+----------+------+------------+------+------+--------+
 ```
 
-Parent query takes each row and submits it to child query.
-Child query gets executed for each row.
+### Explanation:
 
-If the **parent table's alias is referred or used in the Child Table's where clause**, then sql considers that type of query as **correlated**.
-The parent query table and the child query table is same so the table alias (E) is must to identify the row transferred by the parent query to the child query.
+This query retrieves all employees whose salary (`SAL`) is less than the average salary of their respective job roles (`JOB`).
+
+#### Query Breakdown:
+
+- **Outer Query**: `SELECT * FROM EMP E` retrieves all columns from the `EMP` table for each employee.
+- **Subquery**: `(SELECT AVG(SAL) FROM EMP WHERE JOB = E.JOB)` calculates the average salary for each specific job (`JOB`) within the outer query.
+  
+  The subquery is correlated with the outer query using `E.JOB`, meaning it executes for each row of the outer query and compares the salary of the employee to the average salary for employees with the same job title.
+
+#### Result:
+
+The result displays the employee details where their salary is below the average salary for their job category.
+
+### Key Point:
+This is an example of a correlated subquery, where the inner query relies on a value from the outer query (`E.JOB`) to perform its calculation for each row.
+
+### Correlated Subquery Explanation:
+
+In a **correlated subquery**, the child query depends on values from the parent query for its execution. Here's a deeper breakdown of the process:
+
+1. **Parent Query Execution**: The parent query processes each row one by one.
+2. **Child Query Execution**: For each row in the parent query, the child query (or subquery) is executed, using values from the current row of the parent query.
+3. **Reference to Parent Table**: If the **parent table's alias** is used in the child query's `WHERE` clause, SQL treats the query as **correlated**. This is because the child query needs a value from the current row in the parent query to execute its operation.
+
+#### Key Points:
+- The **child query** runs **once for every row** in the parent query.
+- The **table alias** in the parent query is used to uniquely identify the specific row being passed to the child query for processing.
+  
+#### Why Table Alias is Necessary:
+Since the parent and child queries both operate on the same table, the alias (e.g., `E`) is necessary to distinguish between the instance of the table being referenced in the parent query and the instance in the child query.
+
+#### Example:
+In the example query below, the parent query processes each employee, and for each employee, the subquery calculates the average salary for the same job role:
+
+```sql
+SELECT * FROM EMP E
+WHERE SAL < (SELECT AVG(SAL) 
+             FROM EMP 
+             WHERE JOB = E.JOB);
+```
+
+In this case:
+
+- `E.JOB` refers to the current row in the **parent query**.
+- The **child query** calculates the average salary for employees with the same job as the one currently being processed by the parent query.
+
+This type of query is considered **correlated** because the result of the subquery depends on the value (`E.JOB`) from the parent query.
+
+By using a correlated subquery, we can compare each row against an aggregate (such as average salary) that is recalculated for each row being evaluated.
 
 ### MECHANISM:
 
-Generally when CORRELATED mechanism is used with "SELECT" STATEMENT then it can be "slow" in processing if volume of rows is high. So it is less used with "SELECT" statement. With "SELECT" Inline Views (aka Derived Tables) or CTE or Window Functions are the "BEST" technique.
+Correlated subqueries can be **slow** when used with `SELECT` statements on large datasets due to the repeated execution of the subquery for each row. Because of this, correlated subqueries are less commonly used in `SELECT` statements. Instead, techniques such as **inline views (derived tables)**, **Common Table Expressions (CTEs)**, or **window functions** are preferred for efficient querying.
 
-But, Correlated Sub Query is "BEST" when it gets used with "UPDATE" and/or "DELETE" statements. Actually, it is widely used in "Projects".
+However, correlated subqueries are highly effective and commonly used with `UPDATE` and `DELETE` statements in real-world projects. They provide a powerful way to target specific rows for updates or deletions based on complex conditions.
 
-1. Mechanism starts with Outer Query(OQ).
-2. OQ gives first row to Sub Query (SQ).
-3. SQ gets executed for "that" row.
-4. OQ gives next row to SQ.
-5. SQ gets executed for "that" row.
-6. The mechanism continues till the last row is submitted by OQ to SQ.
+The process works as follows:
 
-## Correlated Queries in Update Statement
+1. The mechanism starts with the **Outer Query (OQ)**.
+2. The OQ gives the **first row** to the **Sub Query (SQ)**.
+3. The SQ is executed for **that specific row**.
+4. The OQ then gives the **next row** to the SQ.
+5. The SQ is executed again for **that next row**.
+6. This process continues until the OQ has submitted all rows to the SQ for evaluation.
+
+This row-by-row mechanism can be resource-intensive when used in `SELECT` statements but is highly valuable for targeted updates and deletions.
+
+## Correlated Queries in `UPDATE` Statement
+
+Correlated subqueries can be highly useful in `UPDATE` statements when updating one table with values derived from another. In this example, we use a correlated subquery to update the **emp_1** table with department names from the **dept** table based on the **deptno** (department number) column.
+
+### Example:
+
 ```sql
 ALTER TABLE table_name
 ADD column_name data_type [constraints];
+```
+In this `ALTER TABLE` statement, we add a new column to an existing table.
 
+### Correlated Update Query:
+
+```sql
 UPDATE emp_1
 SET dname = (SELECT dname
              FROM dept
              WHERE emp_1.deptno = dept.deptno);
 ```
+### Explanation:
+
+- The **emp_1** table is updated with the department name (**dname**) fetched from the **dept** table.
+- The **correlated subquery** in the `SET` clause selects the department name where the **deptno** (department number) in the **emp_1** table matches the **deptno** in the **dept** table.
+- The query is **correlated** because the subquery depends on each row of the outer query (**emp_1** table) during execution.
+
+This type of query is commonly used to **synchronize data** between tables or to update a table based on related information from another table.
 
 ```sql
 SELECT DISTINCT SAL AS "Fourth Highest Salary"
@@ -4033,30 +4137,38 @@ WHERE SAL >= e.SAL);
 +-----------------------+
 ```
 
-It will store value from lowest to highest for iteration and then compare count with 4.
-For example, it will take 800 first. Then count greater than or equal to 800 is 12.
-It will do so till 4 is not matched.
-4 is matched when e.SAL stores 2850.
+### Explanation:
 
-The above method is the toughest to carry out execution of this query.
-This is not the total bad method because we have used DISTINCT here.
+This query retrieves the **fourth highest salary** from the **EMP** table.
 
-`We can get same output with multiple techniques.
-SQL is tricky.`
+- The **outer query** selects distinct salary values and labels them as "Fourth Highest Salary."
+- The **subquery** counts the number of distinct salaries that are greater than or equal to the salary in the current row of the outer query.
+- When the count equals 4, it means the current salary (`e.SAL`) is the fourth highest.
 
-## EXISTS AND NOT EXISTS WITH CORRELATED SUB QUERIES
+#### Execution Process:
+- The query starts with the lowest salary (e.g., 800).
+- For each salary, it counts how many salaries are greater than or equal to the current one.
+- This process continues until the count equals 4, at which point it identifies the fourth highest salary (in this case, 2850).
 
-### To display ename and sal from emp table who have their deptno matching as per dept table.
+This approach works but is **complex** and **execution-heavy**, as the subquery needs to be re-evaluated for each row in the outer query.
 
+Although this method is not optimal, it does use **DISTINCT** to ensure accuracy, avoiding duplicate salary values.
+
+> **Note**: There are multiple ways to achieve the same result in SQL, each with varying levels of complexity and efficiency. SQL can be tricky!
+
+## EXISTS AND NOT EXISTS WITH CORRELATED SUBQUERIES
+
+### To display employee name (ename) and salary (sal) from the `emp` table for employees whose department number (deptno) matches the department number in the `dept` table:
+
+#### Using IN Clause:
 ```sql
-
 SELECT ename, sal
 FROM emp
 WHERE deptno IN (SELECT deptno
                  FROM dept);
 ```
 
-Below method uses Boolean Value, so it is faster.
+### Using EXISTS Clause (Optimized Method):
 ```sql
 SELECT ename, sal
 FROM emp
@@ -4065,11 +4177,17 @@ WHERE EXISTS (SELECT NULL
               WHERE emp.deptno = dept.deptno);
 ```
 
-When we want to show records of only one table (columns of only one table) based on join
+### Explanation:
+- The **IN** clause method checks if an employee's `deptno` exists in the `dept` table. While this works, it may not be the most efficient for larger datasets because it retrieves and compares each matching value.
 
-**CORRELATED WITH UPDATE AND DELETE AND EXISTS AND NOT EXISTS.**
+- The **EXISTS** clause method is faster because it uses a **Boolean check**. Instead of retrieving and comparing all matching values, it checks if there is at least one row in the `dept` table where `deptno` matches the employee's department number in the `emp` table. The subquery returns `TRUE` or `FALSE`, improving efficiency by avoiding unnecessary data retrieval.
 
-CORRELATED comes under Advanced SQL.
+### Key Point:
+- When you need to display columns from only one table (like `emp`) based on matching conditions in another table (like `dept`), the **EXISTS** clause is usually faster and more efficient than the **IN** clause.
+
+- This approach is particularly useful with **UPDATE** and **DELETE** statements, where correlated subqueries help optimize complex filtering and matching logic.
+
+- **CORRELATED subqueries** with **EXISTS** and **NOT EXISTS** are part of **Advanced SQL** techniques and provide a powerful method to filter data with optimal performance.
 
 ## VIEWS
 
@@ -4139,10 +4257,13 @@ Dropping a View will not have impact on Original Table.
 But Dropping a Table will have a major impact on View. Because View is a copy of the Table.
 
 There are two types of Views:
-1. Simple View
-2. Complex View
+1. Simple View: View based on SELECT * From TableName are called simple views.
+2. Complex View: Complex Views are those views which have aggregate functions, group by clause, etc.
 
-Complex Views are those views which have aggregate functions, group by clause, etc.
+1. Simple View
+Based on a single table.
+Does not include functions, joins, or groupings.
+Typically allows DML (Data Manipulation Language) operations like INSERT, UPDATE, or DELETE.
 
 ```sql
 CREATE VIEW clerk_data2
@@ -4154,18 +4275,17 @@ with check option;
 ```
 
 INSERT INTO clerk_data2(empno, ename, job, deptno)
-VALUES (3, 'C', 'MANAGER', 10); -- Error
+VALUES (3, 'C', 'MANAGER', 10); -- Error as entry can be done by CLERK Only.
 
 INSERT INTO clerk_data2 (empno, ename, job, deptno)
 VALUES (3, 'C', 'CLERK', 10) -- Works fine now!!  
 
-SELECT view_definition
-FROM information_schema.views
-WHERE table_name = 'CLERK_DATA';
+As in WHERE Clause of the View CLERK is mentioned, then under such cases only CLERK can be able to make entry.
 
-SELECT table_type
-FROM information_schema.tables
-WHERE table_type = '
+2. Complex View
+Based on multiple tables.
+Includes functions, joins, groupings, and aggregations.
+Often read-only (may not allow DML operations).
 
 ```sql
 CREATE VIEW emp_summary
@@ -4183,6 +4303,9 @@ GROUP BY deptno;
 |     10 |  8750 |
 +--------+-------+
 ```
+
+Further views can be made from views.
+We can create a VIEW from another VIEW.
 
 ```sql
 CREATE VIEW clerk_20_data
@@ -4202,7 +4325,6 @@ SELECT * FROM clerk_20_data;
 +-------+-------+-------+------+------------+------+------+--------+
 ```
 
-Child View cannot 
 Complex Views are read only.
 View is also called as Table in MySQL.
 
@@ -4211,11 +4333,9 @@ DELETE FROM emp_summary;
 -- ERROR 1288 (HY000): The target table emp_summary of the DELETE is not updatable
 ```
 
-We can create a VIEW from another VIEW.
-
 ## Commit & RollBack Commands:
 
-MySQL be default has AutoCommit for the DML Commands.
+MySQL by default has AutoCommit for the DML Commands.
 
 But in MySQL Commit & Rollback commands are NOT applicable for DDL and DCL commands.
 DDL and DCL commands are AutoCommit commands in MySQL.
