@@ -5209,3 +5209,114 @@ FROM (SELECT *
 **CONVERT ALL DERIVED TABLE CODES INTO COMMON TABLE EXPRESSION (CTE)**
 **CAN BE DONE WITH ASSIGNMENTS BY CONVERTING THEM INTO DERIVED TABLES AND CTEs.**
                                                                                                                                                               
+## Procedure
+
+- In SQL Databases, Procedure is an object which provides "programmability".
+- Procedure will have a code which will be extension of SQL code.
+
+### Reasons of making Procedure
+1. To handle complex Data Integrity Rules while performing DML.
+2. **To handle Run time errors or aka exceptions.** -- MOST IMPORTANT
+3. To get customized outputs of select statements.
+
+The programming objects are:
+1. Procedures
+2. User Defined Functions
+3. Triggers
+4. Cursors
+5. Exception Handling
+6. Packages
+7. File Handling
+8. User Defined Data Types
+9. Collections
+10. Object Oriented Features in RDBMS (ORDBMS)
+
+Every Database does not support all the above features.
+Among all the Databases, Oracle is the Best.
+It is equivalent to Java Programming Language.
+
+Syntax of Procedures:
+
+Delimiter is used to separate multiple SQL statements.
+
+```sql
+
+DELIMITER $$
+
+CREATE PROCEDURE p1() 
+BEGIN 
+   SELECT 'Welcome to Stored Procedures!!' AS '';
+   SELECT 'Second Line'; 
+END$$
+
+DELIMITER; -- Restoring back the default delimiter after sp code is finished
+```
+
+```sql
+Call p1;
+```
+```
++--------------------------------+
+|                                |
++--------------------------------+
+| Welcome to Stored Procedures!! |
++--------------------------------+
+```
+
+```sql
+DELIMITER $$
+
+CREATE PROCEDURE p3(p_deptno INT) 
+BEGIN 
+SELECT * FROM emp 
+WHERE deptno = p_deptno; 
+END$$ 
+
+DELIMITER ; 
+
+CALL p3(20); 
+```
+```
++-------+-------+---------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB     | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+---------+------+------------+------+------+--------+
+|  7369 | SMITH | CLERK   | 7902 | 1980-12-17 |  800 | NULL |     20 |
+|  7566 | JONES | MANAGER | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7788 | SCOTT | ANALYST | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7876 | ADAMS | CLERK   | 7788 | 1983-12-01 | 1100 | NULL |     20 |
+|  7902 | FORD  | ANALYST | 7566 | 1981-03-06 | 3000 | NULL |     20 |
++-------+-------+---------+------+------------+------+------+--------+
+```
+
+```sql
+DELIMITER $$
+
+CREATE PROCEDURE p3_1(IN p_deptno INT DEFAULT 30) 
+BEGIN 
+SELECT * FROM emp 
+WHERE deptno = p_deptno; 
+END$$ 
+
+DELIMITER ;
+```
+```
+
+```
+
+Out Parameter Mode to Procedure
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
