@@ -3904,7 +3904,7 @@ ON E.DEPTNO = D.DEPTNO;
 ```
 +-------+------------+------+----------+
 | ENAME | DNAME      | SAL  | LOC      |
-+-------+------------+------+----------+
++-------+------------+------+----------+   
 | JONES | RESEARCH   | 2975 | DALLAS   |
 | CLARK | ACCOUNTING | 2450 | NEW YORK |
 | SCOTT | RESEARCH   | 3000 | DALLAS   |
@@ -4995,16 +4995,217 @@ WHERE Salary_Rank <= 4;
 +-------+------+-------------+
 ```
 
+```sql
+SELECT ENAME,
+SAL,
+JOB,
+Average_Salary,
+(Sal - Average_Salary) as "Raised"
+FROM (SELECT ENAME, JOB, SAL,
+AVG(SAL) OVER(PARTITION BY JOB) AS Average_Salary
+FROM emp) Employees
+WHERE SAL > Average_Salary;
+```
+```
++--------+------+----------+----------------+----------+
+| ENAME  | SAL  | JOB      | Average_Salary | Raised   |
++--------+------+----------+----------------+----------+
+| ADAMS  | 1100 | CLERK    |      1037.5000 |  62.5000 |
+| MILLER | 1300 | CLERK    |      1037.5000 | 262.5000 |
+| JONES  | 2975 | MANAGER  |      2758.3333 | 216.6667 |
+| BLAKE  | 2850 | MANAGER  |      2758.3333 |  91.6667 |
+| ALLEN  | 1600 | SALESMAN |      1400.0000 | 200.0000 |
+| TURNER | 1500 | SALESMAN |      1400.0000 | 100.0000 |
++--------+------+----------+----------------+----------+
+```
+```sql
+SELECT EMPNO, ENAME, SAL,
+    SUM(SAL) OVER(ORDER BY EMPNO ROWS BETWEEN UNBOUNDED
+    PRECEDING AND CURRENT ROW) AS "Running Total"
+    FROM emp;
+```
+```
++-------+--------+------+---------------+
+| EMPNO | ENAME  | SAL  | Running Total |
++-------+--------+------+---------------+
+|  7369 | SMITH  |  800 |           800 |
+|  7499 | ALLEN  | 1600 |          2400 |
+|  7521 | WARD   | 1250 |          3650 |
+|  7566 | JONES  | 2975 |          6625 |
+|  7654 | MARTIN | 1250 |          7875 |
+|  7698 | BLAKE  | 2850 |         10725 |
+|  7782 | CLARK  | 2450 |         13175 |
+|  7788 | SCOTT  | 3000 |         16175 |
+|  7839 | KING   | 5000 |         21175 |
+|  7844 | TURNER | 1500 |         22675 |
+|  7876 | ADAMS  | 1100 |         23775 |
+|  7900 | JAMES  |  950 |         24725 |
+|  7902 | FORD   | 3000 |         27725 |
+|  7934 | MILLER | 1300 |         29025 |
++-------+--------+------+---------------+
+```
 
+```sql
+SELECT EMPNO, 
+ENAME, 
+SAL, 
+AVG(SAL) OVER (ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS "Moving Average" 
+FROM emp;
+```
+```
++-------+--------+------+----------------+
+| EMPNO | ENAME  | SAL  | Moving Average |
++-------+--------+------+----------------+
+|  7369 | SMITH  |  800 |       800.0000 |
+|  7499 | ALLEN  | 1600 |      1200.0000 |
+|  7521 | WARD   | 1250 |      1216.6667 |
+|  7566 | JONES  | 2975 |      1941.6667 |
+|  7654 | MARTIN | 1250 |      1825.0000 |
+|  7698 | BLAKE  | 2850 |      2358.3333 |
+|  7782 | CLARK  | 2450 |      2183.3333 |
+|  7788 | SCOTT  | 3000 |      2766.6667 |
+|  7839 | KING   | 5000 |      3483.3333 |
+|  7844 | TURNER | 1500 |      3166.6667 |
+|  7876 | ADAMS  | 1100 |      2533.3333 |
+|  7900 | JAMES  |  950 |      1183.3333 |
+|  7902 | FORD   | 3000 |      1683.3333 |
+|  7934 | MILLER | 1300 |      1750.0000 |
++-------+--------+------+----------------+
+```
 
+Moving Average is mostly used in Projects.
 
+## Lead & Lag Function
 
+Example of Lead Function
 
+```sql
+SELECT EMPNO, ENAME, JOB, DEPTNO, SAL, 
+LEAD(ENAME, 1, 'Already on Last Record!') OVER (ORDER BY EMPNO) AS "Next ENAME" 
+FROM emp;
+```
+```
++-------+--------+-----------+--------+------+-------------------------+
+| EMPNO | ENAME  | JOB       | DEPTNO | SAL  | Next ENAME              |
++-------+--------+-----------+--------+------+-------------------------+
+|  7369 | SMITH  | CLERK     |     20 |  800 | ALLEN                   |
+|  7499 | ALLEN  | SALESMAN  |     30 | 1600 | WARD                    |
+|  7521 | WARD   | SALESMAN  |     30 | 1250 | JONES                   |
+|  7566 | JONES  | MANAGER   |     20 | 2975 | MARTIN                  |
+|  7654 | MARTIN | SALESMAN  |     30 | 1250 | BLAKE                   |
+|  7698 | BLAKE  | MANAGER   |     30 | 2850 | CLARK                   |
+|  7782 | CLARK  | MANAGER   |     10 | 2450 | SCOTT                   |
+|  7788 | SCOTT  | ANALYST   |     20 | 3000 | KING                    |
+|  7839 | KING   | PRESIDENT |     10 | 5000 | TURNER                  |
+|  7844 | TURNER | SALESMAN  |     30 | 1500 | ADAMS                   |
+|  7876 | ADAMS  | CLERK     |     20 | 1100 | JAMES                   |
+|  7900 | JAMES  | CLERK     |     30 |  950 | FORD                    |
+|  7902 | FORD   | ANALYST   |     20 | 3000 | MILLER                  |
+|  7934 | MILLER | CLERK     |     10 | 1300 | Already on Last Record! |
++-------+--------+-----------+--------+------+-------------------------+
+```
+By default, if the third parameter is not given then it shows null for the last record.
 
+Example of Lag Function
 
+```sql
+SELECT EMPNO, ENAME, JOB, DEPTNO, SAL, 
+LAG(ENAME, 1, NULL) OVER (ORDER BY EMPNO) AS "Previous Employee" 
+FROM emp;
+```
+```
++-------+--------+-----------+--------+------+-------------------+
+| EMPNO | ENAME  | JOB       | DEPTNO | SAL  | Previous Employee |
++-------+--------+-----------+--------+------+-------------------+
+|  7369 | SMITH  | CLERK     |     20 |  800 | NULL              |
+|  7499 | ALLEN  | SALESMAN  |     30 | 1600 | SMITH             |
+|  7521 | WARD   | SALESMAN  |     30 | 1250 | ALLEN             |
+|  7566 | JONES  | MANAGER   |     20 | 2975 | WARD              |
+|  7654 | MARTIN | SALESMAN  |     30 | 1250 | JONES             |
+|  7698 | BLAKE  | MANAGER   |     30 | 2850 | MARTIN            |
+|  7782 | CLARK  | MANAGER   |     10 | 2450 | BLAKE             |
+|  7788 | SCOTT  | ANALYST   |     20 | 3000 | CLARK             |
+|  7839 | KING   | PRESIDENT |     10 | 5000 | SCOTT             |
+|  7844 | TURNER | SALESMAN  |     30 | 1500 | KING              |
+|  7876 | ADAMS  | CLERK     |     20 | 1100 | TURNER            |
+|  7900 | JAMES  | CLERK     |     30 |  950 | ADAMS             |
+|  7902 | FORD   | ANALYST   |     20 | 3000 | JAMES             |
+|  7934 | MILLER | CLERK     |     10 | 1300 | FORD              |
++-------+--------+-----------+--------+------+-------------------+
+```
 
+```sql
+SELECT EMPNO, ENAME, JOB, DEPTNO, SAL,
+LAG(ENAME, 1, 'On First') OVER () AS "Previous Employee"
+FROM emp;
+```
+```
++-------+--------+-----------+--------+------+-------------------+
+| EMPNO | ENAME  | JOB       | DEPTNO | SAL  | Previous Employee |
++-------+--------+-----------+--------+------+-------------------+
+|  7369 | SMITH  | CLERK     |     20 |  800 | On First          |
+|  7499 | ALLEN  | SALESMAN  |     30 | 1600 | SMITH             |
+|  7521 | WARD   | SALESMAN  |     30 | 1250 | ALLEN             |
+|  7566 | JONES  | MANAGER   |     20 | 2975 | WARD              |
+|  7654 | MARTIN | SALESMAN  |     30 | 1250 | JONES             |
+|  7698 | BLAKE  | MANAGER   |     30 | 2850 | MARTIN            |
+|  7782 | CLARK  | MANAGER   |     10 | 2450 | BLAKE             |
+|  7788 | SCOTT  | ANALYST   |     20 | 3000 | CLARK             |
+|  7839 | KING   | PRESIDENT |     10 | 5000 | SCOTT             |
+|  7844 | TURNER | SALESMAN  |     30 | 1500 | KING              |
+|  7876 | ADAMS  | CLERK     |     20 | 1100 | TURNER            |
+|  7900 | JAMES  | CLERK     |     30 |  950 | ADAMS             |
+|  7902 | FORD   | ANALYST   |     20 | 3000 | JAMES             |
+|  7934 | MILLER | CLERK     |     10 | 1300 | FORD              |
++-------+--------+-----------+--------+------+-------------------+
+```
 
+## Common Table Expression (CTE)
 
+- Baseline, storyline is from Derived Table.
+- 
 
+### Examples
+```sql
+WITH ABC as (SELECT * 
+             FROM emp 
+             WHERE SAL >= 2000) 
+SELECT * FROM ABC;
+```
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
 
+The following query gives the same output:
 
+```sql
+SELECT * 
+FROM (SELECT * 
+      FROM emp 
+      WHERE SAL >= 2000) ABC;
+```
+```
++-------+-------+-----------+------+------------+------+------+--------+
+| EMPNO | ENAME | JOB       | MGR  | HIREDATE   | SAL  | COMM | DEPTNO |
++-------+-------+-----------+------+------------+------+------+--------+
+|  7566 | JONES | MANAGER   | 7839 | 1981-04-02 | 2975 | NULL |     20 |
+|  7698 | BLAKE | MANAGER   | 7839 | 1981-05-01 | 2850 | NULL |     30 |
+|  7782 | CLARK | MANAGER   | 7839 | 1981-06-08 | 2450 | NULL |     10 |
+|  7788 | SCOTT | ANALYST   | 7566 | 1982-12-09 | 3000 | NULL |     20 |
+|  7839 | KING  | PRESIDENT | NULL | 1981-11-17 | 5000 | NULL |     10 |
+|  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
++-------+-------+-----------+------+------------+------+------+--------+
+```
+
+**CONVERT ALL DERIVED TABLE CODES INTO COMMON TABLE EXPRESSION (CTE)**
+**CAN BE DONE WITH ASSIGNMENTS BY CONVERTING THEM INTO DERIVED TABLES AND CTEs.**
+                                                                                                                                                              
