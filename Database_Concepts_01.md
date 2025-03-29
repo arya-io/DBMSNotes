@@ -5299,12 +5299,65 @@ END$$
 
 DELIMITER ;
 ```
-```
 
 ```
 
-Out Parameter Mode to Procedure
+```
 
+---
+
+Error number specifies the error occurred during Runtime.
+The number after the error number is the error state.
+
+We can use if not exists in front of create procedure syntax and it will create that name procedure if it does not already exists in the system.
+
+## Handling Variable
+
+```sql
+SELECT COLUMN_NAME INTO VARIABLE_NAME
+FROM TABLE_NAME
+WHERE CONDITION;
+```
+
+`WHERE condition should return Single Value.`
+
+---
+
+## Exception Handling in SQL Keywords:
+
+### CONTINUE & EXIT
+
+```sql
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+BEGIN
+SELECT '' AS ErrorMessage
+END;
+```
+
+- Above is a part of CATCH block in Exception
+- Query below this is of TRY block.
+- Ideally, the TRY block code should get executed.
+- When **CONTINUE** keyword is used with Exception Handling, and if the TRY block code does not gets executed, then CATCH block gets executed, prints the message and the code continues to run.
+
+---
+
+### Use EXIT for exit.
+Only this is the change which is to be replaced with CONTINUE keyword in the above Exception Handling.
+Now instead of Continuing the code after throwing error, the query will get terminated.
+Smooth/safe termination of the query.
+
+## SQLSTATE
+We have changed the number of the error state to user defined sql state.
+
+## SIGNAL
+
+There are two keywords:
+
+MYSQL_ERRNO
+MESSAGE_TEXT
+GET DIAGNOSTICS CONDITION
+
+## Looping in MySQL
 
 
 
