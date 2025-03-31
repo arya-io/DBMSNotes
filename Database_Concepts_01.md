@@ -5359,6 +5359,81 @@ GET DIAGNOSTICS CONDITION
 
 ## Looping in MySQL
 
+---
+
+## TRIGGERS
+
+Trigger is a piece of code that gets implicity or Automatically executed whenever Insert Or Update or Delete statements gets fired.
+Triggers do not contain parameters as they can't be called such as Procedure.
+Inside a Trigger, we can call a Procedure, but we can't call Trigger inside a Procedure.
+Both Procedures and Triggers need Delimiter.
+Triggers' dependency is on Tables.
+
+### Why Triggers:
+1. To copy newly inserted records from main table into another table for fast report generation of new current day's records.
+2. To programatically take back up of deleted rows based on certain business conditions(not all records back up).
+3. To keep track of old values before updating the values. This is good for values like salary, product_cost, etc.
+4. To programmaticaly keep track of DML activities based on Day/Date/User Business conditions. Useful for audit purpose.
+5. **To ensure that DML happens as per correct business rules. It will reject the DML if the user violates the complex business conditions.
+This is NOT possible via normal Data integrity rules such as PK ,UK, NN, Ch and FK.**
+
+### Trigger Code has following components:
+1. Trigger name because it is a permanent database object.
+2. Timing of DML --- Whether the code should get execute after DML or before DML: After DML will not reject DML. Before DML has ability to reject DML.
+3. The DML event name.
+4. Table Name
+5. Whether for each row or not.
+
+```sql
+DELIMITER // 
+CREATE TRIGGER after_employee_insert 
+AFTER INSERT ON employees 
+FOR EACH ROW 
+BEGIN 
+    INSERT INTO Log(employee_id, action) VALUES (NEW.id, 'INSERT');
+END;
+//
+DELIMITER ;
+```
+```
+| Action  | New | Old |
+|---------|-----|-----|
+| Insert  | Y   |     |
+| Update  |     | Y   |
+| Delete  | Y   | Y   |
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
