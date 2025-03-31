@@ -5403,8 +5403,43 @@ DELIMITER ;
 | Delete  | Y   | Y   |
 ```
 
+## INDEXES
 
+Used for Query Optimization.
+After creating the index, later when new records get added, or some records get deleted. Of some records get updated then the index table gets auto refreshed.
 
+When DML happens in the main table then the index table first gets refreshed and then the main table gets refreshed. This can slow down Bulk DML.
+
+Index is of no use if the select statement is retrieving more than 80% of records.
+
+The columns coming frequently in WHERE clause, think of giving those columns as Index.
+For example, we have rarely used comm column from the employee table.
+
+There can be two types of Indexing:
+- Physical: aka Clustered Indexing. Used for high cardinality.
+- Logical: Used for low cardinality values. For functions such as GROUP BY.
+
+Low cardinality means there are many repeating values. Unique values are less.
+
+### Without Indexing, Full Table Scan will happen.
+
+### With Indexing
+- A binary table gets created at the time of index creation.
+- It keeps track of row ids of each city
+- A Full Table Scan (FTS) gets eliminated!!
+- Only **selective** rows are scanned!!
+
+### Advantages of Indexing
+- The data retrieval of a SELECT statement will become fast!!
+- It also can avoid **Disk Sorts**!!
+
+```sql
+CREATE TABLE emp_101
+AS
+SELECT * FROM emp;
+
+CREATE INDEX i1_emp101 ON emp_101(job);
+```
 
 
 
