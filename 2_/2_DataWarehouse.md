@@ -163,11 +163,52 @@ Multiple Outputs:
 - Tables get locked by which report generation gets delayed.
 - Not suitable for getting summary results especially when high volume of data is there.
 
+## OLAP (Online Analytical Processing)
+- OLAP is computer processing that enables a user to easily and selectively extract and view data from different points of view.
+- OLAP is actually a **multi-dimensional database** which considers each data attribute (such as **product, geographic sales region, and time period**) as a separate **"dimension"**. OLAP software can locate the intersection of dimensions (all products sold in the Eastern region above a certain price during a certain time period) and display them. Attributes such as time periods can be broken down into sub attributes.
+- For example, **a user can request that data be analyzed to display a spreadsheet showing all of a company's beach ball products sold in Florida in the month of July, compare revenue figures with those for the same products in September, and then see a comparison of other product sales in Florida in the same time period**. To facilitate this kind of analysis, OLAP data is stored in a multidimensional database.
+- Data Refresh happens from OLTP to OLAP.
+- OLAP tool gives you GUI.
+- Excel Pivot Table is the greatest example of OLAP.
 
+### OLAP for a Business Man
+- For people on the business side, the key feature within interrelated data is "Multidimensional". In other words, the ability to analyze metrics in different dimensions such as time, geography, gender, product, etc.
+- For example, sales for the company is up.
+  Which region is most responsible for this increase?
+  Which store in this region is most responsible for the increase?
+  What particular product category or categories contributed the most to the increase?
+  Answering these types of questions, **in order**, means that you are performing an **OLAP** analysis.
+  OLAP is more suitable or relevant for top management team like CEO, MD, Board of Directors and Investors.
 
+### Major Vendors of OLAP
+- Oracle -- Essbase (Hyperion)
+- OBIEE
+- SAS
+- Microstrategy
+- Business Objects
+- SSAS
+- And Many More.......
 
+## OLAP and Data Visualization
+- All the analysis done through OLAP tools can be seen visually using Data Visualization tools.
+- **Power BI, Tableau** are Data Visualization tools for this purpose.
 
-
+## Difference between OLTP and OLAP
+```
+| **Aspect**                | **OLTP**                                                                     | **OLAP**                                              |
+|---------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
+| **Purpose**               | Real-Time Data Entry                                                        | Read and Analyze Historical Data                    |
+| **Perform Updates**       | Yes                                                                         | No, Read-Only mostly                                 |
+| **Perform Deletes**       | Yes                                                                         | No, NEVER                                            |
+| **Perform Inserts**       | Yes                                                                         | Yes, BUT periodically                                |
+| **Perform Selects**       | Generally for non-summary (detailed) rows                                   | Mostly for summary rows                             |
+| **Source of Data**        | Data Entry generally by a single data source                                | Historical summary data from multiple data sources  |
+| **Associated Database**   | Only Operational                                                            | Analytical, may be operational                      |
+| **Validation Factor**     | Optimized for validation of incoming data during transactions; uses validation data tables | Loaded with consistent, valid data; requires no real-time validation |
+| **Optimized for**         | A common set of transactions, usually adding or retrieving a single row at a time per table | Bulk loads and large, complex, unpredictable queries that access many rows per table |
+| **Support for Users**     | Thousands of concurrent users                                               | Few concurrent users                                |
+| **Language for Report Generation** | SQL                                                                 | MDX and DAX (Data Analysis Expression)              |
+```
 
 
 
