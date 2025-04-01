@@ -194,7 +194,7 @@ Multiple Outputs:
 - **Power BI, Tableau** are Data Visualization tools for this purpose.
 
 ## Difference between OLTP and OLAP
-```
+
 | **Aspect**                | **OLTP**                                                                     | **OLAP**                                              |
 |---------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
 | **Purpose**               | Real-Time Data Entry                                                        | Read and Analyze Historical Data                    |
@@ -208,7 +208,7 @@ Multiple Outputs:
 | **Optimized for**         | A common set of transactions, usually adding or retrieving a single row at a time per table | Bulk loads and large, complex, unpredictable queries that access many rows per table |
 | **Support for Users**     | Thousands of concurrent users                                               | Few concurrent users                                |
 | **Language for Report Generation** | SQL                                                                 | MDX and DAX (Data Analysis Expression)              |
-```
+
 
 
 
