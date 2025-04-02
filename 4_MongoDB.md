@@ -471,11 +471,119 @@ true
 Using `db.Emp108.drop();` and `db.Emp108.drop();` also gives `true`.
 This behavior is because MongoDB interprets the command as successfully completing the operation, regardless of whether the collection was present or not. Essentially, the `drop()` command ensures that the collection no longer exists, and if it was already absent, the result is still considered a success. This design choice simplifies operations by not requiring additional checks.
 
+Database - Collection - Documents
+- A Database will have Collections
 
+## BSON
+- MongoDB
 
+## Inserting Documents into Collection:
 
+MongoDB provides the following emthods to insert documents into a collection:
+1. insertOne(): Inserts a single document into a collection.
+2. insert(): Inserts one or more documents into a collection.
+   Note -> insert() is the method from older versions.
+   No difference in insert() and insertMany() as such.
+   Takes single document by default, but there is an option to insert multiple documents supplied as an array.
+3. insertMany(): Insert Multiple Documents into a Collection.
 
+## Insert _id Manually
 
+```bash
+db.Emp201.insertMany(
+    [
+        {
+          _id: "1",
+          ename: "John"
+        },
+        {
+          _id: "2",
+          ename: "Martin"
+        },
+     ]
+);
+```
+Output:
+```bash
+{ acknowledged: true, insertedIds: { '0': '1', '1': '2' } }
+```
+
+## findOne()
+
+- The findOne() returns the first document from a collection if no parameter is passed.
+  `db.employees.findOne()`
+- Passing parameter to findOne()
+  the following finds the first document where salary is greater than 2000.
+  `db.employees.findOne({salary: {$gt: 2000}})`
+
+## find()
+
+The find() method finds all the documents that matches with the specified criteria and returns the cursor object. The cursor object is a pointer to the resutl set.
+
+For example, the following
+---
+
+## Sorting
+```bash
+db.Employees.find().sort({ENAME: 1});
+```
+Output:
+Data is sorted according to Names of Employees, i.e., according to ENAME.
+
+#### Syntax of Sort:
+sort({Field Name: Sorting Order Number});
+
+Sorting Order Number will be -1 for Ascending.
+Sorting Order Number will be -1 for Descending.
+
+---
+
+## Updating Records
+
+- MongoDB provides the following methods to update existing documents in a collection:
+  1.
+
+---
+
+filter means where clause
+document means set clause
+
+## Update
+
+---
+
+## Deleting Documents
+
+db.Employees.find({}, {SAL:1});
+Output:
+```bash
+[
+  { _id: ObjectId('67ecd251a646f14991b7123d'), SAL: 3500 },
+  { _id: ObjectId('67ecd251a646f14991b7123e'), SAL: 2000 },
+  { _id: ObjectId('67ecd251a646f14991b7123f'), SAL: 3000 },
+  { _id: ObjectId('67ecd251a646f14991b71240'), SAL: 4000 },
+  { _id: ObjectId('67ecd251a646f14991b71241'), SAL: 1300 },
+  { _id: ObjectId('67ecd251a646f14991b71242'), SAL: 1500 },
+  { _id: ObjectId('67ecd251a646f14991b71243'), SAL: 4500 },
+  { _id: ObjectId('67ecd251a646f14991b71244'), SAL: 1100 },
+  { _id: ObjectId('67ecd251a646f14991b71245'), SAL: 950 },
+  { _id: ObjectId('67ecd251a646f14991b71246'), SAL: 1000 },
+  { _id: ObjectId('67ecd251a646f14991b71247'), SAL: 1600 },
+  { _id: ObjectId('67ecd251a646f14991b71248'), SAL: 1250 },
+  { _id: ObjectId('67ecd251a646f14991b71249'), SAL: 1250 },
+  { _id: ObjectId('67ecd251a646f14991b7124a'), SAL: 1500 },
+  { _id: ObjectId('67ecd251a646f14991b7124b'), SAL: 2000 },
+  { _id: ObjectId('67ecd251a646f14991b7124c'), SAL: 1800 }
+]
+```
+
+Delete Documents having salary < 1500
+
+db.Employees.deleteMany({SAL: {$lt: 1500}});
+
+### Deleting all the Documents
+
+db.employees.deleteMany({});
 
 
 
