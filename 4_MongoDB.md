@@ -99,7 +99,7 @@ to switch current database.
   
 - Now, to find the documents in the collection, we use the command:
   ```bash
-  db.Emp5.find()
+  db.Emp5.find();
   ```
   When no parameter is given inside the parenthesis of find(), then it is considered as all like (*) of SQL.
   The output of the above command is as follows:
@@ -122,6 +122,373 @@ to switch current database.
   ```
 
 - **Keywords are highly case-sensitive in MongoDB.**
+
+Now we are creating a new collection name Emp6
+
+```bash
+db.Emp6.insert({"empno": 1, "ename": "Smith", sal: 6000});
+db.Emp6.insert({"empno": 2, "ename": "Martin", sal: 7000});
+db.Emp6.insert({"empno": 3, "ename": "James", sal: 5000});
+db.Emp6.insert({"empno": 4, "ename": "King", sal: 4000});
+db.Emp6.find();
+```
+
+Output:
+```bash
+[
+  {
+    _id: ObjectId('67ecc514a646f14991b71239'),
+    empno: 1,
+    ename: 'Smith',
+    sal: 6000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123a'),
+    empno: 2,
+    ename: 'Martin',
+    sal: 7000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123b'),
+    empno: 3,
+    ename: 'James',
+    sal: 5000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123c'),
+    empno: 4,
+    ename: 'King',
+    sal: 4000
+  }
+]
+```
+```bash
+db.Emp6.find({});
+```
+The above command also gives the same output.
+
+```bash
+db.Emp6.find({}, {ename:1});
+```
+First parameter is for the records filter. Currently, we don't have any.
+
+Output:
+```bash
+[
+  { _id: ObjectId('67ecc514a646f14991b71239'), ename: 'Smith' },
+  { _id: ObjectId('67ecc515a646f14991b7123a'), ename: 'Martin' },
+  { _id: ObjectId('67ecc515a646f14991b7123b'), ename: 'James' },
+  { _id: ObjectId('67ecc515a646f14991b7123c'), ename: 'King' }
+]
+```
+
+- Displaying multiple fields but all documents
+
+```bash
+db.Emp6.find({}, {ename:1, sal:2});
+```
+Output:
+```bash
+[
+  {
+    _id: ObjectId('67ecc514a646f14991b71239'),
+    ename: 'Smith',
+    sal: 6000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123a'),
+    ename: 'Martin',
+    sal: 7000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123b'),
+    ename: 'James',
+    sal: 5000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123c'),
+    ename: 'King',
+    sal: 4000
+  }
+]
+```
+
+- To exclude the id field (when we don't have Object Id in the output, we use _id:0)
+```bash
+db.Emp6.find({}, {ename:1, sal:2, _id:0});
+```
+Output:
+```bash
+[
+  { ename: 'Smith', sal: 6000 },
+  { ename: 'Martin', sal: 7000 },
+  { ename: 'James', sal: 5000 },
+  { ename: 'King', sal: 4000 }
+]
+```
+
+Mixing field inclusion (`1`) and exclusion (`0`) in a MongoDB projection is not allowed, except for the `_id` field. Using any non-zero value, such as `1` or `2`, will include the specified field in the query result.
+
+### Filtering Rows and Columns
+
+`find(document filter (where clause), projection filter (column list of select))`
+
+#### Display documents having salary greater than 5000
+
+```bash
+db.Emp6.find({"sal": {$gt: 5000}});
+```
+Output:
+```bash
+[
+  {
+    _id: ObjectId('67ecc514a646f14991b71239'),
+    empno: 1,
+    ename: 'Smith',
+    sal: 6000
+  },
+  {
+    _id: ObjectId('67ecc515a646f14991b7123a'),
+    empno: 2,
+    ename: 'Martin',
+    sal: 7000
+  }
+]
+```
+
+Output without ObjectID:
+
+```bash
+db.Emp6.find({"sal": {$gt: 5000}}, {_id:0});
+```
+```bash
+[
+  { empno: 1, ename: 'Smith', sal: 6000 },
+  { empno: 2, ename: 'Martin', sal: 7000 }
+]
+```
+```bash
+db.Emp6.find({"ename": {$eq: "SMITH"}});
+```
+This query will not work as "Smith" is saved in mixed case and we are trying uppercase.
+
+To work with queries without worrying about case-sensitiveness, use this command:
+
+```bash
+db.Emp6.find({"ename": /smith/i});
+```
+```bash
+[
+  {
+    _id: ObjectId('67ecc514a646f14991b71239'),
+    empno: 1,
+    ename: 'Smith',
+    sal: 6000
+  }
+]
+```
+
+The below query will work successfully:
+```bash
+db.Emp6.find({"ename": {$eq: "Smith"}});
+```
+```bash
+[
+  {
+    _id: ObjectId('67ecc514a646f14991b71239'),
+    empno: 1,
+    ename: 'Smith',
+    sal: 6000
+  }
+]
+```
+
+Following is the query to find a value in uppercase:
+
+```bash
+db.Emp6.find({"ename": "smith".toUpperCase()});
+```
+It will show the output if 'SMITH' is present in the collection's documents.
+
+- We have added a new Employees collection in MongoDB. The queries have been taken from Drive.
+
+### Which employees have names matching either "ROGER" or "MARTIN"?
+
+```bash
+db.Employees.find({"ENAME": {$in: ["ROGER", "MARTIN"]}});
+```
+```bash
+[
+  {
+    _id: ObjectId('67ecd251a646f14991b7123d'),
+    EMPNO: 1,
+    ENAME: 'ROGER',
+    JOB: 'ANALYST',
+    SAL: 3500,
+    DEPTNO: 10
+  },
+  {
+    _id: ObjectId('67ecd251a646f14991b71249'),
+    EMPNO: 13,
+    ENAME: 'MARTIN',
+    JOB: 'SALESMAN',
+    SAL: 1250,
+    DEPTNO: 20
+  }
+]
+```
+
+Single quote can also work for above query for entries after `$in` operator.
+```bash
+db.Employees.find({"ENAME": {$in: ["ROGER", "MARTIN"]}});
+```
+Opposite of $in is $nin.
+It will return all entries except given in the query.
+
+### Logical and or operators.
+
+#### Which employees work as clerks and have a salary less than 1200?
+```bash
+db.Employees.find({ $and: [{JOB:"CLERK"}, {SAL:{$lt: 1200}}]});
+```
+Output:
+```bash
+[
+  {
+    _id: ObjectId('67ecd251a646f14991b71244'),
+    EMPNO: 8,
+    ENAME: 'ADAMS',
+    JOB: 'CLERK',
+    SAL: 1100,
+    DEPTNO: 20
+  },
+  {
+    _id: ObjectId('67ecd251a646f14991b71245'),
+    EMPNO: 9,
+    ENAME: 'JAMES',
+    JOB: 'CLERK',
+    SAL: 950,
+    DEPTNO: 30
+  },
+  {
+    _id: ObjectId('67ecd251a646f14991b71246'),
+    EMPNO: 10,
+    ENAME: 'MARY',
+    JOB: 'CLERK',
+    SAL: 1000,
+    DEPTNO: 30
+  }
+]
+```
+
+#### Display name and job for employees earning sal less than 1200 from job type clerk. Don't show object id.
+
+```bash
+db.Employees.find({ $and: [{JOB:"CLERK"}, {SAL:{$lt: 1200}}]}, {"ENAME":1, "JOB":2, _id:0});
+```
+Output:
+```bash
+[
+  { ENAME: 'ADAMS', JOB: 'CLERK' },
+  { ENAME: 'JAMES', JOB: 'CLERK' },
+  { ENAME: 'MARY', JOB: 'CLERK' }
+]
+```
+
+###### With Salary:
+
+```bash
+db.Employees.find({ $and: [{JOB:"CLERK"}, {SAL:{$lte: 1200}}]}, {"ENAME":1, "JOB":2, SAL: 3, _id:0});
+```
+Output:
+```bash
+[
+  { ENAME: 'ADAMS', JOB: 'CLERK', SAL: 1100 },
+  { ENAME: 'JAMES', JOB: 'CLERK', SAL: 950 },
+  { ENAME: 'MARY', JOB: 'CLERK', SAL: 1000 }
+]
+```
+
+### OR Operator
+
+```bash
+db.Employees.find({ $or: [{JOB:"CLERK"}, {SAL:{$lt: 1200}}]});
+```
+```bash
+db.Employees.find({ $or: [{JOB:"CLERK"}, {SAL:{$lte: 1200}}]}, {"ENAME":1, "JOB":2, SAL: 3, _id:0});
+```
+```bash
+[
+  { ENAME: 'MILLER', JOB: 'CLERK', SAL: 1300 },
+  { ENAME: 'JULIE', JOB: 'CLERK', SAL: 1500 },
+  { ENAME: 'SMITH', JOB: 'CLERK', SAL: 4500 },
+  { ENAME: 'ADAMS', JOB: 'CLERK', SAL: 1100 },
+  { ENAME: 'JAMES', JOB: 'CLERK', SAL: 950 },
+  { ENAME: 'MARY', JOB: 'CLERK', SAL: 1000 }
+]
+```
+
+## CRUD Operations
+
+## MongoDB Collections
+
+- A collection in MongoDB is similar to a table in RDBMS.
+- MongoDb collections do not enforce schemas.
+- Each MongoDB collection can have multiple documents. A document is equivalent to row in a table in RDBMS.
+- To create a collection, use the following command:
+  ```bash
+  db.createCollection("Emp100");
+  ```
+  ```bash
+  { ok: 1 }
+  ```
+
+## Listing all the collections
+
+Shows collections in the current database.
+
+```bash
+show collections;
+```
+```bash
+Emp100
+Emp5
+Emp6
+Employees
+```
+
+We have 4 collections in x100 database.
+
+##### To delete a collection:
+
+```bash
+db.Emp100.drop();
+```
+```bash
+true
+```
+
+Using `db.Emp108.drop();` and `db.Emp108.drop();` also gives `true`.
+This behavior is because MongoDB interprets the command as successfully completing the operation, regardless of whether the collection was present or not. Essentially, the `drop()` command ensures that the collection no longer exists, and if it was already absent, the result is still considered a success. This design choice simplifies operations by not requiring additional checks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
