@@ -261,6 +261,7 @@ Output without ObjectID:
 ```bash
 db.Emp6.find({"sal": {$gt: 5000}}, {_id:0});
 ```
+Output:
 ```bash
 [
   { empno: 1, ename: 'Smith', sal: 6000 },
@@ -277,6 +278,7 @@ To work with queries without worrying about case-sensitiveness, use this command
 ```bash
 db.Emp6.find({"ename": /smith/i});
 ```
+Output:
 ```bash
 [
   {
@@ -292,6 +294,7 @@ The below query will work successfully:
 ```bash
 db.Emp6.find({"ename": {$eq: "Smith"}});
 ```
+Output:
 ```bash
 [
   {
@@ -317,6 +320,7 @@ It will show the output if 'SMITH' is present in the collection's documents.
 ```bash
 db.Employees.find({"ENAME": {$in: ["ROGER", "MARTIN"]}});
 ```
+Output:
 ```bash
 [
   {
@@ -417,6 +421,7 @@ db.Employees.find({ $or: [{JOB:"CLERK"}, {SAL:{$lt: 1200}}]});
 ```bash
 db.Employees.find({ $or: [{JOB:"CLERK"}, {SAL:{$lte: 1200}}]}, {"ENAME":1, "JOB":2, SAL: 3, _id:0});
 ```
+Output:
 ```bash
 [
   { ENAME: 'MILLER', JOB: 'CLERK', SAL: 1300 },
@@ -439,6 +444,7 @@ db.Employees.find({ $or: [{JOB:"CLERK"}, {SAL:{$lte: 1200}}]}, {"ENAME":1, "JOB"
   ```bash
   db.createCollection("Emp100");
   ```
+  Output:
   ```bash
   { ok: 1 }
   ```
@@ -450,6 +456,7 @@ Shows collections in the current database.
 ```bash
 show collections;
 ```
+Output:
 ```bash
 Emp100
 Emp5
@@ -464,6 +471,7 @@ We have 4 collections in x100 database.
 ```bash
 db.Emp100.drop();
 ```
+Output:
 ```bash
 true
 ```
@@ -585,22 +593,185 @@ db.Employees.deleteMany({SAL: {$lt: 1500}});
 
 db.employees.deleteMany({});
 
+---
 
+### Usage of $sum operator
 
+aggregate becomes one of the important methods of the collection object.
+group becomes the first argument.
+It has two properties:
+- _id which contains the column which we are grouping
+- aggregation which should be column alias
+Alias name is mandatory here
 
+###### accumulator object: It is the columns/fields whose distinct values will be used for aggregation (GROUP BY column of SQL).
 
+#### Display Job wise total salaries.
 
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: "$JOB",
+            Total_Salary: { $sum: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: 'ANALYST', Total_Salary: 12500 },
+  { _id: 'CLERK', Total_Salary: 10350 },
+  { _id: 'SALESMAN', Total_Salary: 9400 }
+]
+```
 
+#### Multiple Columns Group By:
 
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: ["$JOB", "$DEPTNO"],
+            Total_Salary: { $sum: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: [ 'ANALYST', 20 ], Total_Salary: 7000 },
+  { _id: [ 'ANALYST', 10 ], Total_Salary: 5500 },
+  { _id: [ 'CLERK', 30 ], Total_Salary: 1950 },
+  { _id: [ 'SALESMAN', 20 ], Total_Salary: 2750 },
+  { _id: [ 'CLERK', 20 ], Total_Salary: 5600 },
+  { _id: [ 'CLERK', 10 ], Total_Salary: 2800 },
+  { _id: [ 'SALESMAN', 10 ], Total_Salary: 2850 },
+  { _id: [ 'SALESMAN', 30 ], Total_Salary: 3800 }
+]
+```
 
+#### Average
 
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: "$JOB",
+            Average: { $avg: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: 'ANALYST', Average: 3125 },
+  { _id: 'CLERK', Average: 1725 },
+  { _id: 'SALESMAN', Average: 1566.6666666666667 }
+]
+```
 
+Same can be done for max and min.
 
+Maximum
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: "$JOB",
+            Maximum: { $max: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: 'ANALYST', Maximum: 4000 },
+  { _id: 'CLERK', Maximum: 4500 },
+  { _id: 'SALESMAN', Maximum: 2000 }
+]
+```
+Minimum
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: "$JOB",
+            Minimum: { $min: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: 'CLERK', Minimum: 950 },
+  { _id: 'ANALYST', Minimum: 2000 },
+  { _id: 'SALESMAN', Minimum: 1250 }
+]
+```
 
+#### Use of count function
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: "$JOB",
+            Count: { $count: {}}
+                }
+    }
+]);
+```
+Output:
+```bash
+[
+  { _id: 'ANALYST', Count: 4 },
+  { _id: 'CLERK', Count: 6 },
+  { _id: 'SALESMAN', Count: 6 }
+]
+```
 
+### Note -> **_id:{} or _id:null** means no column's distinct values to be grouped.
 
+```bash
+db.Employees.aggregate([
+    {
+        $group: {
+            _id: {},
+            Grand_Total: { $sum: "$SAL"}
+                }
+    }
+]);
+```
+Output:
+```bash
+[ { _id: {}, Grand_Total: 32250 } ]
+```
 
+#### Display the name of the first employee in each job sorted as per empno in that job type.
 
+$first:
+$last:
+
+---
+
+#### Simulation of Sub Query, Derived Tables and Join of ANSI SQL 
+
+To find employees with the highest salary
+
+- $LOOKUP operator: It is used for joining documents. It will be equi join as per SQL's logic.
+- $unwind: Converts the joined array into separate documents.
+- $project: projection. Displays only ENAME and SAL fields.
+
+---
+
+#### To find employees who earn less than the average salary for their own job.
+
+$match is similar to WHERE clause.
 
 
 
