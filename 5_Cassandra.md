@@ -80,34 +80,223 @@ In MongoDB, the horizontal scaling is done by 2 ways:
 
 ---
 
+## Cassandra on DataStrax
 
+- Created a Database in Amazon Web Services
+- The region is us-east-2
+- To start, we clicked on CQL Console
+- You should be in the CQL Editor environment first of Astra DB database of DataStax
+---
+```sql
+create table  t1(a int, b int, c int); --- What happens????
+```
+We got an error after running above command:
+```bash
+"No keyspace has been specified. USE a keyspace, or explicitly specify keyspace.tablename"
+```
+Then run:
+```sql
+default_keyspace;
+```
 
+Again running the same create command, we get another error:
+```bash
+message="No PRIMARY KEY specifed for table 't1' (exactly one required)"
+```
+Now, we run:
+```sql
+create table t1(a int Primary Key, b int, c int);
+```
+There's no output that means the query has been executed successfully.
 
+```sql
+Insert into t1 Values(1, 100, 200);
+```
+```bash
+SyntaxException: line 1:15 no viable alternative at input 'Values' (Insert into [t1] Values...)
+```
 
+Now, the correct syntax of Inserting Data into Table in Cassandra:
+```sql
+Insert into t1(a, b, c) Values(1, 100, 200);
+```
+No output but the query has been executed successfully.
 
+```sql
+Rollback;
+```
+```bash
+SyntaxException: line 1:0 no viable alternative at input 'Rollback' ([Rollback]...)
+```
 
+Displaying table t1
+```sql
+select * from t1;
+```
+Output:
+```bash
+ a | b   | c
+---+-----+-----
+ 1 | 100 | 200
 
+(1 rows)
+```
 
+Adding record with same PRIMARY KEY value:
 
+```sql
+Insert into t1(a, b, c) Values(1, 500, 700);
+select * from t1;
+```
+Output:
+```bash
+ a | b   | c
+---+-----+-----
+ 1 | 500 | 700
 
+(1 rows)
+```
 
+This is weird behavior. The value is getting overrided while we have PRIMARY KEY. This isn't the DRAWBACK of Cassandra.
 
+### Creating new table transactions:
+```sql
+create table transactions
+(trid int,
+ country text,
+ emailid text,
+ amount int,
+ Primary Key(country, emailid)
+);  -- The above PK is known as Compound Key.
+-- Country is partition key and emailid is cluster column
 
+Insert into transactions (trid, country, emailid, amount) 
+Values(1, 'India', 'a@abc.com', 3000);
 
+Insert into transactions (trid, country, emailid, amount) 
+Values(2, 'India', 'b@abc.com', 4000);
 
+Insert into transactions (trid, country, emailid, amount) 
+Values(3, 'Australia', 'c@abc.com', 9000);
 
+Insert into transactions (trid, country, emailid, amount) 
+Values(4, 'Australia', 'd@abc.com', 10000);
+```
 
+Output:
+```bash
+ country   | emailid   | amount | trid
+-----------+-----------+--------+------
+     India | a@abc.com |   3000 |    1
+     India | b@abc.com |   4000 |    2
+ Australia | c@abc.com |   9000 |    3
+ Australia | d@abc.com |  10000 |    4
+```
 
+Green color is for numeric value.
+Yellow color is for text.
+Red color is for PRIMARY KEY.
+Purple color is for numeric column.
+Blue color is for 
 
+Query:
+```sql
+select * from transactions where amount > 4000;
+```
+```bash
+"Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+```
 
+Correct Query:
+```sql
+select * from transactions where amount > 4000 Allow Filtering;
+```
+Output:
+```bash
+ country   | emailid   | amount | trid
+-----------+-----------+--------+------
+ Australia | c@abc.com |   9000 |    3
+ Australia | d@abc.com |  10000 |    4
+```
 
+```sql
+select * from transactions where country = 'India';
+```
+Output:
+```bash
+ country | emailid   | amount | trid
+---------+-----------+--------+------
+   India | a@abc.com |   3000 |    1
+   India | b@abc.com |   4000 |    2
+```
+Where clause can be used with Partition Key.
+In other situations, we have to use ALLOW FILTERING.
 
+The below query won't work:
+```sql
+select * from transactions where emailid = 'a@abc.com;
+```
 
+### Update Query
 
+```sql
+update transactions
+set amount = 10000
+where trid = 2;
+```
+We get error message:
+```bash
+message="Some partition key parts are missing: country"
+```
+WHERE clause can only contain PARTITION KEY OR COMPOUND KEY to work in Cassandra.
 
+Corrected Query:
 
+```sql
+update transactions
+set amount = 10000
+where country = 'India' and emailid = 'b@abc.com';
 
+select * from transactions;
+```
+Output:
+```bash
+ country   | emailid   | amount | trid
+-----------+-----------+--------+------
+     India | a@abc.com |   3000 |    1
+     India | b@abc.com |  10000 |    2
+ Australia | c@abc.com |   9000 |    3
+ Australia | d@abc.com |  10000 |    4
+```
 
+### Delete Query
+
+```sql
+delete from transactions
+where country = 'India' and emailid = 'b@abc.com';
+
+select * from transactions;
+```
+Output:
+```bash
+ country   | emailid   | amount | trid
+-----------+-----------+--------+------
+     India | a@abc.com |   3000 |    1
+ Australia | c@abc.com |   9000 |    3
+ Australia | d@abc.com |  10000 |    4
+```
+
+`NOT NULL, UNIQUE KEY, CHECK CONSTRAINT, DEFAULT and FOREIGN KEY is not present and supported in Cassandra.`
+
+## TTL (Time-To-Live) in Cassandra
+
+TTL (Time-To-Live) in Cassandra is a feature that allows you to set an expiration time (in seconds) for data. After the TTL expires, the data is automatically deleted without requiring manual deletion.
+
+### How TTL Works?
+- When inserting or updating a row, you can specify a TTL value in seconds.
+- Once the TTL expires, the row is marked as deleted and will be removed permanently after the next comparision
+
+TTL can also be used with UPDATE.
 
 
 
