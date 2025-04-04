@@ -4481,8 +4481,121 @@ A distributed database stores data on more than one computer, yet the database f
 - Also known as the "no cheating" rule.
 - "If a relational system has a low-level (single-record-at-a-time) language, that low level cannot be used to subvert or bypass the integrity rules and constraints expressed in the higher-level relational language (multiple-records-at-a-time)."
 
-## Window Functions
-aka Analytical Functions
+## Window Functions (aka Analytical Functions)
+
+Window Functions, also known as Analytical Functions, are powerful SQL tools that perform calculations across a set of table rows that are somehow related to the current row. Unlike aggregate functions, they **do not collapse the result set**; instead, they return a value for **each row**.
+
+### Key Features:
+- Operate on a "window" (subset) of rows defined by the `OVER()` clause.
+- Provide **row-wise calculations** while maintaining visibility of the rest of the dataset.
+- Commonly used for **ranking, running totals, moving averages**, and **percentile calculations**.
+
+---
+
+### Syntax:
+```sql
+SELECT column1, column2,
+       window_function(...) OVER (
+           PARTITION BY columnX
+           ORDER BY columnY
+           ROWS BETWEEN ... AND ...
+       ) AS alias_name
+FROM table_name;
+```
+
+## 📊 Window Functions (Analytical Functions)
+
+**Window Functions**, also known as **Analytical Functions**, perform calculations across a set of rows that are related to the current row. Unlike aggregate functions, **they do not reduce the result set** — every row remains in the output.
+
+---
+
+### 🧩 Common Window Functions
+
+| Function         | Description                                      |
+|------------------|--------------------------------------------------|
+| `ROW_NUMBER()`   | Assigns a unique row number to each row per partition. |
+| `RANK()`         | Ranks rows within a partition, allowing gaps.         |
+| `DENSE_RANK()`   | Ranks rows without gaps (dense ranking).             |
+| `NTILE(N)`       | Divides rows into `N` roughly equal buckets.         |
+| `LAG()`          | Accesses data from the previous row.                 |
+| `LEAD()`         | Accesses data from the next row.                     |
+| `SUM()`          | Computes a running total (cumulative sum).          |
+| `AVG()`          | Computes a running average.                         |
+| `COUNT()`        | Counts rows within the window.                      |
+| `FIRST_VALUE()`  | Returns the first value in the window.              |
+| `LAST_VALUE()`   | Returns the last value in the window.               |
+
+---
+
+### 🧮 Example: `ROW_NUMBER()`
+
+```sql
+SELECT empno, ename, deptno,
+       ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS rank_in_dept
+FROM emp;
+```
+
+## 🔍 Explanation: `ROW_NUMBER()`
+
+- `PARTITION BY deptno`: Divides rows by department.
+- `ORDER BY sal DESC`: Ranks employees in each department by descending salary.
+- `ROW_NUMBER()`: Assigns a unique rank per row within each department.
+
+---
+
+## 💰 Example: `SUM()` as a Window Function
+
+```sql
+SELECT empno, ename, deptno, sal,
+       SUM(sal) OVER (PARTITION BY deptno ORDER BY sal) AS running_total
+FROM emp;
+```
+## 🔍 Explanation
+
+Calculates a **cumulative (running) total** of salary within each department.
+
+- `PARTITION BY deptno`: Groups data by department.
+- `ORDER BY sal`: Ensures salaries are accumulated in ascending order.
+- The total increases row-by-row as salary increases within each department.
+
+---
+
+## 📌 Summary
+
+### 🧮 Aggregate Functions:
+- Return a **single value** after collapsing multiple rows.
+- Example: `SUM(sal)` returns the total salary across all rows.
+
+### 🔍 Window Functions:
+- Return **one value per row**, while still being aware of surrounding rows.
+- Do **not** reduce the number of rows returned.
+- Provide **row-wise analytics** like rankings and running totals.
+
+---
+
+## ✅ Common Use Cases
+
+- **Ranking**  
+  `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`
+
+- **Running Totals & Averages**  
+  `SUM()`, `AVG()`
+
+- **Lag/Lead Comparisons**  
+  `LAG()`, `LEAD()`
+
+- **First/Last Row Value Lookups**  
+  `FIRST_VALUE()`, `LAST_VALUE()`
+
+---
+
+## 🛠 Ideal For:
+
+- Reports and dashboards  
+- Trend analysis  
+- Leaderboards  
+- Advanced analytical SQL queries
+
 
 ```sql
 SELECT ENAME,
@@ -4511,11 +4624,61 @@ FROM emp;
 +--------+------+-----------------+
 ```
 
-Before OVER() either a aggregate function OR rank is needed.
-Aggregate Function is used here to give output similar to somewhat like GROUP BY.
-Window Functions are alternate for Derived Tables.
-Aggregate Value gets returned with the help of OVER().
-OVER(): Overriding the default use of GROUP BY Functions.
+## 📘 Understanding OVER() in Window Functions
+
+### 🔹 OVER() Clause – Core Idea:
+The `OVER()` clause is used **with aggregate or ranking functions** to perform calculations across a **set of rows related to the current row**, without collapsing the result into a single row (unlike `GROUP BY`).
+
+---
+
+## 🔍 Key Concepts
+
+### ✅ Prerequisite:
+- `OVER()` must be used **with an aggregate function** (e.g., `SUM`, `AVG`, `COUNT`) or **ranking function** (`ROW_NUMBER`, `RANK`, etc.).
+
+### 🧮 Aggregate Functions with OVER():
+- Provide grouped/partitioned calculations **per row** (unlike `GROUP BY`, which returns one row per group).
+- Example: Cumulative totals, averages, or count **within each partition**.
+
+### 🏷️ Rank Functions with OVER():
+- Assign rankings **based on sorting and partitioning**.
+
+---
+
+## 🧠 Why Use OVER()?
+
+- It **overrides the default behavior** of aggregate functions by allowing them to work **without reducing** the number of rows.
+- Offers **row-wise aggregate insight**—perfect for analytics, comparisons, and reporting.
+- Acts as a **powerful alternative to derived tables** or subqueries.
+
+---
+
+## 🔁 OVER() vs GROUP BY
+
+| Feature           | GROUP BY                           | OVER() with Aggregate |
+|------------------|-------------------------------------|------------------------|
+| Rows Returned     | One per group                      | One per row            |
+| Collapses Data?   | Yes                                | No                     |
+| Use Case          | Summary reports                    | Row-wise analytics     |
+| Supports Ranking? | ❌                                 | ✅                     |
+
+---
+
+## 💡 Summary
+
+- Use `OVER()` with **aggregate or rank functions**.
+- It allows calculations across a **partition of rows**, without hiding or removing any rows.
+- Perfect for **analytical insights**, such as:
+  - Running totals
+  - Row-wise averages
+  - Departmental rankings
+  - First/last comparisons
+
+---
+
+📌 **Remember:**  
+> `OVER()` turns traditional aggregate behavior into a **row-by-row analytical tool** while still being aware of grouped logic like `PARTITION BY` and `ORDER BY`.
+
 
 Example 2:
 
@@ -4549,18 +4712,133 @@ FROM emp;
 +--------+--------+------+------------------------------------+
 ```
 
-GROUP BY will give you pure distinct summary and no details.
-To get summary with actual rows combined, we use Window Functions.
+## 📊 GROUP BY vs. Window Functions (OVER)
 
-### Difference between earlier method and this new method.
-- No derived table is being created.
-- No JOIN operation is being performed.
-- No more logic building.
-- In industry, Window Function is given higher preference.
+### 🧠 Core Difference
 
-## Multiple Columns in Partition By Clause
+- `GROUP BY` gives you **pure summary** – one row per group.
+- **Window Functions** give you **summary + detail** – row-level data with aggregate insight.
 
-You can have Single Column as well as Multiple Columns in PARTITION BY Clause.
+---
+
+## 🔍 Why Window Functions?
+
+To get aggregate values **without losing the row-level detail**, use **Window Functions**.
+
+They allow you to:
+- View summaries **alongside** each row.
+- Eliminate the need for complex subqueries, joins, or derived tables.
+
+---
+
+## ⚖️ GROUP BY vs. Window Functions
+
+| Feature                         | `GROUP BY`                         | Window Functions (`OVER`)      |
+|---------------------------------|------------------------------------|--------------------------------|
+| Rows Returned                   | One row per group                  | All original rows              |
+| Detail Visibility               | ❌ Only grouped summary             | ✅ Full detail + summary        |
+| Need for Joins/Subqueries       | Often needed for combining summary | Not needed                     |
+| Ranking Support                 | ❌                                | ✅ (`RANK()`, `ROW_NUMBER()`)   |
+| Use in Reporting/Dashboards     | Limited                            | Highly preferred               |
+
+---
+
+## ✅ Industry Preference
+
+Window Functions are **widely preferred in real-world applications** because:
+
+- No derived tables required.
+- No JOIN operations needed.
+- No extra logic building or query nesting.
+- Efficient, readable, and powerful for analytics.
+
+---
+
+## 💬 Summary
+
+> If you need **summary with actual rows retained**, go with **Window Functions**.
+>  
+> If you need **distinct aggregated results**, go with `GROUP BY`.
+
+### 🚀 Window Functions = Performance + Clarity + Insight
+
+
+## 🧩 Multiple Columns in PARTITION BY Clause
+
+You can use **one or more columns** in the `PARTITION BY` clause of a Window Function to create **more specific partitions** of your data.
+
+---
+
+### 🔹 Syntax
+
+```sql
+<window_function>() OVER (
+  PARTITION BY column1, column2
+  ORDER BY column3
+)
+```
+
+## 🎯 Multiple Columns in `PARTITION BY` Clause
+
+You can divide your dataset into groups based on **unique combinations of two or more columns** in the `PARTITION BY` clause.
+
+---
+
+### 🔍 Example
+
+```sql
+SELECT empno, ename, job, deptno, sal,
+       ROW_NUMBER() OVER (
+         PARTITION BY job, deptno 
+         ORDER BY sal DESC
+       ) AS row_rank
+FROM emp;
+```
+
+## 🧠 Explanation: Multiple Columns in `PARTITION BY`
+
+### PARTITION BY job, deptno
+- Groups the data by **unique combinations** of `job` and `deptno`.
+
+### ORDER BY sal DESC
+- Ranks employees **within each partition** by **salary in descending order**.
+
+### ROW_NUMBER()
+- Assigns a **unique row number** to each row **within its group**, based on the specified order.
+
+---
+
+## ✅ When to Use Multiple Columns in `PARTITION BY`
+
+Use **multiple columns** when:
+
+- You need **granular control** over grouping logic.
+- You are performing analytics within **composite categories**, such as:
+  - 🏢 Department + Role
+  - 🌍 Region + Product
+  - 📅 Year + Month
+
+---
+
+## 📌 Summary
+
+| Partitioning Type          | Description                                 |
+|----------------------------|---------------------------------------------|
+| `PARTITION BY column`      | Groups by a **single** column               |
+| `PARTITION BY col1, col2`  | Groups by **combinations** of columns       |
+| More columns               | = **Finer and more specific partitioning**  |
+
+---
+
+## 🔥 Pro Tip
+
+Use **multiple partitioning columns** for powerful **multidimensional analytics**. It's perfect for:
+
+- 📊 Reports  
+- 🎯 KPIs  
+- 📈 Dashboards  
+- 🏆 Leaderboards  
+- 📉 Trend tracking
 
 ```sql
 SELECT Trans_id, Continent, Country,
@@ -4640,12 +4918,31 @@ SELECT Trans_id, Continent, Country,
 +----------+-----------+---------+-------------+
 ```
 
-How to crack SQL Interview?
-- When asked what you have learned in SQL, always start with Window Functions.
+## 📆 Partitioning on Expression Values
 
-## Partitioning on Expression Values:
+### 🔍 What is it?
+Instead of partitioning by a column, you can partition by **an expression** — often used for **date-related analysis**.
 
-Especially suitable for date value analysis.
+### 🧠 Example: Monthly Partitioning
+
+```sql
+SELECT empno, ename, hiredate,
+       ROW_NUMBER() OVER (
+         PARTITION BY YEAR(hiredate), MONTH(hiredate)
+         ORDER BY hiredate
+       ) AS row_num_in_month
+FROM emp;
+```
+
+## ✅ Why it matters:
+
+- Shows your understanding of **expression-based partitioning**.
+- Ideal for:
+  - 📊 Time-series trends  
+  - 📅 Monthly reports  
+  - 📈 Activity tracking, and more.
+
+---
 
 ```sql
 SELECT ENAME, YEAR(HIREDATE) AS "Year of Joining",
@@ -4673,11 +4970,78 @@ FROM emp;
 +--------+-----------------+-------------------+
 ```
 
-## Ranking Functions
+## 🏅 Ranking Functions
 
-It is an ANSI SQL Window Function.
-We give Ranking based on Merit, based on Data Values.
-For Numeric Values, it makes more sense.
+Ranking functions are part of **ANSI SQL** and are a type of **Window Function**.
+
+They allow you to **assign a rank or position** to each row based on specified criteria — usually **numerical values** like scores, sales, or salaries.
+
+---
+
+### 🎯 Purpose:
+We give **ranking based on merit** — i.e., based on **data values** rather than row order.
+
+This is especially meaningful when dealing with **numeric data**, such as:
+- Student marks
+- Sales figures
+- Employee salaries
+- Leaderboard scores
+
+---
+
+### 📌 Common Ranking Functions:
+
+| Function       | Description                                        |
+|----------------|----------------------------------------------------|
+| `ROW_NUMBER()` | Gives a unique number to each row within a partition. |
+| `RANK()`       | Gives a rank with **gaps** if there are ties.        |
+| `DENSE_RANK()` | Gives a rank **without gaps** for ties.              |
+
+---
+
+### 🧠 Example:
+
+```sql
+SELECT empno, ename, sal,
+       RANK() OVER (ORDER BY sal DESC) AS salary_rank
+FROM emp;
+```
+
+### 🔍 Explanation:
+
+Ranks employees by **descending salary**.
+
+Tied salaries will receive the **same rank**, but the **next rank will skip** (i.e., there will be a gap in the ranking sequence).
+
+---
+
+### ✅ Use Cases:
+
+- 🏆 Leaderboards (games, contests)
+- 💼 Sales performance rankings
+- 🎓 Academic results
+- 📊 Project priorities based on scores or weights
+
+---
+
+### 💡 Pro Tip:
+
+- Use **`RANK()`** when **gaps in ranking** are important.
+- Use **`DENSE_RANK()`** when you want **continuous ranking**, even in case of ties.
+
+---
+
+### 📌 Quick Comparison:
+
+| Function        | Handles Ties | Gaps in Ranking? | Use Case                        |
+|-----------------|--------------|------------------|----------------------------------|
+| `ROW_NUMBER()`  | No           | No               | Unique ordering of rows         |
+| `RANK()`        | Yes          | Yes              | Competitive rankings             |
+| `DENSE_RANK()`  | Yes          | No               | Continuous sequence with ties   |
+
+---
+
+🔍 These functions are **essential for analytical queries**, such as creating leaderboards, finding top performers, or generating grouped rankings in dashboards.
 
 ```sql
 SELECT ENAME, SAL, RANK() OVER(ORDER BY SAL DESC) "Rank" FROM emp;
@@ -4705,20 +5069,152 @@ SELECT ENAME, SAL, RANK() OVER(ORDER BY SAL DESC) "Rank" FROM emp;
 
 The above output is not good.
 
-Rank Problem: 
-If there is a tie, same rank is given.
-But the entries after that is not given proper ranking.
-Instead they are given position number.
-Therefore, the output is not efficient and is wrong.
-This is pure statistics.
+## ⚠️ Rank Problem in SQL
 
-### Ranking Functions
+### 🎯 Problem Statement:
+When using the `RANK()` function in SQL, **ties in values** (e.g., same salary) receive the **same rank**, but this creates **gaps** in the ranking sequence.
 
-RANK and DENSE_RANK both provide rank to the records based on some column value or expression.
+---
 
-1. RANK
-2. DENSE_RANK
-3. Row Num
+### 📉 Why It’s an Issue:
+- The entries following a tie **skip ranks**, and instead are assigned a **position number** as per the number of preceding rows.
+- This behavior can sometimes be **statistically misleading** or **inefficient**, especially when continuous ranking is required.
+- It affects reporting, scoreboards, and analytics where **each position should reflect a proper relative order.**
+
+---
+
+### 🔍 Example:
+
+| Name   | Salary | RANK() |
+|--------|--------|--------|
+| Alice  | 1000   | 1      |
+| Bob    | 1000   | 1      |
+| Carol  | 950    | 3      |
+| David  | 900    | 4      |
+
+Notice:
+- Alice and Bob tie at Rank 1.
+- Carol jumps to Rank 3 (skipping Rank 2), even though she’s effectively the **second best performer after the tie**.
+
+---
+
+### 📊 Why This Matters:
+This is **pure statistics** — and incorrect ranking can:
+- Mislead stakeholders
+- Misrepresent data performance
+- Lead to flawed decisions
+
+---
+
+### ✅ Alternative: Use `DENSE_RANK()`
+
+| Name   | Salary | DENSE_RANK() |
+|--------|--------|--------------|
+| Alice  | 1000   | 1            |
+| Bob    | 1000   | 1            |
+| Carol  | 950    | 2            |
+| David  | 900    | 3            |
+
+- Here, the ranking remains **continuous**, even after ties.
+- Perfect for fair ranking, leaderboards, academic scoring, and performance metrics.
+
+---
+
+### 🧠 Summary:
+
+| Function     | Gaps in Ranks | Handles Ties | Best For                       |
+|--------------|---------------|--------------|--------------------------------|
+| `RANK()`     | Yes           | Yes          | True statistical competition   |
+| `DENSE_RANK()` | No          | Yes          | Fair and continuous ranking    |
+| `ROW_NUMBER()` | No          | No           | Unique ordering (no ties)      |
+
+---
+
+💡 **Pro Tip:** 
+Always choose your ranking function based on the **business logic** you're solving — whether it's competitive, fair, or unique ranking.
+
+
+## 🏅 SQL Ranking Functions: RANK vs DENSE_RANK vs ROW_NUMBER
+
+These are **ANSI SQL Window Functions** used to assign **ranking or ordering** to rows based on some **column value or expression**.
+
+---
+
+### 1. 🎖️ RANK()
+
+- Assigns the **same rank** to **tied values**.
+- **Skips ranks** for subsequent rows after a tie.
+- Good for statistical or competitive ranking.
+
+#### 🔍 Example:
+
+| Name   | Salary | RANK() |
+|--------|--------|--------|
+| Alice  | 5000   | 1      |
+| Bob    | 5000   | 1      |
+| Carol  | 4800   | 3      |
+| David  | 4700   | 4      |
+
+> Bob and Alice tie for Rank 1 → Next rank becomes 3, skipping 2.
+
+---
+
+### 2. 🏆 DENSE_RANK()
+
+- Also gives **same rank** to tied values.
+- But does **not skip** ranks for the next row.
+- Useful for fair, continuous ranking.
+
+#### 🔍 Example:
+
+| Name   | Salary | DENSE_RANK() |
+|--------|--------|--------------|
+| Alice  | 5000   | 1            |
+| Bob    | 5000   | 1            |
+| Carol  | 4800   | 2            |
+| David  | 4700   | 3            |
+
+> Same as above, but next rank is **not skipped** — stays **dense**.
+
+---
+
+### 3. 🔢 ROW_NUMBER()
+
+- Assigns a **unique sequential number** to every row.
+- No concept of ties — each row is treated independently.
+- Great for pagination, deduplication, and ordered listing.
+
+#### 🔍 Example:
+
+| Name   | Salary | ROW_NUMBER() |
+|--------|--------|--------------|
+| Alice  | 5000   | 1            |
+| Bob    | 5000   | 2            |
+| Carol  | 4800   | 3            |
+| David  | 4700   | 4            |
+
+> All rows have unique numbers, regardless of value ties.
+
+---
+
+### 📊 Summary Table:
+
+| Function        | Handles Ties | Skips Ranks | Unique Rank | Use Case                          |
+|----------------|--------------|-------------|-------------|-----------------------------------|
+| `RANK()`        | ✅ Yes       | ✅ Yes      | ❌ No       | Competition-style ranking         |
+| `DENSE_RANK()`  | ✅ Yes       | ❌ No       | ❌ No       | Fair/continuous ranking           |
+| `ROW_NUMBER()`  | ❌ No        | ❌ No       | ✅ Yes      | Pagination, de-duplication, logs  |
+
+---
+
+### 💡 Pro Tip:
+Use the right function based on your **business logic**:
+
+- 📈 `RANK()` — Best when gaps are meaningful (e.g., race positions).
+- 📊 `DENSE_RANK()` — Best for equal treatment in grouped data.
+- 📘 `ROW_NUMBER()` — Best when **every row needs a unique ID**.
+
+
 
 ```sql
 SELECT ENAME, SAL, DENSE_RANK() OVER(ORDER BY SAL DESC) "Rank" FROM emp;
@@ -4772,7 +5268,46 @@ The above command will give error in Oracle.
 And they have given correct error because the above command should have given error as GROUP BY CLAUSE is missing inside OVER.
 It runs successfully in MySQL, but the output does not make any sense.
 
-**ORDER BY becomes mandatory for RANK Function.**
+## 📌 Important Note: ORDER BY is Mandatory with RANK Functions
+
+The `ORDER BY` clause is **mandatory** when using `RANK()`, `DENSE_RANK()`, or `ROW_NUMBER()` functions.
+
+Without `ORDER BY`, SQL doesn’t know **what criteria** to use for ranking.
+
+---
+
+### 🔍 Why it matters:
+
+Ranking functions evaluate row order within **partitions** or over the **entire dataset**.
+
+To rank meaningfully, the database needs an **ordering basis** — typically a column like salary, score, date, etc.
+
+---
+
+### ✅ Example:
+
+```sql
+SELECT empno, ename, sal,
+       RANK() OVER (ORDER BY sal DESC) AS salary_rank
+FROM emp;
+```
+
+`ORDER BY sal DESC`: Ranks employees by salary, highest first.
+
+If you remove `ORDER BY`, it will throw a **syntax error** — SQL needs a basis to assign the rank.
+
+---
+
+### 🧠 Summary:
+
+| Function       | Requires ORDER BY |
+|----------------|--------------------|
+| `RANK()`        | ✅ Yes             |
+| `DENSE_RANK()`  | ✅ Yes             |
+| `ROW_NUMBER()`  | ✅ Yes             |
+
+> 🔸 Always specify the **column** and **direction** (`ASC` / `DESC`) for predictable and meaningful results in your ranking logic.
+
 
 ### Display ename, deptno, sal and salary rank. The salary rank should be as per deptnos, i.e., for each deptno the ranking will start again.
 
@@ -4857,9 +5392,48 @@ ORDER BY DEPTNO;
 +--------+--------+------+------------------------+---------------------+
 ```
 
-### ROW_NUMBER
+### 📌 ROW_NUMBER()
 
-It will provide the row numbers for the result et once the records are sorted.
+The `ROW_NUMBER()` function provides unique row numbers to the result set **once the records are sorted**.
+
+It starts from **1** for each partition (if specified) or for the entire result set (if no partitioning is used).
+
+---
+
+#### 🔍 Example:
+```sql
+SELECT empno, ename, deptno, sal,
+       ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS row_num
+FROM emp;
+```
+
+### 🧠 Explanation:
+- `PARTITION BY deptno`: Groups rows by department.
+- `ORDER BY sal DESC`: Orders each partition by descending salary.
+- `ROW_NUMBER()`: Assigns a unique sequential number to each row within its partition.
+
+---
+
+### ✅ Key Points:
+- Always requires `ORDER BY` in the `OVER()` clause.
+- Generates **continuous numbering**, with **no gaps** (unlike `RANK()`).
+- Useful for:
+  - **Pagination**
+  - **Filtering top-N records**
+  - **Removing duplicates**
+
+---
+
+### 🔥 Use Case:
+```sql
+-- Get top earning employee in each department
+SELECT *
+FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS rn
+    FROM emp
+) AS ranked
+WHERE rn = 1;
+```
 
 ```sql
 SELECT ENAME, SAL, ROW_NUMBER() OVER(ORDER BY SAL DESC) FROM EMP;
@@ -4974,7 +5548,67 @@ WHERE DENSE_RANK() OVER(ORDER BY SAL DESC) <= 4;
 
 Because it queries rows during runtime. Therefore, it cannot be used.
 
-Window Functions can only appear in the SELECT or ORDER BY clauses.
+### ⚠️ Important Rule: Where Can You Use Window Functions?
+
+- **Window functions** (like `ROW_NUMBER()`, `RANK()`, `SUM() OVER()`, etc.) **can only appear in the `SELECT` or `ORDER BY` clauses** of a SQL query.
+
+---
+
+### ❌ Not Allowed:
+You **cannot** use window functions in:
+- `WHERE` clause  
+- `GROUP BY` clause  
+- `HAVING` clause  
+- `JOIN` conditions  
+
+---
+
+### ✅ Allowed:
+- `SELECT` clause – to add analytical columns per row  
+- `ORDER BY` clause – to sort based on windowed calculations  
+
+---
+
+### 🔍 Example:
+```sql
+SELECT empno, ename, deptno, 
+       ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS rn
+FROM emp
+ORDER BY rn;
+```
+
+📌 **Remember:**  
+If you need to filter based on the result of a window function (e.g., only rows where `rn = 1`), use a **subquery** or **CTE (Common Table Expression)**.
+
+### ✅ Example using a Subquery:
+```sql
+SELECT *
+FROM (
+    SELECT empno, ename, deptno, sal,
+           ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS rn
+    FROM emp
+) AS ranked
+WHERE rn = 1;
+```
+
+✅ **Example using a CTE:**
+```sql
+WITH ranked_employees AS (
+    SELECT empno, ename, deptno, sal,
+           ROW_NUMBER() OVER (PARTITION BY deptno ORDER BY sal DESC) AS rn
+    FROM emp
+)
+SELECT *
+FROM ranked_employees
+WHERE rn = 1;
+```
+
+💡 **Why?**
+
+Because `WHERE` is processed **before** `SELECT`, and **window functions** are evaluated **after `WHERE`**.
+
+That’s why we need a **subquery** or **CTE** to filter using their results.
+
 
 ```sql
 SELECT *
@@ -5075,9 +5709,92 @@ FROM emp;
 
 Moving Average is mostly used in Projects.
 
-## Lead & Lag Function
+## Lead & Lag Functions
 
-Example of Lead Function
+Window functions that allow you to **look backward or forward** across rows, without using self-joins or subqueries.
+
+---
+
+### 🔙 1. LAG() Function
+The `LAG()` function gives you access to the **value from a previous row** in the same result set, based on a defined order.
+
+🧠 **Why it’s useful:**
+- Calculating differences between the current and previous row (e.g., sales growth).
+- Tracking changes in values over time.
+- Comparing an event with its predecessor.
+
+✅ **Example:**
+```sql
+SELECT empno, ename, sal,
+       LAG(sal) OVER (ORDER BY sal) AS prev_salary
+FROM emp;
+```
+
+📌 **Explanation:**
+This returns each employee's salary and the salary of the employee just before them in the sorted list.
+
+### 🔜 2. LEAD() Function
+
+The `LEAD()` function returns the value from the **next row** in the result set.
+
+---
+
+🧠 **Why it’s useful:**
+- Predicting or comparing with the future row’s value.
+- Identifying upcoming events or trends.
+- Calculating next value shifts (e.g., next month's performance).
+
+---
+
+✅ **Example:**
+```sql
+SELECT empno, ename, sal,
+       LEAD(sal) OVER (ORDER BY sal) AS next_salary
+FROM emp;
+```
+
+📌 **Explanation:**  
+This gives each employee's salary and the salary of the **next employee** in the sorted list.
+
+---
+
+### 🔍 Summary Comparison
+
+| Function | Purpose             | Refers To      |
+|----------|---------------------|----------------|
+| `LAG()`  | Compare with past   | Previous row   |
+| `LEAD()` | Compare with future | Next row       |
+
+---
+
+### 🔥 Pro Tips
+
+✅ Always use `ORDER BY` inside `OVER()` to define the sequence.
+
+✅ You can add a default value if there's no previous/next row:
+
+```sql
+LAG(sal, 1, 0) OVER (ORDER BY sal)
+```
+
+This returns `0` if there's **no previous row**.
+
+---
+
+✅ **These functions are highly useful in:**
+
+- Time-series analysis  
+- Stock price tracking  
+- Customer churn detection  
+- Activity logs and user timeline tracking
+
+---
+
+🧠 **Think of it like this:**  
+Instead of writing complex subqueries to **peek** at a previous or next row,  
+just use `LAG()` or `LEAD()` to do it **cleanly and efficiently**.
+
+## Example of Lead Function
 
 ```sql
 SELECT EMPNO, ENAME, JOB, DEPTNO, SAL, 
@@ -5162,8 +5879,43 @@ FROM emp;
 
 ## Common Table Expression (CTE)
 
-- Baseline, storyline is from Derived Table.
-- 
+A **Common Table Expression (CTE)** is a temporary result set that you can reference within a `SELECT`, `INSERT`, `UPDATE`, or `DELETE` statement.
+
+It’s like a **named derived table** but often easier to read and manage — especially in complex queries.
+
+---
+
+📌 **Baseline:**
+The **storyline of CTEs comes from Derived Tables**.
+
+Instead of writing:
+```sql
+SELECT ...
+FROM (
+    SELECT ...
+    FROM table_name
+) AS derived
+```
+
+You can use:
+
+```sql
+WITH cte_name AS (
+    SELECT ...
+    FROM table_name
+)
+SELECT ...
+FROM cte_name;
+```
+
+✅ **Why use CTEs?**
+
+- Improves readability of SQL queries  
+- Helps in breaking down complex logic  
+- Supports recursive queries  
+- Can be referenced multiple times within the main query  
+
+🧠 **Think of a CTE as giving a name to a subquery and lifting it outside for clarity and reuse.**
 
 ### Examples
 ```sql
@@ -5205,42 +5957,46 @@ FROM (SELECT *
 |  7902 | FORD  | ANALYST   | 7566 | 1981-03-06 | 3000 | NULL |     20 |
 +-------+-------+-----------+------+------------+------+------+--------+
 ```
-
-**CONVERT ALL DERIVED TABLE CODES INTO COMMON TABLE EXPRESSION (CTE)**
-**CAN BE DONE WITH ASSIGNMENTS BY CONVERTING THEM INTO DERIVED TABLES AND CTEs.**
                                                                                                                                                               
 ## Procedure
 
-- In SQL Databases, Procedure is an object which provides "programmability".
-- Procedure will have a code which will be extension of SQL code.
+- In SQL Databases, a **Procedure** is an object that provides *programmability*.
+- A Procedure contains code that extends the capabilities of SQL.
 
-### Reasons of making Procedure
-1. To handle complex Data Integrity Rules while performing DML.
-2. **To handle Run time errors or aka exceptions.** -- MOST IMPORTANT
-3. To get customized outputs of select statements.
+### ✅ Reasons for Creating Procedures
 
-The programming objects are:
-1. Procedures
-2. User Defined Functions
-3. Triggers
-4. Cursors
-5. Exception Handling
-6. Packages
-7. File Handling
-8. User Defined Data Types
-9. Collections
-10. Object Oriented Features in RDBMS (ORDBMS)
+1. To handle complex **Data Integrity Rules** during DML operations.
+2. **To handle run-time errors or exceptions.** *(Most Important)*
+3. To produce **customized outputs** from `SELECT` statements.
 
-Every Database does not support all the above features.
-Among all the Databases, Oracle is the Best.
-It is equivalent to Java Programming Language.
+---
 
-Syntax of Procedures:
+### 🔧 Programming Objects in SQL
 
-Delimiter is used to separate multiple SQL statements.
+1. Procedures  
+2. User Defined Functions  
+3. Triggers  
+4. Cursors  
+5. Exception Handling  
+6. Packages  
+7. File Handling  
+8. User Defined Data Types  
+9. Collections  
+10. Object-Oriented Features in RDBMS (ORDBMS)
+
+---
+
+> ⚠️ **Note:** Not every database supports all of the above features.  
+> 🥇 Among all the databases, **Oracle** is considered the best — it is often seen as equivalent to the **Java programming language** in terms of capabilities.
+
+
+## 🔧 Syntax of Procedures in SQL
+
+To define a **Stored Procedure**, we use `DELIMITER` to separate multiple SQL statements, since the default `;` could interfere with internal procedure logic.
+
+### ✅ Example:
 
 ```sql
-
 DELIMITER $$
 
 CREATE PROCEDURE p1() 
@@ -5249,19 +6005,36 @@ BEGIN
    SELECT 'Second Line'; 
 END$$
 
-DELIMITER; -- Restoring back the default delimiter after sp code is finished
+DELIMITER ; -- Restoring back the default delimiter
 ```
 
+▶️ **To Call the Procedure:**
+
 ```sql
-Call p1;
+CALL p1;
 ```
-```
+
+🖥️ **Output:**
+
+```pgsql
 +--------------------------------+
 |                                |
 +--------------------------------+
 | Welcome to Stored Procedures!! |
 +--------------------------------+
+
++-------------+
+| Second Line |
++-------------+
 ```
+
+📌 **Notes:**
+
+- `DELIMITER $$`: Temporarily changes the statement terminator to `$$` so `;` can be used within the procedure body.
+- `DELIMITER ;`: Resets the delimiter back to default after the procedure ends.
+- `CALL p1;`: Executes the stored procedure.
+
+🧠 **Think of Procedures** as reusable blocks of logic — similar to functions in other programming languages, but optimized for database-side logic.
 
 ```sql
 DELIMITER $$
@@ -5300,26 +6073,77 @@ END$$
 DELIMITER ;
 ```
 
-```
+## 📌 Parameter Modes in Stored Procedures
 
-```
+### 1. `IN` (Default)
+- ✅ The default mode.
+- 🔁 Used to **pass input values** to the procedure.
+- 🔒 Read-only inside the procedure — **cannot be modified**.
+- 📤 Data flows **from caller to procedure**.
 
 ---
 
-Error number specifies the error occurred during Runtime.
-The number after the error number is the error state.
+### 2. `OUT`
+- 📥 Used to **pass output values** **from the procedure** back to the caller.
+- 🆕 Procedure sets a value for the `OUT` parameter.
+- ⚠️ Initially holds `NULL` until explicitly assigned.
+- 📤 Data flows **from procedure to caller**.
 
-We can use if not exists in front of create procedure syntax and it will create that name procedure if it does not already exists in the system.
+---
 
-## Handling Variable
+### 3. `INOUT`
+- 🔁 Combines both `IN` and `OUT` functionality.
+- ↔️ Data flows **both ways**: passed in and modified to pass back out.
+- ✅ Useful for updating values and retrieving results in the same variable.
 
+---
+
+## 🛠 Additional Notes
+
+- ⚠️ **Error Number**: Identifies the type of error that occurred during runtime.
+- 🧾 **Error State**: Number following the error number; provides additional error context.
+
+---
+
+## 🚀 Pro Tip
+
+You can use:
 ```sql
-SELECT COLUMN_NAME INTO VARIABLE_NAME
-FROM TABLE_NAME
-WHERE CONDITION;
+CREATE PROCEDURE IF NOT EXISTS procedure_name ...
 ```
 
-`WHERE condition should return Single Value.`
+This ensures the procedure is only created **if it doesn't already exist**, avoiding duplication or overwrite errors.
+
+## 📌 Handling Variables in SQL Procedures
+
+To store a single column value into a variable, use the `SELECT INTO` syntax:
+
+```sql
+SELECT column_name INTO variable_name
+FROM table_name
+WHERE condition;
+```
+
+⚠️ **Important:**
+- The `WHERE` condition **must return a single value**.
+- If the condition returns **no row** or **multiple rows**, it may result in an error like:
+  - `NO_DATA_FOUND`
+  - `TOO_MANY_ROWS`
+  (depending on the DBMS)
+
+---
+
+✅ **Example:**
+
+```sql
+DECLARE emp_sal INT;
+
+SELECT sal INTO emp_sal
+FROM emp
+WHERE empno = 1001;
+```
+
+This will store the salary of employee `1001` into the `emp_sal` variable.
 
 ---
 
@@ -5330,59 +6154,138 @@ WHERE CONDITION;
 ```sql
 DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
 BEGIN
-SELECT '' AS ErrorMessage
+    SELECT '' AS ErrorMessage;
 END;
 ```
 
-- Above is a part of CATCH block in Exception
-- Query below this is of TRY block.
-- Ideally, the TRY block code should get executed.
-- When **CONTINUE** keyword is used with Exception Handling, and if the TRY block code does not gets executed, then CATCH block gets executed, prints the message and the code continues to run.
+The above is a part of the **CATCH block** in exception handling.
+
+Any query above this is considered part of the **TRY block**.
+
+Ideally, the TRY block code should get executed normally.
+
+🔁 **When `CONTINUE` is used:**
+
+- If an error occurs in the TRY block, the CATCH block executes.
+- After displaying the message, the code **continues to run**.
 
 ---
 
-### Use EXIT for exit.
-Only this is the change which is to be replaced with CONTINUE keyword in the above Exception Handling.
-Now instead of Continuing the code after throwing error, the query will get terminated.
-Smooth/safe termination of the query.
+### 🚫 Use `EXIT` to Terminate
 
-## SQLSTATE
-We have changed the number of the error state to user defined sql state.
+Just replace the `CONTINUE` keyword with `EXIT`:
 
-## SIGNAL
+- Now, instead of continuing execution after an error, the query will **terminate safely**.
+- Ensures **smooth and controlled exit** on encountering exceptions.
 
-There are two keywords:
+✅ This is useful when you **don’t want** the rest of the logic to execute after an error is thrown.
 
-MYSQL_ERRNO
-MESSAGE_TEXT
-GET DIAGNOSTICS CONDITION
+## ⚠️ SQLSTATE
 
-## Looping in MySQL
+- You can customize the **SQLSTATE** to represent specific user-defined errors.
+- This helps in identifying and handling custom error scenarios more clearly.
 
 ---
 
-## TRIGGERS
+## 🚨 SIGNAL Statement
 
-Trigger is a piece of code that gets implicity or Automatically executed whenever Insert Or Update or Delete statements gets fired.
-Triggers do not contain parameters as they can't be called such as Procedure.
-Inside a Trigger, we can call a Procedure, but we can't call Trigger inside a Procedure.
-Both Procedures and Triggers need Delimiter.
-Triggers' dependency is on Tables.
+The `SIGNAL` statement is used to **raise an error or warning manually** in stored procedures or triggers.
 
-### Why Triggers:
-1. To copy newly inserted records from main table into another table for fast report generation of new current day's records.
-2. To programatically take back up of deleted rows based on certain business conditions(not all records back up).
-3. To keep track of old values before updating the values. This is good for values like salary, product_cost, etc.
-4. To programmaticaly keep track of DML activities based on Day/Date/User Business conditions. Useful for audit purpose.
-5. **To ensure that DML happens as per correct business rules. It will reject the DML if the user violates the complex business conditions.
-This is NOT possible via normal Data integrity rules such as PK ,UK, NN, Ch and FK.**
+### Two important keywords used with SIGNAL:
 
-### Trigger Code has following components:
-1. Trigger name because it is a permanent database object.
-2. Timing of DML --- Whether the code should get execute after DML or before DML: After DML will not reject DML. Before DML has ability to reject DML.
-3. The DML event name.
-4. Table Name
-5. Whether for each row or not.
+- `MYSQL_ERRNO`: Defines the error number (usually user-defined).
+- `MESSAGE_TEXT`: Custom message shown when the error is raised.
+
+✅ **Example:**
+```sql
+SIGNAL SQLSTATE '45000'
+    SET MYSQL_ERRNO = 1001,
+        MESSAGE_TEXT = 'Custom error message';
+```
+
+📋 **GET DIAGNOSTICS CONDITION**
+
+Used to retrieve detailed information after an exception occurs.
+
+Helpful for debugging or custom error logging.
+
+✅ **Example**:
+```sql
+DECLARE v_error_message TEXT;
+
+GET DIAGNOSTICS CONDITION 1
+    v_error_message = MESSAGE_TEXT;
+```
+
+🔁 **Looping in MySQL**
+
+MySQL provides several looping constructs for iterative operations inside stored procedures:
+
+---
+
+🔄 **LOOP**
+```sql
+[label]: LOOP
+    -- your code
+    LEAVE [label]; -- to exit loop
+END LOOP;
+```
+
+🔄 **WHILE**
+```sql
+WHILE condition DO
+    -- your code
+END WHILE;
+```
+
+🔄 **REPEAT**
+```sql
+REPEAT
+    -- your code
+UNTIL condition
+END REPEAT;
+```
+
+🧠 **Use Cases**:
+
+- Batch processing  
+- Generating test data  
+- Running conditional or repetitive operations within procedures  
+
+
+## 🔁 TRIGGERS
+
+A **Trigger** is a piece of code that gets **implicitly or automatically executed** whenever an `INSERT`, `UPDATE`, or `DELETE` statement is fired.
+
+- Triggers **do not take parameters** as they **can’t be called like Procedures**.
+- You **can call a Procedure inside a Trigger**, but **not the other way around**.
+- Both **Procedures and Triggers require Delimiters**.
+- Triggers are **dependent on tables**.
+
+---
+
+### ✅ Why Triggers?
+
+1. To **copy newly inserted records** from the main table into another table — useful for fast report generation of current day's records.
+2. To **programmatically take backups** of deleted rows based on specific business conditions (not all records).
+3. To **track old values before updates** — e.g., salaries, product costs, etc.
+4. To **track DML activities (Insert/Update/Delete)** based on **day/date/user/business rules** — very helpful for auditing.
+5. 🔒 **To enforce business rules** that **can’t be handled by standard integrity constraints** like `PRIMARY KEY`, `UNIQUE`, `NOT NULL`, `CHECK`, or `FOREIGN KEY`.
+
+---
+
+### 🧱 Trigger Code Components:
+
+1. **Trigger Name** – Because it's a permanent DB object.
+2. **DML Timing** – `BEFORE` or `AFTER` the DML operation:
+   - `AFTER` triggers **cannot reject DML**.
+   - `BEFORE` triggers **can reject DML**.
+3. **DML Event** – Specify the event: `INSERT`, `UPDATE`, or `DELETE`.
+4. **Table Name** – The trigger is associated with a specific table.
+5. **FOR EACH ROW** – Determines if the trigger fires for each affected row.
+
+
+### 🛠️ Trigger Example
 
 ```sql
 DELIMITER // 
@@ -5395,43 +6298,94 @@ END;
 //
 DELIMITER ;
 ```
-```
-| Action  | New | Old |
-|---------|-----|-----|
-| Insert  | Y   |     |
-| Update  |     | Y   |
-| Delete  | Y   | Y   |
-```
 
-## INDEXES
+🧠 **Explanation**:
 
-Used for Query Optimization.
-After creating the index, later when new records get added, or some records get deleted. Of some records get updated then the index table gets auto refreshed.
+This is an `AFTER INSERT` trigger on the `employees` table.
 
-When DML happens in the main table then the index table first gets refreshed and then the main table gets refreshed. This can slow down Bulk DML.
+When a new employee is inserted, the trigger automatically logs the action into a `Log` table.
 
-Index is of no use if the select statement is retrieving more than 80% of records.
+`NEW.id` refers to the newly inserted row's ID.
 
-The columns coming frequently in WHERE clause, think of giving those columns as Index.
-For example, we have rarely used comm column from the employee table.
+---
 
-There can be two types of Indexing:
-- Physical: aka Clustered Indexing. Used for high cardinality.
-- Logical: Used for low cardinality values. For functions such as GROUP BY.
+🔄 **Row Context Reference Table**
 
-Low cardinality means there are many repeating values. Unique values are less.
+| Action | `NEW` | `OLD` |
+|--------|-------|-------|
+| INSERT | ✅    | ❌    |
+| UPDATE | ✅    | ✅    |
+| DELETE | ❌    | ✅    |
 
-### Without Indexing, Full Table Scan will happen.
+✅ = Available  
+❌ = Not Available
 
-### With Indexing
-- A binary table gets created at the time of index creation.
-- It keeps track of row ids of each city
-- A Full Table Scan (FTS) gets eliminated!!
-- Only **selective** rows are scanned!!
+📌 Use `NEW.column_name` to access values **after** the DML, and `OLD.column_name` to access values **before** the DML.
 
-### Advantages of Indexing
-- The data retrieval of a SELECT statement will become fast!!
-- It also can avoid **Disk Sorts**!!
+
+## 📚 INDEXES
+
+Indexes are used for **query optimization**.
+
+After an index is created, it automatically refreshes whenever:
+- New records are **inserted**
+- Existing records are **deleted**
+- Records are **updated**
+
+⚠️ **Note:**  
+When a DML operation occurs, the **index table is refreshed first**, followed by the **main table**.  
+This can slow down **bulk DML operations** (like massive INSERTs or UPDATEs).
+
+---
+
+🔍 **When Index is NOT Useful:**
+- If the `SELECT` query retrieves **more than 80%** of the table records, indexing won't help much.
+
+💡 **Good Practice:**  
+Index columns that **frequently appear in WHERE clauses**.
+
+> For example: If the `comm` column is rarely used in filters, don't index it.
+
+---
+
+## 🧱 Types of Indexing
+
+- **Physical Indexing (Clustered)**  
+  - Ideal for **high cardinality** columns (many unique values)
+
+- **Logical Indexing**  
+  - Best for **low cardinality** columns (many repeated values)  
+  - Often used in **GROUP BY**, **ORDER BY**, etc.
+
+🔑 **Low cardinality** = Few unique values, lots of repetition.  
+🔑 **High cardinality** = Many unique values.
+
+---
+
+## 🧐 What Happens Without Indexing?
+
+- A **Full Table Scan (FTS)** happens — every row is scanned, even if not needed.  
+  This is **inefficient**, especially with large tables.
+
+---
+
+## 🚀 What Happens With Indexing?
+
+- A **binary tree structure** is created.
+- It stores **row IDs** for each indexed value.
+- **Full Table Scans are eliminated** ✅
+- Only **selective** rows are scanned 🔍
+
+---
+
+## ✅ Advantages of Indexing
+
+- Significantly faster data retrieval for `SELECT` statements.
+- Can help **avoid Disk Sorts** in queries (especially with `ORDER BY`, `GROUP BY`).
+
+---
+
+## 🛠️ Example
 
 ```sql
 CREATE TABLE emp_101
@@ -5441,45 +6395,4 @@ SELECT * FROM emp;
 CREATE INDEX i1_emp101 ON emp_101(job);
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**This creates an index on the `job` column in the `emp_101` table.**
